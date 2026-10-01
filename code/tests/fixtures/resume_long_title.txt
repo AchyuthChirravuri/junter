@@ -1,0 +1,10 @@
+TEMPLATE: gabelli
+NAME: Alex Rivera
+CONTACT: New York, NY | (555) 010-0100 | alex@example.com | linkedin.com/in/alexrivera
+TAGLINE: PRODUCT STRATEGY | GROWTH | ANALYTICS
+SUMMARY: A short positioning summary.
+SECTION Experience
+JOB: Northwind Labs | Vice President of Product Strategy and Platform Partnerships for the long-horizon enterprise tier | Jan 2022 - Present | Brooklyn, NY
+- Owned checkout conversion funnel; lifted completion rate 14 points over two years.
+- Built and ran a weekly experimentation cadence; shipped 24 A/B tests in 2024.
+GROUP: Stack | python, sql, figma, amplitude

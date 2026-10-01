@@ -1,0 +1,56 @@
+[build-system]
+# Offline-only: no build backend is invoked by any gate. The demo
+# (`python3 code/synth_demo.py`) runs against stdlib + fpdf2 + python-docx
+# only; no `pip install -e .` is required.
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hermes-job-hunter"
+version = "0.2.0"
+description = "Reproducible engineering scaffold for an autonomous job-search agent system. Synthetic demo only."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+authors = [{name = "Achyuth Chirravuri"}]
+keywords = ["job-search", "scoring", "resume", "ats", "agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+]
+# Runtime dependencies used by the demo. Versions are MINIMUMS the demo is
+# tested against; lower bounds pin the behavior the tests assume.
+# The synthetic demo works without these because the imports are guarded,
+# but real use of the resume PDF / DOCX builders needs them.
+dependencies = [
+    "fpdf2>=2.7.0",
+    "python-docx>=1.0.0",
+]
+
+[project.optional-dependencies]
+# Dev-only: tests run under pytest 8.x; this is NOT pulled in by any gate.
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+# No console scripts; the demo is invoked as `python3 code/synth_demo.py`.
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+include = ["code*"]
+
+[tool.pytest.ini_options]
+# CI-safe defaults: collect only the test files we ship, no surprises.
+testpaths = ["code/tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

@@ -1,21 +1,40 @@
 #!/usr/bin/env python3
 """make-resume-pdf: designed one-page resume PDF from structured markdown.
 
+Two parser entry points:
+
+  * parse(src)            — legacy permissive parser used by the original
+                            generator. Kept for backwards compatibility with
+                            any caller that does not pass TEMPLATE:.
+
+  * parse_resume(src)     — strict parser used by the build pipeline.
+                            Validates the TEMPLATE: token against an explicit
+                            enum ({"default", "gabelli"}), raises typed
+                            errors with the offending 1-indexed line number,
+                            and never silently swallows unknown directives.
+
 Format:
+  TEMPLATE: default | gabelli
   NAME: Your Name
   CONTACT: New York, NY | (000) 000-0000 | you@example.com | linkedin.com/in/your-handle
   TAGLINE: BUSINESS STRATEGY | PRODUCT ROADMAPS | ...
   SUMMARY: 2-line positioning summary
   SECTION Experience
-  JOB: Company | Title | Dates
+  JOB: Company | Title | Dates | City
   CONTEXT: optional italic line
   - bullet (STAR, one line, wraps)
   GROUP: Label | comma,separated,items
   SECTION Education
-  JOB: School | Degree | Dates
+  JOB: School | Degree | Dates | City
 
-Design tokens live in resume-style.md. One-page enforced via auto-scale (9.2 -> 8.9 -> 8.6pt)
-then hard error: cut writing instead of squeezing.
+Design tokens live in resume-writing-design-standard.md. One-page enforced
+via auto-scale (1.12 -> 0.855pt) then hard error: cut writing instead of
+squeezing.
+
+The gabelli template draws the company + city row and the title + dates row
+as two separate visual lines; both rows ALWAYS advance the cursor to a new
+line even when the right-aligned element is empty, so missing-city and
+missing-dates cannot cause content to bleed onto the same visual line.
 """
 import sys
 from pathlib import Path
@@ -30,10 +49,168 @@ ACCENT_SOFT = (14, 90, 94)
 
 MM = 1.0
 
+VALID_TEMPLATES = ("default", "gabelli")
 
-def parse(src: str):
+
+# ── Errors ───────────────────────────────────────────────────────────
+class ResumeParseError(ValueError):
+    """Typed error from the strict parser. Carries the 1-indexed line
+    number so a user can locate the offender in the source."""
+
+    def __init__(self, message, line_no, source_path=None):
+        loc = "line {}".format(line_no)
+        if source_path:
+            loc = "{}:{}".format(source_path, line_no)
+        super(ResumeParseError, self).__init__("[{}] {}".format(loc, message))
+        self.line_no = line_no
+        self.source_path = source_path
+
+
+# ── Strict parser (used by build()) ──────────────────────────────────
+def parse_resume(src, source_path=None):
+    """Parse a structured resume source. Returns a dict.
+
+    Raises ResumeParseError with the offending line number on any of:
+      * unknown directive
+      * TEMPLATE: token not in VALID_TEMPLATES
+      * JOB: directive outside a SECTION
+      * GROUP: directive outside a JOB
+      * CONTEXT: directive outside a JOB
+      * - bullet outside both a JOB and a SECTION
+    """
+    template = "default"
+    name = contact = tagline = None
+    summary_lines = []
+    sections = []
+    cur_section = None
+    cur_job = None
+    state = "head"
+
+    lines = src.splitlines()
+    for idx, raw in enumerate(lines, start=1):
+        line = raw.rstrip()
+        s = line.strip()
+        if not s:
+            if state == "summary":
+                state = "head"
+            continue
+        if s.startswith("TEMPLATE:"):
+            value = s[9:].strip().lower()
+            if value not in VALID_TEMPLATES:
+                raise ResumeParseError(
+                    "unknown TEMPLATE: {!r}; expected one of {}".format(
+                        value, list(VALID_TEMPLATES)
+                    ),
+                    line_no=idx,
+                    source_path=source_path,
+                )
+            template = value
+            state = "head"
+            continue
+        if s.startswith("NAME:"):
+            name = s[5:].strip()
+            state = "head"
+            continue
+        if s.startswith("CONTACT:"):
+            contact = s[8:].strip()
+            state = "head"
+            continue
+        if s.startswith("TAGLINE:"):
+            tagline = s[8:].strip()
+            state = "head"
+            continue
+        if s.startswith("SUMMARY:"):
+            summary_lines.append(s[8:].strip())
+            state = "summary"
+            continue
+        if s.startswith("SECTION"):
+            # SECTION may be "SECTION" alone or "SECTION <name>"
+            rest = s[len("SECTION"):].strip()
+            section_name = rest or "Untitled"
+            cur_section = {"name": section_name, "jobs": [], "bullets": []}
+            sections.append(cur_section)
+            cur_job = None
+            state = "head"
+            continue
+        if s.startswith("JOB:"):
+            if cur_section is None:
+                raise ResumeParseError(
+                    "JOB directive outside any SECTION", line_no=idx,
+                    source_path=source_path,
+                )
+            parts = [p.strip() for p in s[4:].split("|")]
+            parts += [""] * (4 - len(parts))
+            cur_job = {
+                "company": parts[0],
+                "title": parts[1],
+                "dates": parts[2],
+                "city": parts[3],
+                "context": "",
+                "bullets": [],
+                "groups": [],
+            }
+            cur_section["jobs"].append(cur_job)
+            state = "head"
+            continue
+        if s.startswith("CONTEXT:"):
+            if cur_job is None:
+                raise ResumeParseError(
+                    "CONTEXT directive outside any JOB", line_no=idx,
+                    source_path=source_path,
+                )
+            cur_job["context"] = s[8:].strip()
+            state = "head"
+            continue
+        if s.startswith("GROUP:"):
+            if cur_job is None:
+                raise ResumeParseError(
+                    "GROUP directive outside any JOB", line_no=idx,
+                    source_path=source_path,
+                )
+            label, _, items = s[6:].partition("|")
+            cur_job["groups"].append(
+                (label.strip(), [i.strip() for i in items.split(",") if i.strip()])
+            )
+            state = "head"
+            continue
+        if s.startswith("- "):
+            if cur_job is not None:
+                cur_job["bullets"].append(s[2:].strip())
+            elif cur_section is not None:
+                cur_section["bullets"].append(s[2:].strip())
+            else:
+                raise ResumeParseError(
+                    "bullet outside any SECTION or JOB", line_no=idx,
+                    source_path=source_path,
+                )
+            state = "head"
+            continue
+        if state == "summary":
+            summary_lines.append(s)
+            continue
+        # Anything else is an unknown directive — fail loudly.
+        raise ResumeParseError(
+            "unknown directive {!r}; expected one of TEMPLATE, NAME, CONTACT, "
+            "TAGLINE, SUMMARY, SECTION, JOB, CONTEXT, GROUP, or '- ' bullet".format(s),
+            line_no=idx,
+            source_path=source_path,
+        )
+
+    summary = " ".join(summary_lines)
+    return {
+        "template": template,
+        "name": name,
+        "contact": contact,
+        "tagline": tagline,
+        "summary": summary,
+        "sections": sections,
+    }
+
+
+# ── Legacy permissive parser (kept for backward compatibility) ──────
+def parse(src):
     name = contact = tagline = summary = ""
-    sections = []           # list of dicts: {name, jobs:[{company,title,dates,context,bullets}]}
+    sections = []
     cur_section = None
     cur_job = None
     for raw in Path(src).read_text().splitlines():
@@ -48,8 +225,6 @@ def parse(src: str):
             tagline = line[8:].strip()
         elif line.startswith("SUMMARY:"):
             summary = line[8:].strip()
-            summary += " " + next(Path(src).read_text().splitlines(), "")
-            # SUMMARY may span until next directive; handled by join below
         elif line.startswith("SECTION"):
             cur_section = {"name": line.split(None, 1)[1].strip(), "jobs": []}
             sections.append(cur_section)
@@ -57,8 +232,13 @@ def parse(src: str):
         elif line.startswith("JOB:"):
             parts = [p.strip() for p in line[4:].split("|")]
             parts += [""] * (3 - len(parts))
-            cur_job = {"company": parts[0], "title": parts[1] if len(parts) > 1 else "",
-                       "dates": parts[2] if len(parts) > 2 else "", "context": "", "bullets": []}
+            cur_job = {
+                "company": parts[0],
+                "title": parts[1] if len(parts) > 1 else "",
+                "dates": parts[2] if len(parts) > 2 else "",
+                "context": "",
+                "bullets": [],
+            }
             cur_section["jobs"].append(cur_job)
         elif line.startswith("CONTEXT:"):
             if cur_job:
@@ -69,61 +249,10 @@ def parse(src: str):
         elif line.startswith("GROUP:"):
             if cur_job is not None:
                 cur_job["bullets"].append("GROUP::" + line[6:].strip())
-    # merge multi-line SUMMARY (consecutive lines after SUMMARY: until blank/next token)
     return name, contact, tagline, summary, sections
 
 
-def parse_strict(src_text: str):
-    template = "default"
-    name = contact = tagline = None
-    summary_lines = []
-    sections = []
-    cur_section = None
-    cur_job = None
-    state = "head"
-    for raw in src_text.splitlines():
-        line = raw.rstrip()
-        s = line.strip()
-        if not s:
-            if state == "summary":
-                state = "head"
-            continue
-        if s.startswith("TEMPLATE:"):
-            template = s[9:].strip().lower(); state = "head"
-        elif s.startswith("NAME:"):
-            name = s[5:].strip(); state = "head"
-        elif s.startswith("CONTACT:"):
-            contact = s[8:].strip(); state = "head"
-        elif s.startswith("TAGLINE:"):
-            tagline = s[8:].strip(); state = "head"
-        elif s.startswith("SUMMARY:"):
-            summary_lines.append(s[8:].strip()); state = "summary"
-        elif s.startswith("SECTION"):
-            cur_section = {"name": s.split(None, 1)[1].strip(), "jobs": [], "bullets": []}
-            sections.append(cur_section); cur_job = None; state = "head"
-        elif s.startswith("JOB:"):
-            parts = [p.strip() for p in s[4:].split("|")]
-            parts += [""] * (4 - len(parts))
-            cur_job = {"company": parts[0], "title": parts[1], "dates": parts[2],
-                       "city": parts[3], "context": "", "bullets": [], "groups": []}
-            cur_section["jobs"].append(cur_job); state = "head"
-        elif s.startswith("CONTEXT:"):
-            if cur_job: cur_job["context"] = s[8:].strip()
-        elif s.startswith("GROUP:"):
-            if cur_job:
-                label, _, items = s[6:].partition("|")
-                cur_job["groups"].append((label.strip(), [i.strip() for i in items.split(",") if i.strip()]))
-        elif s.startswith("- "):
-            if cur_job is not None:
-                cur_job["bullets"].append(s[2:].strip())
-            elif cur_section is not None:
-                cur_section["bullets"].append(s[2:].strip())  # section-level bullet (no JOB)
-        elif state == "summary":
-            summary_lines.append(s)
-    summary = " ".join(summary_lines)
-    return template, name, contact, tagline, summary, sections
-
-
+# ── PDF generator ────────────────────────────────────────────────────
 class ResumePDF(FPDF):
     def __init__(self, scale=1.0):
         super().__init__("P", "mm", "Letter")
@@ -135,8 +264,14 @@ class ResumePDF(FPDF):
         return round(base * self.scale, 2)
 
 
-def build(src_text: str, out: str, accent=(14, 90, 94)):
-    template, name, contact, tagline, summary, sections = parse_strict(src_text)
+def build(src_text, out, accent=(14, 90, 94)):
+    parsed = parse_resume(src_text)
+    template = parsed["template"]
+    name = parsed["name"]
+    contact = parsed["contact"]
+    tagline = parsed["tagline"]
+    summary = parsed["summary"]
+    sections = parsed["sections"]
     assert name and contact, "NAME: and CONTACT: required"
     if template == "gabelli":
         accent = (17, 17, 17)  # all-black ink for the Gabelli template
@@ -248,7 +383,15 @@ def render(scale, name, contact, tagline, summary, sections, accent, template="d
 
 def _job(d, job, eff, accent, gabelli=False):
     """Job header. gabelli: COMPANY caps left + city right; title bold left + dates right.
-    default: company|title inline left + dates right (wraps when long)."""
+    default: company|title inline left + dates right (wraps when long).
+
+    Both branches ALWAYS advance the cursor to a new visual line after each
+    row, even when the right-aligned element is empty. Without this, a
+    missing city in the gabelli template leaves the title at x=196 mm on
+    the SAME line as the company, which overflows the Letter page width.
+    The regression test in code/tests/test_pdf_layout.py asserts that the
+    rendered title's xMax stays within the usable width (182 mm).
+    """
     if gabelli:
         # Line 1: COMPANY caps + city right
         city_w = 0.0
@@ -263,6 +406,10 @@ def _job(d, job, eff, accent, gabelli=False):
         if job.get("city"):
             d.set_font("helvetica", "", eff(8.8))
             d.cell(0, eff(4.6), job["city"], align="R", new_x="LMARGIN", new_y="NEXT")
+        else:
+            # No city: ALWAYS advance to the next line so the title does
+            # not collide with the company on the same row.
+            d.ln(eff(4.6))
         # Line 2: title bold + dates right
         if job["title"] or job["dates"]:
             d.set_font("helvetica", "B", eff(9.3))
@@ -276,6 +423,10 @@ def _job(d, job, eff, accent, gabelli=False):
             if job["dates"]:
                 d.set_font("helvetica", "", eff(8.8))
                 d.cell(0, eff(4.3), job["dates"], align="R", new_x="LMARGIN", new_y="NEXT")
+            else:
+                # No dates: ALWAYS advance to the next line so the
+                # context (if any) does not collide with the title.
+                d.ln(eff(4.3))
         if job["context"]:
             d.set_font("helvetica", "", eff(8.8))
             d.set_text_color(*BODY)
@@ -286,7 +437,7 @@ def _job(d, job, eff, accent, gabelli=False):
         if job["dates"]:
             d.set_font("helvetica", "", eff(8.8))
             dates_w = d.get_string_width(job["dates"]) + 4
-        inline = f'{job["company"]}   |   {job["title"]}' if job["title"] else job["company"]
+        inline = "{}   |   {}".format(job["company"], job["title"]) if job["title"] else job["company"]
         d.set_font("helvetica", "B", eff(9.8))
         d.set_text_color(*INK)
         inline_w = d.get_string_width(inline)
@@ -296,6 +447,8 @@ def _job(d, job, eff, accent, gabelli=False):
                 d.set_font("helvetica", "", eff(8.8))
                 d.set_text_color(*GRAY)
                 d.cell(0, eff(4.6), job["dates"], align="R", new_x="LMARGIN", new_y="NEXT")
+            else:
+                d.ln(eff(4.6))
         else:
             y0 = d.get_y()
             d.cell(182 - dates_w, eff(4.6), job["company"], new_x="RIGHT", new_y="TOP")
@@ -328,6 +481,67 @@ def _job(d, job, eff, accent, gabelli=False):
         d.set_font("helvetica", "", eff(8.8))
         d.set_text_color(*BODY)
         d.multi_cell(0, eff(4.0), ",  ".join(items), new_x="LMARGIN", new_y="NEXT")
+
+
+# ── Layout introspection (used by tests) ─────────────────────────────
+# Letter page: 215.9 mm wide. Generators use l_margin = 14 mm and a body
+# region of 182 mm wide (i.e. right edge at x = 14 + 182 = 196 mm). The
+# "usable width" for content is therefore 182 mm, and the absolute page
+# right edge is 215.9 mm.
+LETTER_PAGE_WIDTH_MM = 215.9
+USABLE_WIDTH_MM = 182.0
+CONTENT_RIGHT_EDGE_MM = 14.0 + USABLE_WIDTH_MM  # = 196 mm
+
+
+def render_in_memory(src_text, scale=1.0, template="gabelli"):
+    """Render to memory and return (pdf, max_x_mm, last_y_mm).
+
+    max_x_mm is the rightmost x coordinate actually written by the
+    generator during the render pass. last_y_mm is the cursor y position
+    at the end of the single page.
+
+    We compute max_x_mm by capturing the (x, text, align) of every
+    cell/multi_cell call via a temporary monkey-patch on FPDF.cell. This
+    works across fpdf2 versions because we read fpdf2's own cursor state
+    at call time, not the post-render PDF object shape.
+    """
+    parsed = parse_resume(src_text)
+    d = ResumePDF(scale)
+    d.add_page()
+    captured = []  # list of (x_mm, text, align)
+
+    orig_cell = FPDF.cell
+
+    def _capture(self, *args, **kwargs):
+        x_before = float(self.x)
+        text = kwargs.get("text", args[2] if len(args) > 2 else "")
+        align = kwargs.get("align", "")
+        captured.append((x_before, text or "", align or ""))
+        return orig_cell(self, *args, **kwargs)
+
+    FPDF.cell = _capture
+    try:
+        eff = d.scaled
+        accent = (17, 17, 17) if template == "gabelli" else ACCENT
+        render(scale, parsed["name"], parsed["contact"], parsed["tagline"],
+               parsed["summary"], parsed["sections"], accent, template)
+    finally:
+        FPDF.cell = orig_cell
+
+    x_max = float(d.l_margin)
+    for x, txt, align in captured:
+        if not txt:
+            continue
+        try:
+            w = float(d.get_string_width(txt))
+        except Exception:
+            w = 0.0
+        # align='R' (or R-in-something): right edge is the cell's x, not x+w.
+        right = x if "R" in align.upper() else x + w
+        if right > x_max:
+            x_max = right
+    last_y = float(d.get_y())
+    return d, x_max, last_y
 
 
 if __name__ == "__main__":
