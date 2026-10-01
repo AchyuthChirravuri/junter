@@ -1,3 +1,33 @@
+# OS / editor
 .DS_Store
-*.env
+.idea/
+.vscode/
+
+# Python bytecode
 __pycache__/
+*.pyc
+*.pyo
+
+# Virtualenvs
+.venv/
+venv/
+
+# pytest cache
+.pytest_cache/
+
+# Secrets and environment files
+.env
+.env.example
+.env.local
+.env.*
+*.env
+
+# Generated / build outputs
+out/
+build/
+dist/
+*.egg-info/
+
+# Editor backups
+*.bak-*
+*.swp
