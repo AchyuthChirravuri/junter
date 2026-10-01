@@ -10,7 +10,7 @@ Authoritative daily routine for the Hermes `jobs` profile. SOUL.md points here.
 5. **Target watchlist (BINDING): target-watchlist.md — Google (#1 priority, every run), Microsoft, Amazon, Adobe, MongoDB, Meta, X, TikTok; agency holding companies WPP, Publicis, Dentsu, Omnicom, IPG (PM/PMM/growth/platform roles, matched loosely). Rules in that file: watchlist matches go to digest TOP with ⭐, always included, level-fit relaxed, backgrounder queue-jump, PROGRAM OPEN flags.**
 
 ## Daily run (7:30am ET, cron on jobs profile)
-1. Search sources — tiered escalation, time-boxed (~40 min max, ~25 queries max):
+1. Search sources — tiered escalation, time-boxed (~40 min max, **~25 queries max total** across all three tiers):
    - Tier 1 (fixed sources): HN Who's Hiring, Built In NYC, Wellfound, seeded career pages — max 8 queries.
    - Tier 2 (if fewer than 10 roles ≥ 6): expand keywords (APM program 2027, new grad PM, associate PMM, growth associate) + new-grad program watchlist queries (Amex, Mastercard, Citi, JPMorgan early-career pages, big-tech APM/university pages) — up to 10 more queries.
    - Tier 3 (still short): adjacent boards (YC jobs, Remotive, WeWorkRemotely, NYC startup boards) — up to 7 more queries.
@@ -31,7 +31,7 @@ Statuses in tracker: pinged → interested → backgrounded → packaged → (su
 
 ### Account backgrounder (cron 9am + 6pm ET, "account-backgrounder" job)
 For each interested role, in one run per role:
-1. Company research — one pass, cached to cache/companies/<name>.md; reuse cache if fresh (<30 days).
+1. Company research — one pass, cached to cache/companies/<name>.md; **reuse the backgrounder cache if it is less than 30 days old** (time-based freshness window).
 2. Build a one-pager per account-backgrounder-template.md: About Us, Mission, Vision, CEO, Relevant Links, Recent News, Funding & Status, Main Products, What You Would Be Working On (derived from the specific job posting + how the candidate's background maps to it).
 3. Save drafts/<id>-<company>-backgrounder.md; send to Telegram (send-doc or formatted text).
 4. Immediately feed it to the resume + cover letter builder: tailored ATS resume (.docx per ats-rules.md, JD keywords verbatim, bullets from master-resume.md only) + cover letter (right angle from cover-letter-templates.md, company specifics from the backgrounder). Send the resume to Telegram as an individual document per role. Mark status=packaged.
@@ -65,10 +65,10 @@ the candidate pastes the portal's essay/short-answer questions. Using the backgr
 
 ## Company intelligence cache
 - On first appearance: one background research pass → cache/companies/<name>.md (product, stage, news, competitors).
-- Reused for all future matches; refresh only on a new 7+ role.
+- Reused for all future matches. **Refresh the company-intel cache only when a new role at that company scores 7.0 or higher** (signal-based refresh trigger; this is independent of the backgrounder cache's 30-day time-based freshness rule above).
 
 ## Cost controls
-- Max 8 search queries/run, one daily run, one weekly run.
+- Max **~25 search queries per run** total (8 Tier 1 + 10 Tier 2 + 7 Tier 3), one daily run, one weekly run.
 - Cheap model for daily ops; premium only for a 9+ full draft if quality requires it.
 - No browser automation in v1. No LinkedIn scraping ever.
 

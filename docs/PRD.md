@@ -14,7 +14,7 @@ A full-time MBA candidate targeting PM/PMM/growth roles faces three failure mode
 
 | # | Goal | Measure |
 |---|---|---|
-| G1 | Never miss an on-fit role at target companies | Every watchlist company checked every daily run |
+| G1 | Never miss an on-fit role at target companies | Google is checked every daily run; other watchlist companies are checked on a rotating weekly cadence so the daily query budget stays within bounds (see `docs/target-watchlist.md`) |
 | G2 | Compress application prep from hours to minutes | Daily involvement ≤ 3 minutes (digest triage + package review) |
 | G3 | Preserve quality discipline at scale | Every resume bullet traceable to master resume; zero auto-submissions |
 | G4 | Learn from outcomes | Rubric reweighted weekly from real reply/outcome data |

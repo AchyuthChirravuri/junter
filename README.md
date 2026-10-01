@@ -63,6 +63,38 @@ The rules that make this system trustworthy are in the PRD, but the short versio
 4. **No LinkedIn scraping, no browser automation in v1.**
 5. **Mandatory humanizer scan** on every draft before it ships.
 
+## Evidence matrix — what this repo actually ships
+
+The repo describes an end-to-end system. This table separates what the published
+code and tests *demonstrate* from what is *specified as orchestration* in `docs/`
+but only partially executed by the public code, and from what is *future work*.
+Nothing in the matrix is invented. Every row maps to a file or test that exists
+in this repository.
+
+| Area | Status | Evidence (file or test) |
+|---|---|---|
+| ATS-safe markdown→docx generator (`make-docx`) | Implemented in code, tested | `code/jobbot_helpers.py`, `code/tests/` |
+| One-page PDF resume with hard page-1 gate | Implemented in code, tested | `code/make_resume_pdf.py`, `code/tests/test_pdf_layout.py` (15 tests) |
+| Weighted 0–10 fit scoring with hard caps + routing | Implemented in code, tested | `code/scoring.py`, `code/tests/test_scoring.py` (23 tests) |
+| Synthetic demo that emits `out/{README.md, score.txt, resume.docx, gates.json}` | Implemented in code, runs offline | `code/synth_demo.py` |
+| Offline demo metadata parse via stdlib `tomllib` | Implemented in CI workflow | `.github/workflows/tests.yml` (the `tomllib` step on Python 3.11+; on 3.9 the step is intentionally skipped because `tomllib` is 3.11+) |
+| Stdlib YAML subset for workflow self-parse | Implemented in code, offline | `code/yaml.py` |
+| **Sourcing adapters** (HN, Built In, Wellfound, career-page polling) | Specified in docs only; **not in this repo** | `docs/operating-spec.md` (sections "Sources", "Daily run") — orchestrator code lives in the operator's private `jobs` profile |
+| **Telegram digest delivery** | Specified in docs; delivery client is in the operator's private profile | `docs/operating-spec.md` ("Tailoring & delivery mechanics") |
+| **Weekly rubric calibration** with stated rationale | Specified in docs; calibration script lives in the operator's private profile | `docs/operating-spec.md` ("Weekly calibration"), `docs/scoring-rubric.md` |
+| **Account backgrounder** (company one-pager cache, 30-day reuse) | Specified in docs; implementation in operator's private profile | `docs/operating-spec.md` ("Account backgrounder", "Company intelligence cache") |
+| **ATS keyword rules + humanizer scan** | Specified in docs; scanner lives in operator's private profile | `docs/ats-rules.md`, `docs/resume-writing-design-standard.md` |
+| **Edit-diff learning** from operator's manual edits | Specified; not in this repo | `docs/PRD.md` ("System behavior & guardrails — Edit-diff learning") |
+| **Outcome metrics dashboard** | Future work | `docs/PRD.md` ("P2 — Metrics dashboard") |
+| **Config-driven source adapters** so anyone can run it | Future work | `docs/PRD.md` ("P2") |
+| **Portal-question analysis** (`qs <id>`) | Future work / partial — spec only | `docs/PRD.md` ("P1 — partial"), `docs/operating-spec.md` ("Portal questions") |
+
+The repo is honest about this split: the **method** (specs, rubric, templates,
+the two resume builders, and the scoring engine with its tests) is public; the
+**live execution** (daily sourcing, Telegram transport, calibration, and any
+real network call) stays in the operator's private `jobs` profile because it
+carries secrets and the operator's real tracker.
+
 ## Built with
 
 [Hermes Agent](https://hermes-agent.nousresearch.com/) (isolated `jobs` profile, cron-triggered runs) · Python · python-docx · fpdf2 · Telegram Bot API · a very large cup of coffee
