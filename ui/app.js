@@ -1,19 +1,20 @@
 /* Junter — single-page app with hash routing.
-   Loads ../synthetic-data/seed.json via fetch; normalizes it to the screens'
-   contract (see normalizeState), and falls back to an inline dataset when the
-   fetch fails or the payload looks like real PII. */
+   Fetches live tracker JSON from the same-origin /api/data endpoint; normalizes
+   it to the screens' contract (see normalizeState / adoptApiPayload), and falls
+   back to an embedded synthetic dataset when the API is unavailable, returns a
+   non-2xx status, is malformed, reports an error, or carries no usable rows. */
 
 (function () {
   'use strict';
 
-  // ---- Inline fallback dataset (used when seed.json cannot be fetched, OR when
-  // it contains forbidden PII tokens). 50 fictional roles across 5 status columns;
+  // ---- Inline fallback dataset (used when /api/data cannot be fetched or its
+  // payload is unusable). 50 fictional roles across 5 status columns;
   // 6 of them carry deadlines so the Deadline Rail has content; company names
   // match the Junter design notes (Google and Meta appear intentionally as
   // fictional seed data).
   //
-  // PII guard: if a fetched seed.json contains anything that looks like
-  // real PII — actual email addresses, real company URLs (anything not
+  // PII guard (defense in depth): if a payload contains anything that looks
+  // like real PII — actual email addresses, real company URLs (anything not
   // on example.com), or strings that match a name-pattern heuristic —
   // we ignore it and use this fallback. This is a hard gate; the
   // synthetic seed and inline FALLBACK are designed to pass these
@@ -192,6 +193,10 @@
   // days > ORANGE_MAX -> blue tier (this month+)
   var RED_MAX = 7;
   var ORANGE_MAX = 14;
+
+  // A hung /api/data request is a failure too: abort and use the embedded
+  // fallback rather than leaving the board blank forever.
+  var API_TIMEOUT_MS = 5000;
 
   // Hash routes — referenced as string literals so the route-assertion regex
   // in tests/test_app.py can pick them up via re.findall(r'#/(\w[\w-]*)', app.js).
@@ -1000,33 +1005,86 @@
 
   // ---- Boot
 
+  // Fetch same-origin /api/data with a timeout. Resolves to
+  //   { ok: true, data }   on a usable HTTP response, or
+  //   { ok: false, reason } otherwise (network, timeout, non-2xx, bad JSON).
+  // The caller decides what to do with the payload; this function only owns
+  // transport.
+  function fetchApiData() {
+    if (typeof fetch !== 'function') {
+      return Promise.resolve({ ok: false, reason: 'fetch unavailable' });
+    }
+    return new Promise(function (resolve) {
+      var settled = false;
+      function finish(result) { if (!settled) { settled = true; resolve(result); } }
+      var timer = setTimeout(function () {
+        finish({ ok: false, reason: 'timeout after ' + API_TIMEOUT_MS + 'ms' });
+      }, API_TIMEOUT_MS);
+      fetch('/api/data', { cache: 'no-store', headers: { Accept: 'application/json' } })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) { clearTimeout(timer); finish({ ok: true, data: data }); })
+        .catch(function (err) { clearTimeout(timer); finish({ ok: false, reason: err.message }); });
+    });
+  }
+
+  // Decide whether a /api/data payload is usable as the live dataset.
+  // Returns { state } when the payload is adoptable, or { fallback: reason }
+  // when the embedded dataset should be used instead.
+  //
+  // A payload with `error` set (e.g. {error: 'edge-config unavailable'}) is a
+  // reported failure. A payload whose roles array is missing or empty is ALSO
+  // treated as "no live data": the endpoint never serves an empty list for a
+  // healthy populated store, and the embedded fallback exists so the demo board
+  // is never blank. The PII guard is the last gate before adoption — a payload
+  // carrying real emails / non-example URLs / many name-shaped strings is
+  // refused in favour of the synthetic dataset.
+  function adoptApiPayload(data) {
+    if (!data || typeof data !== 'object') {
+      return { fallback: 'response was not a JSON object' };
+    }
+    if (data.error) {
+      return { fallback: 'API reported error: ' + data.error };
+    }
+    var normalized = normalizeState(data);
+    var roles = (normalized && Array.isArray(normalized.roles)) ? normalized.roles : [];
+    if (roles.length === 0) {
+      return { fallback: 'no live roles in response' };
+    }
+    var piiReason = looks_like_pii(JSON.stringify(data));
+    if (piiReason) {
+      return { fallback: 'payload looks like real data (' + piiReason + ')' };
+    }
+    return { state: normalized };
+  }
+
   function loadData(cb) {
-    if (typeof fetch !== 'function') return cb(FALLBACK);
-    fetch('../synthetic-data/seed.json', { cache: 'no-store' })
-      .then(function (r) {
-        if (!r.ok) throw new Error('seed fetch status ' + r.status);
-        return r.json();
-      })
-      .then(function (data) {
-        // PII guard: serialize and check before adopting.
-        var serialized = JSON.stringify(data);
-        var piiReason = looks_like_pii(serialized);
-        if (piiReason) {
-          console.warn('seed.json looks like real data (' + piiReason + ') — falling back to inline FALLBACK. The synthetic seed should not trip this guard.');
-          return cb(FALLBACK);
-        }
-        cb(normalizeState(data));
-      })
-      .catch(function (err) {
-        console.warn('seed.json fetch failed (' + err.message + ') — using inline fallback');
-        cb(FALLBACK);
-      });
+    fetchApiData().then(function (res) {
+      if (!res.ok) {
+        console.warn('/api/data fetch failed (' + res.reason + ') — using embedded fallback');
+        return cb(FALLBACK);
+      }
+      var decision = adoptApiPayload(res.data);
+      if (decision.fallback) {
+        console.warn('using embedded fallback: ' + decision.fallback);
+        return cb(FALLBACK);
+      }
+      cb(decision.state);
+    });
   }
 
   function boot() {
     loadData(function (state) {
       // Expose for tests / debugging
-      window.__junter = { state: state, RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier, daysUntil: daysUntil, roleDays: roleDays, normalizeState: normalizeState, looks_like_pii: looks_like_pii };
+      window.__junter = {
+        state: state,
+        RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier,
+        daysUntil: daysUntil, roleDays: roleDays,
+        normalizeState: normalizeState, looks_like_pii: looks_like_pii,
+        adoptApiPayload: adoptApiPayload
+      };
 
       window.addEventListener('hashchange', function () { render(state); });
       if (!window.location.hash) window.location.hash = '#/pipeline';

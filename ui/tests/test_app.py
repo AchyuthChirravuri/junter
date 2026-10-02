@@ -25,6 +25,9 @@ DOCS_DIR = REPO_ROOT / "docs"
 TOKENS_PATH = DOCS_DIR / "design-tokens.md"
 SEED_PATH = REPO_ROOT / "synthetic-data" / "seed.json"
 
+# Node is used to execute the real ui/app.js against DOM/fetch stubs.
+NODE = shutil.which("node")
+
 
 # ---------------------------------------------------------------------------
 # Mirrors of the runtime PII guard in ui/app.js (looks_like_pii). Kept in sync
@@ -329,7 +332,8 @@ class HashRoutingTests(unittest.TestCase):
 
 
 class FetchFallbackTests(unittest.TestCase):
-    """If seed.json fetch fails, app must use the inline FALLBACK dataset."""
+    """The app must fetch the same-origin live API and keep the embedded
+    synthetic dataset as a safe fallback."""
 
     def test_inline_fallback_exists_and_is_large_enough(self):
         js_text = APP_JS.read_text(encoding="utf-8")
@@ -340,14 +344,160 @@ class FetchFallbackTests(unittest.TestCase):
         ids = re.findall(r"id:\s*'([^']+)'", m.group(1))
         self.assertGreaterEqual(len(ids), 50, f"FALLBACK has only {len(ids)} roles")
 
-    def test_fetch_with_catch_falls_back(self):
+    def test_app_fetches_same_origin_api_and_not_static_seed(self):
         js_text = APP_JS.read_text(encoding="utf-8")
-        # The catch handler must call cb(FALLBACK).
+        self.assertIn("'/api/data'", js_text, "app.js must fetch the same-origin /api/data endpoint")
+        self.assertNotIn(
+            "synthetic-data/seed.json",
+            js_text,
+            "app.js must no longer load the static synthetic seed directly",
+        )
+
+    def test_load_data_has_a_fallback_path_on_transport_failure(self):
+        js_text = APP_JS.read_text(encoding="utf-8")
+        # loadData must resolve to cb(FALLBACK) when the API fetch is not ok.
         self.assertRegex(
             js_text,
-            re.compile(r"\.catch\(function\s*\(err\)\s*\{[\s\S]*?cb\(FALLBACK\)"),
-            "fetch catch must call cb(FALLBACK) on failure",
+            re.compile(r"function loadData\(cb\)[\s\S]*?loadData"),
+            "loadData function missing",
         )
+        self.assertRegex(
+            js_text,
+            re.compile(r"!\s*res\.ok[\s\S]*?cb\(FALLBACK\)"),
+            "a failed /api/data fetch must fall back to cb(FALLBACK)",
+        )
+
+
+# ---------------------------------------------------------------------------
+# Live /api/data loader.
+#
+# The loader fetches the same-origin endpoint, adopts a usable payload, and
+# degrades to the embedded synthetic dataset on every failure mode: transport
+# error, timeout, non-2xx status, malformed body, an error-marked body, an
+# empty payload, and a PII-shaped payload. These tests run the real ui/app.js
+# in Node with a stubbed fetch (see _run_app_js).
+# ---------------------------------------------------------------------------
+
+FALLBACK_ROLE_COUNT = 50
+
+
+def _fetch_json(body_obj, status=200, ok=True):
+    """A global.fetch stub resolving to a JSON body (or a non-2xx response)."""
+    body = json.dumps(body_obj)
+    return (
+        "function () { return Promise.resolve({ ok: %s, status: %d, "
+        "json: function () { return Promise.resolve(%s); } }); }"
+        % ("true" if ok else "false", status, body)
+    )
+
+
+def _fetch_error(message):
+    """A global.fetch stub that rejects (network failure / bad JSON)."""
+    return "function () { return Promise.reject(new Error(%s)); }" % json.dumps(message)
+
+
+def _state_summary():
+    """Expression evaluated inside the Node harness: a summary of loaded state."""
+    return (
+        "({n: J.state.roles.length, first: (J.state.roles[0]||{}).company || null})"
+    )
+
+
+@unittest.skipIf(NODE is None, "node not available to execute ui/app.js")
+class LiveApiLoaderTests(unittest.TestCase):
+    """loadData() must adopt the live API payload and fall back safely."""
+
+    def _loaded_summary(self, fetch_js):
+        res = _run_app_js(_state_summary(), fetch_js=fetch_js)
+        self.assertNotIn("__error__", res, f"node run failed: {res}")
+        return res
+
+    # --- success path -----------------------------------------------------
+
+    def test_populated_api_is_adopted(self):
+        payload = _exporter_fixture()  # 2 pipeline roles (Google, Meta)
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], 2, "live payload with roles must be rendered, not the fallback")
+        self.assertEqual(res["first"], "Google", "the API-provided company must render")
+
+    def test_already_normalized_api_payload_is_adopted(self):
+        # A payload already in the screens' shape (roles[]) must also be adopted.
+        payload = {"roles": [
+            {"id": "x1", "company": "LiveCo", "role": "PM", "fit": 9.0,
+             "source": "Career", "url": "https://example.com/x1", "status": "interested",
+             "deadline": "", "status_date": "2026-10-01"},
+        ], "lastUpdated": "2026-10-02T09:00:00-04:00"}
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], 1)
+        self.assertEqual(res["first"], "LiveCo")
+
+    # --- fallback paths ---------------------------------------------------
+
+    def test_unreachable_api_uses_fallback(self):
+        res = self._loaded_summary(_fetch_error("network down"))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "a rejected fetch must use the fallback board")
+
+    def test_non_2xx_status_uses_fallback(self):
+        res = self._loaded_summary(_fetch_json({"roles": []}, status=500, ok=False))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "a 500 response must use the fallback board")
+
+    def test_bad_json_uses_fallback(self):
+        bad_json = (
+            "function () { return Promise.resolve({ ok: true, status: 200, "
+            "json: function () { return Promise.reject(new Error('invalid json')); } }); }"
+        )
+        res = self._loaded_summary(bad_json)
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "an unparseable body must use the fallback board")
+
+    def test_error_marked_payload_uses_fallback(self):
+        payload = {"roles": [], "lastUpdated": None, "error": "edge-config unavailable"}
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "a payload reporting an error must use the fallback board")
+
+    def test_empty_roles_uses_fallback(self):
+        payload = {"roles": [], "lastUpdated": "2026-10-02T09:00:00-04:00"}
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "an empty live dataset must not blank the board")
+
+    def test_malformed_non_object_uses_fallback(self):
+        res = self._loaded_summary(_fetch_json("not-an-object"))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT)
+
+    def test_malformed_roles_not_a_list_uses_fallback(self):
+        res = self._loaded_summary(_fetch_json({"roles": "oops", "lastUpdated": None}))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT)
+
+    def test_pii_shaped_payload_uses_fallback(self):
+        # Fixture uses reserved .test domains: a real email + a non-example.com
+        # URL are exactly what the guard must reject.
+        payload = {"roles": [
+            {"id": 1, "company": "Acme",
+             "url": "https://jobs.not-a-real-company.test/posting/1",
+             "notes": "contact jane.doe@acme-corp.test"},
+        ]}
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "a PII-shaped payload must be refused")
+
+    # --- direct unit coverage of the decision function --------------------
+
+    def test_adopt_decision_shapes(self):
+        cases = {
+            "populated": (json.dumps(_exporter_fixture()), "state"),
+            "error": (json.dumps({"roles": [], "error": "x"}), "fallback"),
+            "empty": (json.dumps({"roles": []}), "fallback"),
+            "junk": (json.dumps({"roles": "no"}), "fallback"),
+            "scalar": (json.dumps(42), "fallback"),
+            "pii": (json.dumps({"roles": [
+                {"id": 1, "company": "Acme", "url": "https://jobs.some-company.test/posting/9"}]}), "fallback"),
+        }
+        for label, (payload, want) in cases.items():
+            res = _run_app_js(
+                "(function(){var d=J.adoptApiPayload(%s);"
+                "return (d.state?'state':'fallback');})()" % payload
+            )
+            self.assertNotIn("__error__", res, f"{label}: node run failed: {res}")
+            self.assertEqual(res, want, f"adoptApiPayload({label}) should choose {want}")
+
 
 
 # ---------------------------------------------------------------------------
@@ -360,15 +510,18 @@ class FetchFallbackTests(unittest.TestCase):
 # shipped code rather than a re-implementation.
 # ---------------------------------------------------------------------------
 
-NODE = shutil.which("node")
+# (NODE is defined near the top of this module.)
 
 
-def _run_app_js(expr):
+def _run_app_js(expr, fetch_js=None):
     """Load ui/app.js in Node with a DOM stub, then evaluate `expr` where `J`
-    is window.__junter. Returns the JSON-decoded result (or None on failure)."""
+    is window.__junter. `fetch_js` optionally overrides global.fetch with a JS
+    expression (a function). Returns the JSON-decoded result (or an
+    {"__error__": ...} dict on failure)."""
     app = APP_JS.read_text(encoding="utf-8")
+    fetch_impl = fetch_js or "function () { return Promise.reject(new Error('no-network-in-test')); }"
     stub = (
-        "global.fetch = function () { return Promise.reject(new Error('no-network-in-test')); };\n"
+        "global.fetch = " + fetch_impl + ";\n"
         "var window = { location: { hash: '#/pipeline' }, addEventListener: function () {} };\n"
         "var document = {\n"
         "  readyState: 'complete',\n"
@@ -386,7 +539,7 @@ def _run_app_js(expr):
     program += "  if (!J) { process.stdout.write('NO_JUNTER'); return; }\n"
     program += "  try { process.stdout.write(JSON.stringify(" + expr + ")); }\n"
     program += "  catch (e) { process.stdout.write('ERR:' + e.message); }\n"
-    program += "}, 25);\n"
+    program += "}, 40);\n"
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
         f.write(program)
         path = f.name
