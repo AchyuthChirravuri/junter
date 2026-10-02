@@ -95,6 +95,14 @@ and renders them. Full component diagram and design notes:
 
 ### UI prototype layer (synthetic data only)
 
+> **Try the prototype:** it's a static SPA with no build step — clone the
+> repo and open `ui/index.html` in your browser. It runs fully offline
+> (`ui/app.js` reads `synthetic-data/seed.json`, with an inline fallback
+> if the fetch fails), so nothing needs to be installed or served. A
+> hosted demo URL will be linked here once the deploy lands.
+>
+> **Live Figma wireframes:** [figma.com/design/e4kzWfgPUTchpIcuv1o7Y6](https://www.figma.com/design/e4kzWfgPUTchpIcuv1o7Y6)
+
 | Path | What it is |
 |---|---|
 | `ui/index.html` | SPA shell with hash routing (`#/pipeline`, `#/deadline`, `#/focus`, `#/digest`, `#/role/<id>`, `#/run-health`, `#/rubric`, `#/telegram`) |
