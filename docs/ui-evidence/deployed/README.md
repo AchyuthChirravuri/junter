@@ -28,6 +28,16 @@ immigration-specific blocked reasons are in the published projection.
 | 07 | `07-rubric-calibration.png` | Rubric & Calibration | **Blank body** (defect D-1, below) |
 | 08 | `08-telegram-mirror.png` | Telegram Mirror | **Blank body** (defect D-1, below) |
 
+## A note on identical screenshots
+
+`06-run-health.png`, `07-rubric-calibration.png`, and
+`08-telegram-mirror.png` are **byte-identical** (md5
+`b269a88de32e716957e0ccf67fe130a6`). This is not a capture failure — it is
+direct evidence of defect D-1: all three screens throw on the same missing
+array *before* appending any header or content, so each renders exactly the
+same empty `.screen__mount`. `04-daily-digest.png` is distinct only because
+the Daily Digest renderer appends its header/toolbar before hitting the throw.
+
 ## Defects found (flagged, NOT fixed in this card)
 
 ### D-1 — Engine screens throw on the live payload shape
