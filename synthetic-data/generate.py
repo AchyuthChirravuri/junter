@@ -42,6 +42,23 @@ FICTIONAL_COMPANIES = [
     "Brex", "Verkada", "Datadog", "Snowflake", "HashiCorp", "Cloudflare",
 ]
 
+# Public watchlist names used as *fictional stand-ins* so the demo Pipeline
+# Board and Deadline Rail show the same priority companies the inline FALLBACK
+# in ui/app.js already names (see the FALLBACK comment: "Google and Meta
+# appear intentionally as fictional seed data"). These are public names from
+# docs/target-watchlist.md; the roles, URLs, dates, and scores attached to
+# them remain entirely fictional. Deterministic role_ids are used so the
+# coverage survives the post-build shuffle.
+WATCHLIST_STANDINS = ["Google", "Microsoft", "Amazon", "Adobe", "MongoDB", "Meta"]
+WATCHLIST_ASSIGNMENT = {
+    3:  "Google",     # pinged    (deadline +3d  -> red)
+    11: "Microsoft",  # pinged    (deadline +6d  -> red)
+    15: "Amazon",     # interested
+    23: "MongoDB",    # packaged
+    24: "Adobe",      # packaged  (deadline +10d -> orange)
+    30: "Meta",       # packaged
+}
+
 ROLE_TITLES_PM = [
     "Associate Product Manager, 2027 Start",
     "Product Manager, Growth",
@@ -282,6 +299,11 @@ def _build_roles(rng: random.Random, today: _dt.date) -> list:
     for status, n in counts.items():
         for _ in range(n):
             company = rng.choice(FICTIONAL_COMPANIES)
+            # Watchlist stand-in: assigned at construction time (pre-shuffle)
+            # so it travels with the role through the shuffle. Uses no RNG, so
+            # the stream — and therefore the rest of the seed — is unchanged.
+            if role_id in WATCHLIST_ASSIGNMENT:
+                company = WATCHLIST_ASSIGNMENT[role_id]
             title = _pick_role_title(rng, status)
             source = _pick_source(rng)
             url = _make_url(role_id)

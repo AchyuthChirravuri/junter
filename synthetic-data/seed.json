@@ -101,7 +101,7 @@
     {
       "id": 7,
       "date_found": "2026-09-26",
-      "company": "Deel",
+      "company": "MongoDB",
       "role": "Product Manager, Developer Experience",
       "source": "watchlist",
       "url": "https://example.com/jobs/023",
@@ -229,7 +229,7 @@
     {
       "id": 15,
       "date_found": "2026-09-25",
-      "company": "Cloudflare",
+      "company": "Meta",
       "role": "Senior PMM, Competitive",
       "source": "HN Who's Hiring",
       "url": "https://example.com/jobs/030",
@@ -309,7 +309,7 @@
     {
       "id": 20,
       "date_found": "2026-09-26",
-      "company": "Snowflake",
+      "company": "Adobe",
       "role": "PMM, Demand Generation",
       "source": "Wellfound",
       "url": "https://example.com/jobs/024",
@@ -357,7 +357,7 @@
     {
       "id": 23,
       "date_found": "2026-09-21",
-      "company": "Supabase",
+      "company": "Microsoft",
       "role": "Senior Product Manager, Platform",
       "source": "Built In NYC",
       "url": "https://example.com/jobs/011",
@@ -373,7 +373,7 @@
     {
       "id": 24,
       "date_found": "2026-09-19",
-      "company": "Pitch",
+      "company": "Amazon",
       "role": "Product Manager, New Grad Program",
       "source": "Wellfound",
       "url": "https://example.com/jobs/015",
@@ -661,7 +661,7 @@
     {
       "id": 42,
       "date_found": "2026-09-22",
-      "company": "Brex",
+      "company": "Google",
       "role": "Product Manager, International Expansion",
       "source": "HN Who's Hiring",
       "url": "https://example.com/jobs/003",
@@ -806,7 +806,7 @@
   "deadline_rail": [
     {
       "id": 42,
-      "company": "Brex",
+      "company": "Google",
       "role": "Product Manager, International Expansion",
       "fit_score": 5.6,
       "deadline": "2026-10-04",
@@ -818,7 +818,7 @@
     },
     {
       "id": 23,
-      "company": "Supabase",
+      "company": "Microsoft",
       "role": "Senior Product Manager, Platform",
       "fit_score": 8.1,
       "deadline": "2026-10-07",
@@ -830,7 +830,7 @@
     },
     {
       "id": 20,
-      "company": "Snowflake",
+      "company": "Adobe",
       "role": "PMM, Demand Generation",
       "fit_score": 8.3,
       "deadline": "2026-10-11",
@@ -1320,7 +1320,7 @@
     },
     "7": {
       "id": 7,
-      "company": "Deel",
+      "company": "MongoDB",
       "role": "Product Manager, Developer Experience",
       "url": "https://example.com/jobs/023",
       "fit_score": 8.5,
@@ -1642,7 +1642,7 @@
     },
     "15": {
       "id": 15,
-      "company": "Cloudflare",
+      "company": "Meta",
       "role": "Senior PMM, Competitive",
       "url": "https://example.com/jobs/030",
       "fit_score": 8.8,
@@ -1824,7 +1824,7 @@
     },
     "20": {
       "id": 20,
-      "company": "Snowflake",
+      "company": "Adobe",
       "role": "PMM, Demand Generation",
       "url": "https://example.com/jobs/024",
       "fit_score": 8.3,
@@ -1937,7 +1937,7 @@
     },
     "23": {
       "id": 23,
-      "company": "Supabase",
+      "company": "Microsoft",
       "role": "Senior Product Manager, Platform",
       "url": "https://example.com/jobs/011",
       "fit_score": 8.1,
@@ -1969,7 +1969,7 @@
     },
     "24": {
       "id": 24,
-      "company": "Pitch",
+      "company": "Amazon",
       "role": "Product Manager, New Grad Program",
       "url": "https://example.com/jobs/015",
       "fit_score": 9.0,
@@ -2664,7 +2664,7 @@
     },
     "42": {
       "id": 42,
-      "company": "Brex",
+      "company": "Google",
       "role": "Product Manager, International Expansion",
       "url": "https://example.com/jobs/003",
       "fit_score": 5.6,

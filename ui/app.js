@@ -1,5 +1,7 @@
 /* Junter — single-page app with hash routing.
-   Loads ../synthetic-data/seed.json via fetch; falls back to inline data if missing. */
+   Loads ../synthetic-data/seed.json via fetch; normalizes it to the screens'
+   contract (see normalizeState), and falls back to an inline dataset when the
+   fetch fails or the payload looks like real PII. */
 
 (function () {
   'use strict';
@@ -21,17 +23,41 @@
   var PII_EMAIL_RE = /[A-Za-z0-9._%+-]+@(?!example\.com)[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
   var PII_NON_EXAMPLE_URL_RE = /https?:\/\/(?!example\.com)[^\s"']+/;
   // Heuristic for personal-name-shaped strings (capitalized first+last).
-  // False-positive prone; we only flag if BOTH first AND last look like
-  // a real name and the string is longer than 6 chars.
-  var PII_LIKELY_NAME_RE = /\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}\b/;
+  // The raw regex is deliberately permissive: job data is FULL of
+  // two-capitalized-word phrases that are not names ("Product Manager",
+  // "Associate Product", "New Grad", "Company Careers"). We therefore
+  // filter those out against a role/company vocabulary before counting,
+  // so ordinary PM job data does not read as PII while genuine
+  // Firstname Lastname lists still trip the gate.
+  var PII_NAME_RE = /[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}/g;
+  var PII_NAME_STOPWORDS = {
+    // role / seniority vocabulary
+    product: 1, manager: 1, marketing: 1, senior: 1, associate: 1,
+    principal: 1, staff: 1, lead: 1, growth: 1, strategy: 1, data: 1,
+    platform: 1, corporate: 1, development: 1, experience: 1, markets: 1,
+    international: 1, expansion: 1, grad: 1, engineering: 1, software: 1,
+    design: 1, program: 1, director: 1, digital: 1, analyst: 1, operations: 1,
+    success: 1, specialist: 1, engineer: 1, project: 1, management: 1,
+    business: 1, technical: 1, solutions: 1, customer: 1, content: 1,
+    cloud: 1, security: 1, risk: 1, compliance: 1, finance: 1, financial: 1,
+    sales: 1, account: 1, research: 1, university: 1, careers: 1, company: 1,
+    demand: 1, generation: 1, developer: 1, services: 1, systems: 1,
+    infrastructure: 1, applications: 1, sciences: 1, health: 1, media: 1,
+    brand: 1, global: 1, regional: 1, national: 1, executive: 1, general: 1,
+    vice: 1, head: 1, chief: 1, officer: 1, coordinator: 1, consultant: 1,
+    architect: 1, scientist: 1,
+  };
+  var PII_NAME_HITS_MAX = 12;
   function looks_like_pii(serialized) {
     if (PII_EMAIL_RE.test(serialized)) return 'real email';
     if (PII_NON_EXAMPLE_URL_RE.test(serialized)) return 'non-example.com URL';
-    // The name regex is intentionally permissive; only flag if the count
-    // is high (synthetic seeds have 0-2 capitalized two-word phrases
-    // like "Stripe Payments" or "Risk Team"; real personal data has many).
-    var nameHits = (serialized.match(/[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}/g) || []).length;
-    if (nameHits > 8) return 'many name-shaped strings (' + nameHits + ')';
+    var matches = serialized.match(PII_NAME_RE) || [];
+    var nameHits = matches.filter(function (m) {
+      var parts = m.split(/\s+/);
+      return !(PII_NAME_STOPWORDS[parts[0].toLowerCase()] ||
+               PII_NAME_STOPWORDS[parts[1].toLowerCase()]);
+    }).length;
+    if (nameHits > PII_NAME_HITS_MAX) return 'many name-shaped strings (' + nameHits + ')';
     return null;
   }
   var FALLBACK = {
@@ -193,6 +219,172 @@
     return Math.round(ms / (1000 * 60 * 60 * 24));
   }
 
+  // Prefer the exporter's exact days_out (relative to the snapshot moment)
+  // when present; fall back to date math for the offline seed/FALLBACK.
+  function roleDays(r) {
+    if (r && typeof r.deadline_days === 'number' && isFinite(r.deadline_days)) {
+      return r.deadline_days;
+    }
+    return daysUntil(r && r.deadline);
+  }
+
+  // ---- Exporter-shape adapter (D1 fix).
+  // snapshot-export/export.py emits one contract:
+  //   {snapshot_at, snapshot_kind, pipeline, deadline_rail, role_detail,
+  //    run_health, rejected_with_reasons, digests, rubric_versions, ...}
+  // The screens above read a different, normalized contract:
+  //   {roles, cron_runs, rubric_versions, rubric_diff, rubric_outcomes,
+  //    digests, telegram_messages}
+  // normalizeState() maps exporter -> normalized so a real exporter snapshot
+  // renders without changing the exporter's published schema. It is a no-op
+  // on already-normalized input (the inline FALLBACK), so offline use is
+  // unaffected.
+  function _num(v, d) {
+    return (typeof v === 'number' && isFinite(v)) ? v : (d == null ? 0 : d);
+  }
+  function _daysBetween(fromIso, toIso) {
+    if (!fromIso || !toIso) return NaN;
+    var a = new Date(fromIso + 'T00:00:00');
+    var b = new Date(toIso + 'T00:00:00');
+    if (isNaN(a.getTime()) || isNaN(b.getTime())) return NaN;
+    return Math.round((b.getTime() - a.getTime()) / 86400000);
+  }
+  function normalizeState(raw) {
+    if (!raw || typeof raw !== 'object') return raw;
+    if (Array.isArray(raw.roles)) return raw; // already normalized (FALLBACK / seed)
+
+    var pipeline = raw.pipeline || [];
+    var detail = raw.role_detail || {};
+    var asOf = (raw.snapshot_at || '').slice(0, 10);
+
+    // The rail carries days_out relative to the snapshot moment; prefer it
+    // (exact) and fall back to date math when a row is missing.
+    var daysById = {};
+    (raw.deadline_rail || []).forEach(function (row) { daysById[String(row.id)] = row.days_out; });
+    function daysFor(id, deadline) {
+      var k = String(id);
+      if (typeof daysById[k] === 'number') return daysById[k];
+      return _daysBetween(asOf, deadline);
+    }
+
+    var roles = pipeline.map(function (r) {
+      var d = detail[String(r.id)] || {};
+      var deadline = r.deadline || d.deadline || '';
+      return {
+        id: String(r.id),
+        company: r.company || d.company || '',
+        role: r.role || d.role || '',
+        fit: _num(r.fit_score != null ? r.fit_score : d.fit_score),
+        source: r.source || '',
+        url: r.url || d.url || '',
+        status: r.status || d.status || '',
+        routed: r.routed || '',
+        deadline: deadline,
+        deadline_days: daysFor(r.id, deadline),
+        status_date: r.status_date || r.date_found || '',
+        blocked_reason: r.blocked_reason || d.blocked_reason || '',
+        angle: r.notes || '',
+        summary: d.company_summary || '',
+        rubric_factors: d.rubric_factors || null,
+        rubric_version: d.rubric_version ||
+          ((raw.rubric_versions || [])[0] || {}).version || '',
+        draft_paths: d.draft_paths || [],
+        history: d.history || []
+      };
+    });
+
+    var roleById = {};
+    roles.forEach(function (r) { roleById[r.id] = r; });
+
+    // digests: {date, sections:[{title, role_ids}]} -> {date, promoted, rejected}
+    // Exporter digests carry no per-day rejection detail, so the current
+    // blocked set (rejected_with_reasons) is grouped by reason and attached
+    // to the newest digest — real evidence beats an empty block.
+    var rejectedGroups = {};
+    (raw.rejected_with_reasons || []).forEach(function (x) {
+      var reason = x.blocked_reason || 'blocked';
+      if (!rejectedGroups[reason]) rejectedGroups[reason] = [];
+      rejectedGroups[reason].push((x.company + ' ' + x.role).trim());
+    });
+    var rejectedForNewest = Object.keys(rejectedGroups).map(function (reason) {
+      return { reason: reason, names: rejectedGroups[reason] };
+    });
+    var rawDigests = raw.digests || [];
+    var digests = rawDigests.map(function (g) {
+      var promoted = [];
+      (g.sections || []).forEach(function (s) {
+        (s.role_ids || []).forEach(function (id) {
+          var r = roleById[String(id)];
+          if (!r) return;
+          if (promoted.some(function (p) { return p.id === r.id; })) return;
+          promoted.push({
+            id: r.id,
+            headline: r.company + ' — ' + r.role + ' (fit ' + r.fit.toFixed(1) + ')'
+          });
+        });
+      });
+      var rejected = (g === rawDigests[0]) ? rejectedForNewest : [];
+      return { date: g.date, promoted: promoted, rejected: rejected };
+    });
+    // Don't render digest cards with nothing to say.
+    digests = digests.filter(function (g) {
+      return g.promoted.length > 0 || g.rejected.length > 0;
+    });
+
+    // rubric_versions: flatten per-version weights -> diff + outcomes lists.
+    var versions = raw.rubric_versions || [];
+    var current = versions[versions.length - 1] || {};
+    var prev = versions.length > 1 ? versions[versions.length - 2] : null;
+    var rubric_diff = [];
+    var rubric_outcomes = [];
+    if (prev) {
+      Object.keys(current.weights || {}).forEach(function (k) {
+        var to = _num(current.weights[k]);
+        var from = (prev.weights && prev.weights[k] != null) ? _num(prev.weights[k]) : to;
+        rubric_diff.push({
+          factor: k,
+          from: from,
+          to: to,
+          // The rationale that explains the change lives on the newer version.
+          rationale: String(current.rationale || prev.rationale || '').slice(0, 400)
+        });
+      });
+    }
+    if (prev && current.outcomes) {
+      Object.keys(current.outcomes).forEach(function (k) {
+        rubric_outcomes.push({
+          metric: k,
+          v1: prev.outcomes ? prev.outcomes[k] : '—',
+          v2: current.outcomes[k]
+        });
+      });
+    }
+
+    var rejected_rows = (raw.rejected_with_reasons || []).map(function (x) {
+      return {
+        id: String(x.id),
+        company: x.company || '',
+        role: x.role || '',
+        fit: _num(x.fit_score),
+        reason: x.blocked_reason || 'blocked'
+      };
+    });
+
+    return {
+      generated_at: raw.snapshot_at || '',
+      snapshot_kind: raw.snapshot_kind || 'real',
+      as_of: asOf,
+      roles: roles,
+      digests: digests,
+      cron_runs: raw.run_health || [],
+      rubric_versions: versions,
+      rubric_diff: rubric_diff,
+      rubric_outcomes: rubric_outcomes,
+      telegram_messages: raw.telegram_messages || [],
+      rejected_rows: rejected_rows
+    };
+  }
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
@@ -227,7 +419,7 @@
     ];
     var header = el('div', { class: 'page-header' }, [
       el('h1', { class: 'page-header__title', text: 'Pipeline Board' }),
-      el('div', { class: 'page-header__meta', text: '50 roles · 5 columns · ' + state.roles.length + ' loaded' })
+      el('div', { class: 'page-header__meta', text: state.roles.length + ' roles · 5 columns · ' + state.roles.length + ' loaded' })
     ]);
     var toolbar = el('div', { class: 'toolbar' }, [
       el('input', { class: 'toolbar__search', placeholder: 'Search company or role…' }),
@@ -270,7 +462,7 @@
     var withDeadline = state.roles
       .filter(function (r) { return r.deadline && r.deadline.length > 0; })
       .map(function (r) {
-        return { role: r, days: daysUntil(r.deadline) };
+        return { role: r, days: roleDays(r) };
       })
       .filter(function (x) { return !isNaN(x.days); })
       .sort(function (a, b) { return a.days - b.days; });
@@ -344,13 +536,13 @@
     var interested = state.roles
       .filter(function (r) { return r.status === 'interested'; })
       .sort(function (a, b) {
-        var da = a.deadline ? daysUntil(a.deadline) : 99999;
-        var db = b.deadline ? daysUntil(b.deadline) : 99999;
+        var da = a.deadline ? roleDays(a) : 99999;
+        var db = b.deadline ? roleDays(b) : 99999;
         return da - db;
       });
     var list = el('div');
     interested.forEach(function (r) {
-      var days = r.deadline ? daysUntil(r.deadline) : null;
+      var days = r.deadline ? roleDays(r) : null;
       var card = el('div', { class: 'card focus-card' }, [
         el('div', null, [
           el('h2', { class: 'focus-card__title', text: r.role }),
@@ -453,14 +645,30 @@
       el('div', { class: 'page-header__meta', text: 'Status: ' + role.status + ' · ' + role.status_date })
     ]);
 
-    // Rubric factors (illustrative breakdown that sums to fit)
-    var factorInputs = [
-      { label: 'Level fit', v: 0.9 },
-      { label: 'Role fit', v: 0.95 },
-      { label: 'Company fit', v: 0.7 },
-      { label: 'Comp fit', v: 0.6 },
-      { label: 'Location fit', v: 0.85 }
-    ];
+    // Rubric factors — use the real per-factor breakdown when the exporter
+    // provides one (rubric_factors); otherwise fall back to an illustrative
+    // breakdown so the offline seed still renders a full screen.
+    var factorInputs;
+    var rubricNote = '';
+    if (role.rubric_factors && typeof role.rubric_factors === 'object') {
+      // Real factor scores are 0–3ish; normalize to a 0–1 bar width.
+      factorInputs = Object.keys(role.rubric_factors).map(function (k) {
+        var raw = role.rubric_factors[k];
+        var v = Math.max(0, Math.min(1, _num(raw) / 3));
+        return { label: k, v: v, raw: _num(raw) };
+      });
+      rubricNote = 'Factor scores from ' + (role.rubric_version || 'the current rubric') + ', each on a 0–3 scale.';
+    } else {
+      factorInputs = [
+        { label: 'domain fit', v: 0.9, raw: 2.7 },
+        { label: 'program match', v: 0.95, raw: 2.85 },
+        { label: 'sponsorship clear', v: 0.7, raw: 2.1 },
+        { label: 'level fit', v: 0.6, raw: 1.8 },
+        { label: 'location fit', v: 0.85, raw: 2.55 },
+        { label: 'comp fit', v: 0.75, raw: 2.25 }
+      ];
+      rubricNote = 'Illustrative breakdown — the engine did not emit per-factor scores for this role.';
+    }
     var bars = el('div', { class: 'rubric-bars' });
     factorInputs.forEach(function (f) {
       bars.appendChild(el('div', { class: 'rubric-bar' }, [
@@ -468,55 +676,85 @@
         el('div', { class: 'rubric-bar__track' }, [
           el('div', { class: 'rubric-bar__fill', style: 'width: ' + Math.round(f.v * 100) + '%;' })
         ]),
-        el('div', { class: 'rubric-bar__num', text: (f.v * 3).toFixed(1) + ' / 3.0' })
+        el('div', { class: 'rubric-bar__num', text: f.raw.toFixed(1) + ' / 3.0' })
       ]));
     });
+    if (rubricNote) bars.appendChild(el('div', { class: 'page-header__meta', text: rubricNote }));
 
-    var files = el('ul', { class: 'file-list' }, [
-      el('li', { class: 'file-list__item' }, [
+    // Backgrounder & drafts — real draft paths when present, otherwise the
+    // expected filenames for the offline seed.
+    var files = el('ul', { class: 'file-list' });
+    var draftPaths = role.draft_paths || [];
+    if (draftPaths.length) {
+      draftPaths.forEach(function (p) {
+        files.appendChild(el('li', { class: 'file-list__item' }, [
+          el('span', { class: 'file-card__filename', text: p }),
+          el('span', { class: 'toolbar__chip', text: 'Open' })
+        ]));
+      });
+    } else {
+      files.appendChild(el('li', { class: 'file-list__item' }, [
         el('span', { class: 'file-card__filename', text: role.id + '-' + role.company.replace(/[^A-Za-z0-9]/g, '') + '-role-backgrounder.md' }),
         el('span', { class: 'toolbar__chip', text: 'Read' })
-      ]),
-      el('li', { class: 'file-list__item' }, [
+      ]));
+      files.appendChild(el('li', { class: 'file-list__item' }, [
         el('span', { class: 'file-card__filename', text: role.id + '-' + role.company.replace(/[^A-Za-z0-9]/g, '') + '-role-resume.docx' }),
         el('span', { class: 'toolbar__chip', text: 'Draft' })
-      ]),
-      el('li', { class: 'file-list__item' }, [
+      ]));
+      files.appendChild(el('li', { class: 'file-list__item' }, [
         el('span', { class: 'file-card__filename', text: role.id + '-' + role.company.replace(/[^A-Za-z0-9]/g, '') + '-role-cover.docx' }),
         el('span', { class: 'toolbar__chip', text: 'Draft' })
-      ])
-    ]);
+      ]));
+    }
 
-    var history = el('ul', { class: 'history-timeline' }, [
-      el('li', { class: 'history-timeline__item' }, [
-        el('span', { class: 'history-timeline__dot' }),
-        el('div', { class: 'history-timeline__body' }, [
-          el('div', { text: 'Discovered on ' + role.source }),
-          el('div', { class: 'history-timeline__when', text: role.status_date })
+
+    // History — real per-event log when the exporter provides one, otherwise
+    // the synthetic 4-step timeline for the offline seed.
+    var history;
+    if (role.history && role.history.length) {
+      history = el('ul', { class: 'history-timeline' });
+      role.history.forEach(function (h) {
+        history.appendChild(el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: h.note || h.event || '' }),
+            el('div', { class: 'history-timeline__when', text: (h.ts || '').replace('T', ' ').slice(0, 16) })
+          ])
+        ]));
+      });
+    } else {
+      history = el('ul', { class: 'history-timeline' }, [
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Discovered on ' + role.source }),
+            el('div', { class: 'history-timeline__when', text: role.status_date })
+          ])
+        ]),
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot history-timeline__dot--watchlist' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Added to watchlist (fit ' + role.fit.toFixed(1) + ')' }),
+            el('div', { class: 'history-timeline__when', text: role.status_date })
+          ])
+        ]),
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot history-timeline__dot--interested' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Marked interested (int)' }),
+            el('div', { class: 'history-timeline__when', text: role.status_date })
+          ])
+        ]),
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot history-timeline__dot--artifact' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Backgrounder + resume + cover letter drafted' }),
+            el('div', { class: 'history-timeline__when', text: role.status_date })
+          ])
         ])
-      ]),
-      el('li', { class: 'history-timeline__item' }, [
-        el('span', { class: 'history-timeline__dot history-timeline__dot--watchlist' }),
-        el('div', { class: 'history-timeline__body' }, [
-          el('div', { text: 'Added to watchlist (fit ' + role.fit.toFixed(1) + ')' }),
-          el('div', { class: 'history-timeline__when', text: role.status_date })
-        ])
-      ]),
-      el('li', { class: 'history-timeline__item' }, [
-        el('span', { class: 'history-timeline__dot history-timeline__dot--interested' }),
-        el('div', { class: 'history-timeline__body' }, [
-          el('div', { text: 'Marked interested (int)' }),
-          el('div', { class: 'history-timeline__when', text: role.status_date })
-        ])
-      ]),
-      el('li', { class: 'history-timeline__item' }, [
-        el('span', { class: 'history-timeline__dot history-timeline__dot--artifact' }),
-        el('div', { class: 'history-timeline__body' }, [
-          el('div', { text: 'Backgrounder + resume + cover letter drafted' }),
-          el('div', { class: 'history-timeline__when', text: role.status_date })
-        ])
-      ])
-    ]);
+      ]);
+    }
+
 
     var left = el('div', null, [
       el('div', { class: 'card', style: 'margin-bottom: var(--space-5);' }, [
@@ -777,7 +1015,7 @@
           console.warn('seed.json looks like real data (' + piiReason + ') — falling back to inline FALLBACK. The synthetic seed should not trip this guard.');
           return cb(FALLBACK);
         }
-        cb(data);
+        cb(normalizeState(data));
       })
       .catch(function (err) {
         console.warn('seed.json fetch failed (' + err.message + ') — using inline fallback');
@@ -788,7 +1026,7 @@
   function boot() {
     loadData(function (state) {
       // Expose for tests / debugging
-      window.__junter = { state: state, RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier, daysUntil: daysUntil };
+      window.__junter = { state: state, RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier, daysUntil: daysUntil, roleDays: roleDays, normalizeState: normalizeState, looks_like_pii: looks_like_pii };
 
       window.addEventListener('hashchange', function () { render(state); });
       if (!window.location.hash) window.location.hash = '#/pipeline';

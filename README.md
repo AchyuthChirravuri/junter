@@ -95,11 +95,15 @@ and renders them. Full component diagram and design notes:
 
 ### UI prototype layer (synthetic data only)
 
-> **Try the prototype:** it's a static SPA with no build step — clone the
-> repo and open `ui/index.html` in your browser. It runs fully offline
-> (`ui/app.js` reads `synthetic-data/seed.json`, with an inline fallback
-> if the fetch fails), so nothing needs to be installed or served. A
-> hosted demo URL will be linked here once the deploy lands.
+> **Try the prototype:** it's a static SPA with no build step. Because
+> `ui/app.js` `fetch()`es `synthetic-data/seed.json` by relative path,
+> open it over a static server rooted at the **repo root** (not `ui/`):
+> `python3 -m http.server 8765` then visit
+> `http://localhost:8765/ui/index.html`. Opening `ui/index.html`
+> directly, or serving from `ui/`, makes the fetch 404 and the app falls
+> back to its inline dataset — still fully functional, just not reading
+> the seed. No install is required. A hosted demo URL will be linked
+> here once the deploy lands.
 >
 > **Live Figma wireframes:** [figma.com/design/e4kzWfgPUTchpIcuv1o7Y6](https://www.figma.com/design/e4kzWfgPUTchpIcuv1o7Y6)
 
@@ -107,9 +111,9 @@ and renders them. Full component diagram and design notes:
 |---|---|
 | `ui/index.html` | SPA shell with hash routing (`#/pipeline`, `#/deadline`, `#/focus`, `#/digest`, `#/role/<id>`, `#/run-health`, `#/rubric`, `#/telegram`) |
 | `ui/styles.css` | All values are `var(--space-*)` / `var(--text-*)` / `var(--color-*)` tokens from `docs/ui-design-tokens.md` — zero hard-coded literals for sizes and colors |
-| `ui/app.js` | Reads `synthetic-data/seed.json` via `fetch()`; falls back to inline FALLBACK if fetch fails or seed contains PII tokens (defense in depth) |
-| `ui/tests/test_app.py` | PII-guard tests, route-rendering tests, design-token compliance |
-| `synthetic-data/generate.py` | Deterministic seed generator (seed=42 → byte-identical output). 50 fictional roles across 5 status columns, 3+ deadlines, 1+ rejected per reason |
+| `ui/app.js` | Reads `synthetic-data/seed.json` via `fetch()`; falls back to inline FALLBACK if the fetch fails or the seed contains PII tokens (defense in depth). `normalizeState()` adapts the exporter's output shape (`pipeline`/`deadline_rail`/`role_detail`/`run_health`) onto the screens' shape (`roles`/`cron_runs`/`rubric_diff`), so the UI renders a real exporter snapshot — not just the seed — without changing the exporter's schema |
+| `ui/tests/test_app.py` | PII-guard tests, route-rendering tests, design-token compliance, and adapter tests (runs the real `ui/app.js` in Node against a DOM stub) |
+| `synthetic-data/generate.py` | Deterministic seed generator (seed=42 → byte-identical output). 50 fictional roles across 5 status columns, 3+ deadlines, 1+ rejected per reason; names the six watchlist companies (Google, Microsoft, Amazon, Adobe, MongoDB, Meta) as fictional stand-ins so the demo Pipeline Board and Deadline Rail are demonstrable |
 | `synthetic-data/seed.json` | The generated seed (88 KB) |
 | `snapshot-export/export.py` | Reads `tracker.csv` + `digests/` + `cache/companies/` OR `synthetic-data/` (env var `JUNTER_DATA_DIR`) and emits a single JSON the UI consumes. Parse-defensively — bad rows are warnings, not exceptions |
 | `docs/ui-design-tokens.md` | The canonical design-token spec; CSS in `ui/styles.css` is a 1:1 mirror of these tokens |
