@@ -41,10 +41,15 @@ So the two live side by side:
 | `api/data.js` (root `api/`) | `/api/data` |
 
 **Observed on the current production deployment** (`junter-xi.vercel.app`,
-commit `6e62d00`, i.e. before `api/` existed):
+commit `6e62d00`, i.e. before `api/` existed) — the `ui/` Output Directory is
+confirmed in effect:
 
-- `GET /` → HTTP 200, `text/html` — the `ui/index.html` prototype (confirms the
-  `ui/` Output Directory is in effect).
+- `GET /` → HTTP 200, `text/html` — the `ui/index.html` prototype.
+- `GET /styles.css` → HTTP 200, `text/css`, 19987 bytes — identical size and
+  SHA-256 prefix (`151d557d4fa04455`) to the repo's `ui/styles.css`, so `ui/` is
+  served at the domain **root**.
+- `GET /ui/styles.css` → HTTP 404 — assets are **not** served under a `/ui/`
+  prefix, which rules out root-directory serving.
 - `GET /api/data` → HTTP 404 — expected, because `main` has no `api/` yet.
 
 ## Required checks on the first deploy that contains `api/`
