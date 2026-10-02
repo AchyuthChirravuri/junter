@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Junter — Reading Layer (Prototype)</title>
-  <meta name="description" content="Static HTML prototype of the Junter reading layer — Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail, Run Health, Rubric &amp; Calibration, Telegram Mirror. Reads ../synthetic-data/seed.json via fetch; falls back to an inline dataset if the fetch fails or the file contains PII tokens." />
+  <meta name="description" content="Static HTML prototype of the Junter reading layer — Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail, Run Health, Rubric &amp; Calibration, Telegram Mirror. Reads live tracker JSON from the same-origin /api/data endpoint; falls back to an embedded synthetic dataset if the API is unavailable, malformed, or reports an error." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -30,8 +30,8 @@
       </ul>
       <p class="sidebar__hint">→ see all 8 screens in the wireframe file</p>
       <div style="margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--color-border); font-size: var(--text-meta); color: var(--color-text-secondary);">
-        <p style="margin: 0 0 var(--space-3) 0;"><strong>Data source:</strong> <code style="font-family: ui-monospace, monospace;">../synthetic-data/seed.json</code></p>
-        <p style="margin: 0 0 var(--space-3) 0;">Falls back to inline FALLBACK dataset if fetch fails or the file contains forbidden PII tokens.</p>
+        <p style="margin: 0 0 var(--space-3) 0;"><strong>Data source:</strong> <code style="font-family: ui-monospace, monospace;">/api/data</code> (same-origin)</p>
+        <p style="margin: 0 0 var(--space-3) 0;">Falls back to an embedded synthetic dataset if the API is unavailable, returns a non-2xx status, is malformed, reports an error, or carries no roles.</p>
         <p style="margin: 0;">Role detail URL pattern: <code style="font-family: ui-monospace, monospace;">#/role/&lt;id&gt;</code></p>
       </div>
     </aside>
