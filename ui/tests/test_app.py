@@ -467,6 +467,16 @@ class LiveApiLoaderTests(unittest.TestCase):
         res = self._loaded_summary(_fetch_json({"roles": "oops", "lastUpdated": None}))
         self.assertEqual(res["n"], FALLBACK_ROLE_COUNT)
 
+    def test_roles_keyed_payload_with_unadapted_rows_uses_fallback(self):
+        # A roles[] array whose rows are exporter-shaped (fit_score, not fit)
+        # would crash the board's r.fit.toFixed(); it must fall back, not crash.
+        payload = {"roles": [
+            {"id": 7, "company": "Google", "role": "APM", "fit_score": 8.7,
+             "status": "interested", "url": "https://example.com/g"},
+        ]}
+        res = self._loaded_summary(_fetch_json(payload))
+        self.assertEqual(res["n"], FALLBACK_ROLE_COUNT, "unrenderable live rows must fall back")
+
     def test_pii_shaped_payload_uses_fallback(self):
         # Fixture uses reserved .test domains: a real email + a non-example.com
         # URL are exactly what the guard must reject.

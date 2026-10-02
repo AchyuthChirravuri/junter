@@ -1041,6 +1041,16 @@
   // is never blank. The PII guard is the last gate before adoption — a payload
   // carrying real emails / non-example URLs / many name-shaped strings is
   // refused in favour of the synthetic dataset.
+  // A role is renderable only if it carries the fields the screens read
+  // unconditionally (company string, numeric fit — the board calls
+  // r.fit.toFixed). A payload that is roles-keyed but whose rows are
+  // exporter-shaped (fit_score, not fit) would crash mid-render, so it is
+  // treated as unusable and falls back.
+  function _isRenderableRole(r) {
+    return !!r && typeof r === 'object' &&
+      typeof r.company === 'string' && typeof r.fit === 'number' && isFinite(r.fit);
+  }
+
   function adoptApiPayload(data) {
     if (!data || typeof data !== 'object') {
       return { fallback: 'response was not a JSON object' };
@@ -1052,6 +1062,11 @@
     var roles = (normalized && Array.isArray(normalized.roles)) ? normalized.roles : [];
     if (roles.length === 0) {
       return { fallback: 'no live roles in response' };
+    }
+    for (var i = 0; i < roles.length; i++) {
+      if (!_isRenderableRole(roles[i])) {
+        return { fallback: 'role ' + (roles[i] && roles[i].id) + ' is missing required fields' };
+      }
     }
     var piiReason = looks_like_pii(JSON.stringify(data));
     if (piiReason) {
