@@ -1,0 +1,11 @@
+{
+  "name": "junter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Junter — job-search pipeline tracker. Static UI plus a Vercel serverless endpoint that serves live tracker JSON from Edge Config.",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/edge-config": "^1.2.0"
+  }
+}

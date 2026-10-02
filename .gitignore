@@ -22,11 +22,17 @@ venv/
 .env.*
 *.env
 
+# Node
+node_modules/
+
 # Generated / build outputs
 out/
 build/
 dist/
 *.egg-info/
+
+# Local-only tooling (reads real tracker data; carries no secrets but stays local)
+scripts/
 
 # Editor backups
 *.bak-*
