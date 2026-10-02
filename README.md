@@ -175,6 +175,9 @@ Every row maps to a file or test that exists in this repository.
 | **Outcome metrics dashboard** | Future work | `docs/PRD.md` ("P2 — Metrics dashboard") |
 | **Config-driven source adapters** so anyone can run it | Future work | `docs/PRD.md` ("P2") |
 | **Portal-question analysis** (`qs <id>`) | Future work / partial — spec only | `docs/PRD.md` ("P1 — partial"), `docs/operating-spec.md` ("Portal questions") |
+| CI workflow that parses its own YAML and self-checks `.gitignore` | Implemented in code, runs on every push/PR | `.github/workflows/tests.yml` (jobs: python matrix 3.9–3.12, `yaml.safe_load` self-parse step, 4-grep `.gitignore` coverage step) |
+| `.gitignore` covering `.DS_Store`, env files (incl. `.env.*`), `out/`, `.venv/`, `node_modules/`, `.vercel/`, `__pycache__/`, editor backups (`*.bak-*`, `*.swp`) | Implemented and CI-verified on every push | `.gitignore`; verified by `.github/workflows/tests.yml` step "Verify .gitignore covers required paths" |
+| Serverless `/api/data` route (Edge Config-backed, empty-safe, schema-locked envelope) | Implemented and deployed; tested | `api/data.js`, `tests/api/route_test.mjs`, `tests/api/pii_guard_test.mjs` |
 
 The repo is honest about this split: the **method** (specs, rubric,
 templates, the engine + scoring + tests, the reading-layer UI prototype,
