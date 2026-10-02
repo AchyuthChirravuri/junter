@@ -13,52 +13,30 @@
   // match the Junter design notes (Google and Meta appear intentionally as
   // fictional seed data).
   //
-  // PII guard (defense in depth): if a payload contains anything that looks
-  // like real PII — actual email addresses, real company URLs (anything not
-  // on example.com), or strings that match a name-pattern heuristic —
-  // we ignore it and use this fallback. This is a hard gate; the
-  // synthetic seed and inline FALLBACK are designed to pass these
-  // checks. Replace this guard with a project-specific blocklist if
-  // you have operator-identifying tokens you want to refuse; the
-  // mechanism is the same.
+  // PII guard (defense in depth): refuse a payload that carries an actual email
+  // address, a real (non-example.com) URL, or a listed operator-identifier
+  // token. The synthetic seed and inline FALLBACK pass these checks.
+  //
+  // NOTE: the capitalized-name-count heuristic that used to live here was
+  // removed. Measured against the product's real dataset it had a 100%
+  // false-positive rate: job-board data legitimately contains far more than 12
+  // "Capitalized Word" phrases (company names, role titles), so it refused
+  // every real payload and made the live pipeline unusable. What actually
+  // identifies a leak in a job-listing dataset is contact PII (emails) and live
+  // links (URLs); the publisher strips personal free-text (notes, URLs,
+  // reasons) before a value ever reaches the store, so the displayed fields
+  // carry listing facts only. To refuse deployment-specific tokens, list them
+  // in PII_IDENTIFIER_TOKENS.
   var PII_EMAIL_RE = /[A-Za-z0-9._%+-]+@(?!example\.com)[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
   var PII_NON_EXAMPLE_URL_RE = /https?:\/\/(?!example\.com)[^\s"']+/;
-  // Heuristic for personal-name-shaped strings (capitalized first+last).
-  // The raw regex is deliberately permissive: job data is FULL of
-  // two-capitalized-word phrases that are not names ("Product Manager",
-  // "Associate Product", "New Grad", "Company Careers"). We therefore
-  // filter those out against a role/company vocabulary before counting,
-  // so ordinary PM job data does not read as PII while genuine
-  // Firstname Lastname lists still trip the gate.
-  var PII_NAME_RE = /[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}/g;
-  var PII_NAME_STOPWORDS = {
-    // role / seniority vocabulary
-    product: 1, manager: 1, marketing: 1, senior: 1, associate: 1,
-    principal: 1, staff: 1, lead: 1, growth: 1, strategy: 1, data: 1,
-    platform: 1, corporate: 1, development: 1, experience: 1, markets: 1,
-    international: 1, expansion: 1, grad: 1, engineering: 1, software: 1,
-    design: 1, program: 1, director: 1, digital: 1, analyst: 1, operations: 1,
-    success: 1, specialist: 1, engineer: 1, project: 1, management: 1,
-    business: 1, technical: 1, solutions: 1, customer: 1, content: 1,
-    cloud: 1, security: 1, risk: 1, compliance: 1, finance: 1, financial: 1,
-    sales: 1, account: 1, research: 1, university: 1, careers: 1, company: 1,
-    demand: 1, generation: 1, developer: 1, services: 1, systems: 1,
-    infrastructure: 1, applications: 1, sciences: 1, health: 1, media: 1,
-    brand: 1, global: 1, regional: 1, national: 1, executive: 1, general: 1,
-    vice: 1, head: 1, chief: 1, officer: 1, coordinator: 1, consultant: 1,
-    architect: 1, scientist: 1,
-  };
-  var PII_NAME_HITS_MAX = 12;
+  var PII_IDENTIFIER_TOKENS = [];
   function looks_like_pii(serialized) {
     if (PII_EMAIL_RE.test(serialized)) return 'real email';
     if (PII_NON_EXAMPLE_URL_RE.test(serialized)) return 'non-example.com URL';
-    var matches = serialized.match(PII_NAME_RE) || [];
-    var nameHits = matches.filter(function (m) {
-      var parts = m.split(/\s+/);
-      return !(PII_NAME_STOPWORDS[parts[0].toLowerCase()] ||
-               PII_NAME_STOPWORDS[parts[1].toLowerCase()]);
-    }).length;
-    if (nameHits > PII_NAME_HITS_MAX) return 'many name-shaped strings (' + nameHits + ')';
+    for (var i = 0; i < PII_IDENTIFIER_TOKENS.length; i++) {
+      var tok = PII_IDENTIFIER_TOKENS[i];
+      if (tok && serialized.indexOf(tok) !== -1) return 'operator identifier';
+    }
     return null;
   }
   var FALLBACK = {

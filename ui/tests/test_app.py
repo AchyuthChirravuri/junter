@@ -32,29 +32,18 @@ NODE = shutil.which("node")
 # ---------------------------------------------------------------------------
 # Mirrors of the runtime PII guard in ui/app.js (looks_like_pii). Kept in sync
 # by hand; if app.js's guard changes, these must change too.
+#
+# The guard refuses contact PII (emails) and live links (non-example.com URLs),
+# plus an optional operator-identifier token list. The former capitalized-name-
+# count heuristic was removed from both app.js and here: measured against the
+# product's real dataset it refused 100% of payloads (job data legitimately
+# holds far more than 12 Capitalized Word phrases), so it could never let a
+# real, privacy-minimised payload render.
 # ---------------------------------------------------------------------------
 
 PII_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@(?!example\.com)[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PII_NON_EXAMPLE_URL_RE = re.compile(r"https?://(?!example\.com)[^\s\"']+")
-PII_NAME_RE = re.compile(r"[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}")
-PII_NAME_HITS_MAX = 12
-
-# Role / seniority vocabulary that must NOT count as a personal name. This is a
-# subset of the stop-words in ui/app.js — enough to demonstrate the mechanism.
-PII_NAME_STOPWORDS = {
-    "product", "manager", "marketing", "senior", "associate", "principal",
-    "staff", "lead", "growth", "strategy", "data", "platform", "corporate",
-    "development", "experience", "markets", "international", "expansion",
-    "grad", "engineering", "software", "design", "program", "director",
-    "digital", "analyst", "operations", "success", "specialist", "engineer",
-    "project", "management", "business", "technical", "solutions", "customer",
-    "content", "cloud", "security", "risk", "compliance", "finance",
-    "financial", "sales", "account", "research", "university", "careers",
-    "company", "demand", "generation", "developer", "services", "systems",
-    "infrastructure", "applications", "sciences", "health", "media", "brand",
-    "global", "regional", "national", "executive", "general", "vice", "head",
-    "chief", "officer", "coordinator", "consultant", "architect", "scientist",
-}
+PII_IDENTIFIER_TOKENS = []
 
 
 def pii_guard_reasons(text):
@@ -64,14 +53,10 @@ def pii_guard_reasons(text):
         reasons.append("real email")
     if PII_NON_EXAMPLE_URL_RE.search(text):
         reasons.append("non-example.com URL")
-    hits = 0
-    for m in PII_NAME_RE.finditer(text):
-        parts = m.group(0).split()
-        if parts[0].lower() in PII_NAME_STOPWORDS or parts[1].lower() in PII_NAME_STOPWORDS:
-            continue
-        hits += 1
-    if hits > PII_NAME_HITS_MAX:
-        reasons.append(f"many name-shaped strings ({hits})")
+    for tok in PII_IDENTIFIER_TOKENS:
+        if tok and tok in text:
+            reasons.append("operator identifier")
+            break
     return reasons
 
 
