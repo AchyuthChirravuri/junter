@@ -106,6 +106,7 @@ and renders them. Full component diagram and design notes:
 | `snapshot-export/export.py` | Reads `tracker.csv` + `digests/` + `cache/companies/` OR `synthetic-data/` (env var `JUNTER_DATA_DIR`) and emits a single JSON the UI consumes. Parse-defensively — bad rows are warnings, not exceptions |
 | `docs/ui-design-tokens.md` | The canonical design-token spec; CSS in `ui/styles.css` is a 1:1 mirror of these tokens |
 | `docs/ui-stage-0.md` | The problem-definition brief behind the UI prototype (the reframe from "build a tracker app" to "build the reading layer on top of the engine") |
+| `docs/ui-pm-reasoning.md` | The PM reasoning behind every screen: the framing problem, the three bets (deadline-first, score explainability, refusal-to-pad), the screen-by-screen JTBD, the trade-offs accepted, the things I'd do differently next time. **The read-this-first document for a recruiter.** |
 | `docs/ui-evidence/` | Before/after screenshots documenting the Figma polish (T5) and HTML sync (T6): 8 Figma-before + 3 Figma-after + 4 HTML-after PNGs, ~1.7 MB. See `docs/ui-evidence/README.md` for the index. |
 
 **Not included (deliberately):** the operator's master resume, tailored
