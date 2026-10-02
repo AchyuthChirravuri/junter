@@ -102,8 +102,8 @@ and renders them. Full component diagram and design notes:
 > `http://localhost:8765/ui/index.html`. Opening `ui/index.html`
 > directly, or serving from `ui/`, makes the fetch 404 and the app falls
 > back to its inline dataset — still fully functional, just not reading
-> the seed. No install is required. A hosted demo URL will be linked
-> here once the deploy lands.
+> the seed. No install is required — or visit the deployed prototype at
+> https://junter-xi.vercel.app.
 >
 > **Live Figma wireframes:** [figma.com/design/e4kzWfgPUTchpIcuv1o7Y6](https://www.figma.com/design/e4kzWfgPUTchpIcuv1o7Y6)
 
@@ -120,6 +120,7 @@ and renders them. Full component diagram and design notes:
 | `docs/ui-stage-0.md` | The problem-definition brief behind the UI prototype (the reframe from "build a tracker app" to "build the reading layer on top of the engine") |
 | `docs/ui-pm-reasoning.md` | The PM reasoning behind every screen: the framing problem, the three bets (deadline-first, score explainability, refusal-to-pad), the screen-by-screen JTBD, the trade-offs accepted, the things I'd do differently next time. **The read-this-first document for a recruiter.** |
 | `docs/ui-evidence/` | Before/after screenshots documenting the Figma polish (T5) and HTML sync (T6): 8 Figma-before + 3 Figma-after + 4 HTML-after PNGs, ~1.7 MB. See `docs/ui-evidence/README.md` for the index. |
+| `api/data.js` | Vercel serverless function serving live tracker JSON via Edge Config; `ui/app.js` fetches `/api/data` with embedded-seed fallback |
 
 **Not included (deliberately):** the operator's master resume, tailored
 drafts, application tracker, daily digests, and Telegram credentials —
