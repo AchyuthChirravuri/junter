@@ -540,7 +540,7 @@ class PiiGuardRuntimeTests(unittest.TestCase):
             "pipeline": [
                 {"id": 1, "company": "Acme",
                  "url": "https://news.ycombinator.com/item?id=49522897",
-                 "notes": "contact emily.thompson@luciaprotocol.com"},
+                 "notes": "contact jane.doe@acme-corp.test"},
             ]
         })
         res = _run_app_js("J.looks_like_pii(%s)" % json.dumps(fake_real))
