@@ -232,9 +232,34 @@
     if (isNaN(a.getTime()) || isNaN(b.getTime())) return NaN;
     return Math.round((b.getTime() - a.getTime()) / 86400000);
   }
+  // Screen arrays every renderer reads. The minimized live envelope
+  // ({roles, lastUpdated}) publishes none of them, so normalizeState defaults
+  // any that are missing to [] before a screen can iterate a non-array.
+  var SCREEN_ARRAYS = ['digests', 'cron_runs', 'rubric_versions', 'rubric_diff',
+                       'rubric_outcomes', 'telegram_messages', 'rejected_rows'];
+
   function normalizeState(raw) {
     if (!raw || typeof raw !== 'object') return raw;
-    if (Array.isArray(raw.roles)) return raw; // already normalized (FALLBACK / seed)
+    if (Array.isArray(raw.roles)) {
+      // Already in the screens' contract (the inline FALLBACK / synthetic seed,
+      // or the live {roles, lastUpdated} payload). Default any screen section
+      // the payload does not publish to an empty array so the engine screens
+      // render an honest empty state instead of throwing on undefined. Filling
+      // happens in place and returns the same reference, so this adapter stays
+      // idempotent and a fully-populated FALLBACK passes through untouched.
+      var minimized = false;
+      for (var i = 0; i < SCREEN_ARRAYS.length; i++) {
+        if (!Array.isArray(raw[SCREEN_ARRAYS[i]])) {
+          raw[SCREEN_ARRAYS[i]] = [];
+          minimized = true;
+        }
+      }
+      // Records that this payload omitted the engine sections (the deployed
+      // privacy-minimized projection). Screens use it to prefer an honest
+      // "not published" state over illustrative filler.
+      raw.minimized = minimized;
+      return raw;
+    }
 
     var pipeline = raw.pipeline || [];
     var detail = raw.role_detail || {};
@@ -389,6 +414,17 @@
     return node;
   }
 
+  // Honest empty state for a screen whose backing section is not published in
+  // the live payload. Renders a titled card with an explanation instead of a
+  // blank body, so the reader knows the data is absent, not broken.
+  function emptyState(mount, title, message) {
+    mount.appendChild(el('div', { class: 'card empty-state', style: 'margin-top: var(--space-5);' }, [
+      el('div', { class: 'empty-state__title', text: title }),
+      el('div', { class: 'empty-state__body', text: message })
+    ]));
+    return mount;
+  }
+
   // ---- Screen renderers (one per hash route).
 
   function renderPipeline(state, mount) {
@@ -517,13 +553,24 @@
     ]);
     var banner = el('div', { class: 'focus-banner', text: 'Gate progress is self-reported (your checks). Engine-written artifacts live in drafts/ — this checklist is a planning aid, not source of truth.' });
     var interested = state.roles
-      .filter(function (r) { return r.status === 'interested'; })
+      .filter(function (r) {
+        // The published pipeline tracks interest in the `routed` column
+        // (routed === 'int'), not a status value — the engine keeps
+        // status ∈ {pinged, packaged, submitted, blocked}. Accept the
+        // exporter's legacy `interested` status too so both shapes work.
+        return r.routed === 'int' || r.status === 'interested';
+      })
       .sort(function (a, b) {
         var da = a.deadline ? roleDays(a) : 99999;
         var db = b.deadline ? roleDays(b) : 99999;
         return da - db;
       });
     var list = el('div');
+    if (interested.length === 0) {
+      emptyState(list, 'No roles marked interested',
+        'Interest is tracked in the routed column (routed = "int"). ' +
+        'No published role carries it on this dataset yet.');
+    }
     interested.forEach(function (r) {
       var days = r.deadline ? roleDays(r) : null;
       var card = el('div', { class: 'card focus-card' }, [
@@ -572,6 +619,11 @@
       ])
     ]);
     var list = el('div');
+    if (state.digests.length === 0) {
+      emptyState(list, 'No digest data published',
+        'The live /api/data endpoint publishes a privacy-minimized projection ' +
+        '(roles + lastUpdated only). Digest history is not part of it.');
+    }
     state.digests.forEach(function (d) {
       var card = el('div', { class: 'card digest-card' });
       var header = el('div', { class: 'digest-card__header' }, [
@@ -611,7 +663,7 @@
 
   function renderRole(state, mount, roleId) {
     mount.innerHTML = '';
-    var role = state.roles.filter(function (r) { return r.id === roleId; })[0];
+    var role = state.roles.filter(function (r) { return String(r.id) === String(roleId); })[0];
     if (!role) {
       mount.appendChild(el('div', { class: 'crumb', text: '< Back to Pipeline' }));
       mount.appendChild(el('h1', { class: 'page-header__title', text: 'Role not found: ' + roleId }));
@@ -641,6 +693,10 @@
         return { label: k, v: v, raw: _num(raw) };
       });
       rubricNote = 'Factor scores from ' + (role.rubric_version || 'the current rubric') + ', each on a 0–3 scale.';
+    } else if (state.minimized) {
+      // The live projection publishes fit score but no per-factor breakdown.
+      factorInputs = [];
+      rubricNote = 'The published projection carries a single fit score, not the per-factor rubric breakdown.';
     } else {
       factorInputs = [
         { label: 'domain fit', v: 0.9, raw: 2.7 },
@@ -665,7 +721,9 @@
     if (rubricNote) bars.appendChild(el('div', { class: 'page-header__meta', text: rubricNote }));
 
     // Backgrounder & drafts — real draft paths when present, otherwise the
-    // expected filenames for the offline seed.
+    // expected filenames for the offline seed. On the live (minimized)
+    // payload the engine publishes no artifact paths, so we say so honestly
+    // rather than inventing filenames that do not exist.
     var files = el('ul', { class: 'file-list' });
     var draftPaths = role.draft_paths || [];
     if (draftPaths.length) {
@@ -675,6 +733,10 @@
           el('span', { class: 'toolbar__chip', text: 'Open' })
         ]));
       });
+    } else if (state.minimized) {
+      files.appendChild(el('li', { class: 'file-list__item' }, [
+        el('span', { class: 'file-card__filename', text: 'No draft artifacts published for this role.' })
+      ]));
     } else {
       files.appendChild(el('li', { class: 'file-list__item' }, [
         el('span', { class: 'file-card__filename', text: role.id + '-' + role.company.replace(/[^A-Za-z0-9]/g, '') + '-role-backgrounder.md' }),
@@ -692,7 +754,10 @@
 
 
     // History — real per-event log when the exporter provides one, otherwise
-    // the synthetic 4-step timeline for the offline seed.
+    // the synthetic 4-step timeline for the offline seed. On the live
+    // (minimized) payload no event log exists, so show the two facts the
+    // published row does carry (source + status date) instead of a fabricated
+    // multi-step timeline.
     var history;
     if (role.history && role.history.length) {
       history = el('ul', { class: 'history-timeline' });
@@ -705,6 +770,23 @@
           ])
         ]));
       });
+    } else if (state.minimized) {
+      history = el('ul', { class: 'history-timeline' }, [
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Discovered on ' + (role.source || 'a tracked board') }),
+            el('div', { class: 'history-timeline__when', text: role.status_date || '' })
+          ])
+        ]),
+        el('li', { class: 'history-timeline__item' }, [
+          el('span', { class: 'history-timeline__dot history-timeline__dot--watchlist' }),
+          el('div', { class: 'history-timeline__body' }, [
+            el('div', { text: 'Status: ' + (role.status || 'unset') }),
+            el('div', { class: 'history-timeline__when', text: role.status_date || '' })
+          ])
+        ])
+      ]);
     } else {
       history = el('ul', { class: 'history-timeline' }, [
         el('li', { class: 'history-timeline__item' }, [
@@ -769,22 +851,26 @@
     mount.innerHTML = '';
     var okRuns = state.cron_runs.filter(function (r) { return r.last_status === 'ok'; }).length;
     var warnRuns = state.cron_runs.filter(function (r) { return r.last_status === 'warn'; }).length;
+    var totalRuns = state.cron_runs.length;
     var header = el('div', { class: 'page-header' }, [
       el('h1', { class: 'page-header__title', text: 'Run Health' }),
       el('div', { class: 'page-header__meta', text: 'Cron status as of today' })
     ]);
+    // Summary figures derive from the published run list — never hard-coded —
+    // so an empty projection shows "—" instead of an invented pass rate.
+    var have = totalRuns > 0;
     var summary = el('div', { class: 'health-cards' }, [
       el('div', { class: 'card health-card' }, [
         el('div', { class: 'rail-summary__label', text: 'Today' }),
-        el('div', { class: 'health-card__num health-card__num--ok', text: 'OK' })
+        el('div', { class: 'health-card__num health-card__num--' + (have && warnRuns === 0 ? 'ok' : have ? 'warn' : 'ok'), text: have ? (warnRuns === 0 ? 'OK' : warnRuns + ' warn') : '—' })
       ]),
       el('div', { class: 'card health-card' }, [
-        el('div', { class: 'rail-summary__label', text: 'This week' }),
-        el('div', { class: 'health-card__num health-card__num--ok', text: '7 / 7' })
+        el('div', { class: 'rail-summary__label', text: 'Jobs tracked' }),
+        el('div', { class: 'health-card__num health-card__num--ok', text: have ? String(totalRuns) : '—' })
       ]),
       el('div', { class: 'card health-card' }, [
-        el('div', { class: 'rail-summary__label', text: 'This month (in progress)' }),
-        el('div', { class: 'health-card__num health-card__num--warn', text: '12 / 30' })
+        el('div', { class: 'rail-summary__label', text: 'Healthy' }),
+        el('div', { class: 'health-card__num health-card__num--' + (have && okRuns === totalRuns ? 'ok' : 'warn'), text: have ? okRuns + ' / ' + totalRuns : '—' })
       ])
     ]);
 
@@ -820,17 +906,18 @@
         el('span', { text: r.warning || '(no warning text)' })
       ]));
     });
-
-    var queueCard = el('div', { class: 'card', style: 'margin-top: var(--space-5);' }, [
-      el('h3', { class: 'card__title', text: 'Queue' }),
-      el('div', { text: 'Pending actions: 3 (2 backgrounder reruns, 1 stale-digest rebuild)' })
-    ]);
+    if (state.cron_runs.length === 0) errorsBlock.appendChild(el('div', { class: 'errors-block__item', text: 'No runs published.' }));
 
     mount.appendChild(header);
     mount.appendChild(summary);
-    mount.appendChild(table);
-    mount.appendChild(errorsBlock);
-    mount.appendChild(queueCard);
+    if (state.cron_runs.length === 0) {
+      emptyState(mount, 'No run-health data published',
+        'The live /api/data endpoint publishes a privacy-minimized projection ' +
+        '(roles + lastUpdated only). Cron run health is not part of it.');
+    } else {
+      mount.appendChild(table);
+      mount.appendChild(errorsBlock);
+    }
   }
 
   function renderRubric(state, mount) {
@@ -839,6 +926,13 @@
       el('h1', { class: 'page-header__title', text: 'Rubric & Calibration' }),
       el('div', { class: 'page-header__meta', text: 'Version history with rationale' })
     ]);
+    mount.appendChild(header);
+    if (state.rubric_versions.length === 0) {
+      emptyState(mount, 'No rubric data published',
+        'The live /api/data endpoint publishes a privacy-minimized projection ' +
+        '(roles + lastUpdated only). Rubric version history is not part of it.');
+      return;
+    }
     var left = el('div', { class: 'card rubric-col' }, [
       el('h3', { class: 'card__title', text: 'Versions' })
     ]);
@@ -887,7 +981,6 @@
     ]);
 
     var grid = el('div', { class: 'rubric-grid' }, [left, middle, right]);
-    mount.appendChild(header);
     mount.appendChild(grid);
     mount.appendChild(footer);
   }
@@ -943,7 +1036,13 @@
 
     mount.appendChild(header);
     mount.appendChild(toolbar);
-    mount.appendChild(list);
+    if (state.telegram_messages.length === 0) {
+      emptyState(mount, 'No Telegram traffic published',
+        'The live /api/data endpoint publishes a privacy-minimized projection ' +
+        '(roles + lastUpdated only). Telegram delivery history is not part of it.');
+    } else {
+      mount.appendChild(list);
+    }
   }
 
   // ---- Router

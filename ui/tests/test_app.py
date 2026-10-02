@@ -716,5 +716,95 @@ class SeedWatchlistTests(unittest.TestCase):
         )
 
 
+# ---------------------------------------------------------------------------
+# Live-payload defects (D-1, D-2) — regression coverage.
+#
+# The deployed /api/data publishes a privacy-minimized projection of the shape
+# {roles: [...], lastUpdated: "..."} only. The engine screens iterate arrays
+# (digests, cron_runs, rubric_versions, telegram_messages) that this shape does
+# not carry, and the hash router supplies a string role id while the payload
+# emits a numeric one. These tests pin both fixes against the REAL ui/app.js.
+# ---------------------------------------------------------------------------
+
+
+@unittest.skipIf(NODE is None, "node not available to execute ui/app.js")
+class MinimizedPayloadTests(unittest.TestCase):
+    """normalizeState() must turn the deployed {roles,lastUpdated} shape into a
+    state whose screen arrays are all arrays (never undefined), and mark it
+    minimized so screens prefer honest empty states."""
+
+    MINIMIZED = {
+        "roles": [
+            {"id": 1, "company": "Wikimedia Foundation", "role": "Lead PM",
+             "source": "HN Who's Hiring", "status": "packaged", "routed": "int",
+             "deadline": "", "status_date": "2026-09-17", "fit": 7.2},
+        ],
+        "lastUpdated": "2026-10-02T13:05:40-04:00",
+    }
+
+    def _screen_array_shape(self):
+        return (
+            "({digests: Array.isArray(J.state.digests),"
+            " cron_runs: Array.isArray(J.state.cron_runs),"
+            " rubric_versions: Array.isArray(J.state.rubric_versions),"
+            " telegram_messages: Array.isArray(J.state.telegram_messages),"
+            " minimized: J.state.minimized === true,"
+            " roles: J.state.roles.length})"
+        )
+
+    def test_engine_screen_arrays_are_defined_for_minimized_payload(self):
+        res = self._loaded(self.MINIMIZED)
+        self.assertNotIn("__error__", res, f"node run failed: {res}")
+        for key in ("digests", "cron_runs", "rubric_versions", "telegram_messages"):
+            self.assertTrue(res[key], f"{key} must be an array on the minimized payload")
+        self.assertTrue(res["minimized"], "minimized payload must be flagged")
+        self.assertEqual(res["roles"], 1, "the live roles must still be adopted")
+
+    def _loaded(self, payload):
+        return _run_app_js(
+            self._screen_array_shape(),
+            fetch_js=_fetch_json(payload),
+        )
+
+    def test_fallback_is_not_flagged_minimized(self):
+        # The embedded FALLBACK already carries every section; adopting it must
+        # not mark the state minimized (its illustrative content is intended).
+        res = _run_app_js(
+            "(function(){var s=J.normalizeState(%s);"
+            "return {minimized: s.minimized === true, n: s.roles.length};})()"
+            % json.dumps({
+                "roles": [{"id": "r01", "company": "X", "role": "PM", "fit": 7.0,
+                           "status": "pinged", "deadline": ""}],
+                "digests": [], "cron_runs": [], "rubric_versions": [],
+                "rubric_diff": [], "rubric_outcomes": [], "telegram_messages": [],
+                "rejected_rows": [],
+            })
+        )
+        self.assertNotIn("__error__", res, f"node run failed: {res}")
+        self.assertFalse(res["minimized"])
+
+
+@unittest.skipIf(NODE is None, "node not available to execute ui/app.js")
+class RoleIdMatchTests(unittest.TestCase):
+    """renderRole() must resolve a role whose payload id is numeric while the
+    hash route supplies a string (D-2)."""
+
+    def test_numeric_and_string_ids_resolve(self):
+        # The router passes parts[1] (a string). The payload id is a number.
+        res = _run_app_js(
+            "(function(){var role={id:9};"
+            "return {match: String(role.id) === String('9')};})()"
+        )
+        self.assertTrue(res["match"], "numeric payload id 9 must match route string '9'")
+
+    def test_app_js_compares_ids_as_strings(self):
+        js_text = APP_JS.read_text(encoding="utf-8")
+        self.assertIn(
+            "String(r.id) === String(roleId)",
+            js_text,
+            "renderRole must normalize both sides of the id comparison to strings",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
