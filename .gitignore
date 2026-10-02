@@ -22,11 +22,23 @@ venv/
 .env.*
 *.env
 
+# Node
+node_modules/
+
 # Generated / build outputs
 out/
 build/
 dist/
 *.egg-info/
+
+# Real tracker data / snapshots (local-only; never commit real PII)
+/tracker.csv
+/tracker-*.csv
+/published.json
+/parse_warnings.json
+
+# Local-only tooling (reads real tracker data; carries no secrets but stays local)
+scripts/
 
 # Editor backups
 *.bak-*
