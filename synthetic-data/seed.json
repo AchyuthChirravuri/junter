@@ -1,0 +1,3251 @@
+{
+  "snapshot_at": "2026-10-01T12:00:00-04:00",
+  "snapshot_kind": "synthetic",
+  "pipeline": [
+    {
+      "id": 1,
+      "date_found": "2026-09-17",
+      "company": "Mercury",
+      "role": "Principal Product Manager, Data",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/045",
+      "fit_score": 4.3,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "stale-posting-closed"
+    },
+    {
+      "id": 2,
+      "date_found": "2026-09-28",
+      "company": "Brex",
+      "role": "Director of Product, International",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/048",
+      "fit_score": 5.5,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "location-onsite-only"
+    },
+    {
+      "id": 3,
+      "date_found": "2026-09-13",
+      "company": "Calendly",
+      "role": "Senior PMM, Competitive",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/020",
+      "fit_score": 7.7,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-28",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 4,
+      "date_found": "2026-09-27",
+      "company": "Webflow",
+      "role": "Product Manager, Risk & Compliance",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/029",
+      "fit_score": 6.9,
+      "routed": "int",
+      "draft_path": "drafts/029-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-28",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 5,
+      "date_found": "2026-09-21",
+      "company": "Notion",
+      "role": "Strategy Manager, Growth Markets",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/031",
+      "fit_score": 8.7,
+      "routed": "int",
+      "draft_path": "drafts/031-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 6,
+      "date_found": "2026-09-13",
+      "company": "Supabase",
+      "role": "Product Manager, International Expansion",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/025",
+      "fit_score": 7.7,
+      "routed": "int",
+      "draft_path": "drafts/025-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-25",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 7,
+      "date_found": "2026-09-26",
+      "company": "Deel",
+      "role": "Product Manager, Developer Experience",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/023",
+      "fit_score": 8.5,
+      "routed": "int",
+      "draft_path": "drafts/023-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-29",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 8,
+      "date_found": "2026-09-15",
+      "company": "HashiCorp",
+      "role": "Product Manager, Risk & Compliance",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/033",
+      "fit_score": 8.8,
+      "routed": "int",
+      "draft_path": "drafts/033-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-24",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 9,
+      "date_found": "2026-09-23",
+      "company": "Pitch",
+      "role": "Senior Strategy Associate, Platform",
+      "source": "Wellfound",
+      "url": "https://example.com/jobs/012",
+      "fit_score": 6.0,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-29",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 10,
+      "date_found": "2026-09-25",
+      "company": "Datadog",
+      "role": "Staff Product Manager, Data Platform",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/018",
+      "fit_score": 8.8,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-23",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 11,
+      "date_found": "2026-09-27",
+      "company": "Notion",
+      "role": "Product Manager, AI Products",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/002",
+      "fit_score": 7.7,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 12,
+      "date_found": "2026-09-12",
+      "company": "Loom",
+      "role": "Senior Product Manager, Risk",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/041",
+      "fit_score": 4.5,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "2026-10-18",
+      "blocked_reason": "sponsorship-not-confirmed"
+    },
+    {
+      "id": 13,
+      "date_found": "2026-09-13",
+      "company": "Ramp",
+      "role": "Associate Product Manager, 2027 Start",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/036",
+      "fit_score": 9.2,
+      "routed": "submitted",
+      "draft_path": "drafts/036-role-backgrounder.md+drafts/036-role-resume.md+drafts/036-role-AssociatePM.pdf+drafts/036-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 14,
+      "date_found": "2026-09-26",
+      "company": "Deel",
+      "role": "Associate Product Manager, 2027 Start",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/028",
+      "fit_score": 7.4,
+      "routed": "int",
+      "draft_path": "drafts/028-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-29",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 15,
+      "date_found": "2026-09-25",
+      "company": "Cloudflare",
+      "role": "Senior PMM, Competitive",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/030",
+      "fit_score": 8.8,
+      "routed": "int",
+      "draft_path": "drafts/030-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-21",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 16,
+      "date_found": "2026-09-18",
+      "company": "Retool",
+      "role": "Product Manager, AI Products",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/007",
+      "fit_score": 6.6,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-29",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 17,
+      "date_found": "2026-09-12",
+      "company": "Vercel",
+      "role": "Principal Product Manager, Data",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/043",
+      "fit_score": 4.2,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-20",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "location-onsite-only"
+    },
+    {
+      "id": 18,
+      "date_found": "2026-09-12",
+      "company": "Deel",
+      "role": "Corporate Strategy Associate",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/004",
+      "fit_score": 7.2,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-26",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 19,
+      "date_found": "2026-09-11",
+      "company": "Figma",
+      "role": "Senior Product Manager, Platform",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/019",
+      "fit_score": 8.5,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-26",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 20,
+      "date_found": "2026-09-26",
+      "company": "Snowflake",
+      "role": "PMM, Demand Generation",
+      "source": "Wellfound",
+      "url": "https://example.com/jobs/024",
+      "fit_score": 8.3,
+      "routed": "int",
+      "draft_path": "drafts/024-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-24",
+      "notes": "",
+      "deadline": "2026-10-11",
+      "blocked_reason": ""
+    },
+    {
+      "id": 21,
+      "date_found": "2026-09-22",
+      "company": "Datadog",
+      "role": "Product Manager, AI Products",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/001",
+      "fit_score": 7.7,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 22,
+      "date_found": "2026-09-22",
+      "company": "Pitch",
+      "role": "Senior Product Manager, Growth",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/042",
+      "fit_score": 4.4,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-23",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "role-mismatch-senior"
+    },
+    {
+      "id": 23,
+      "date_found": "2026-09-21",
+      "company": "Supabase",
+      "role": "Senior Product Manager, Platform",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/011",
+      "fit_score": 8.1,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-28",
+      "notes": "",
+      "deadline": "2026-10-07",
+      "blocked_reason": ""
+    },
+    {
+      "id": 24,
+      "date_found": "2026-09-19",
+      "company": "Pitch",
+      "role": "Product Manager, New Grad Program",
+      "source": "Wellfound",
+      "url": "https://example.com/jobs/015",
+      "fit_score": 9.0,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 25,
+      "date_found": "2026-09-22",
+      "company": "Brex",
+      "role": "Product Manager, New Grad Program",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/010",
+      "fit_score": 5.7,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-26",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 26,
+      "date_found": "2026-09-23",
+      "company": "Deel",
+      "role": "Corporate Strategy Associate",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/032",
+      "fit_score": 8.7,
+      "routed": "int",
+      "draft_path": "drafts/032-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-21",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 27,
+      "date_found": "2026-09-15",
+      "company": "Snowflake",
+      "role": "Product Manager, New Grad Program",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/022",
+      "fit_score": 7.1,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-24",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 28,
+      "date_found": "2026-09-29",
+      "company": "Calendly",
+      "role": "Staff Product Manager, Data Platform",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/005",
+      "fit_score": 7.3,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-25",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 29,
+      "date_found": "2026-09-27",
+      "company": "Snowflake",
+      "role": "Product Manager, Developer Experience",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/013",
+      "fit_score": 8.3,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-26",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 30,
+      "date_found": "2026-09-18",
+      "company": "Loom",
+      "role": "Senior Product Manager, Platform",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/009",
+      "fit_score": 6.4,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-26",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 31,
+      "date_found": "2026-09-28",
+      "company": "Snowflake",
+      "role": "Principal Product Manager, Data",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/047",
+      "fit_score": 4.4,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "role-mismatch-senior"
+    },
+    {
+      "id": 32,
+      "date_found": "2026-09-28",
+      "company": "Linear",
+      "role": "Product Manager, New Grad Program",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/035",
+      "fit_score": 7.9,
+      "routed": "submitted",
+      "draft_path": "drafts/035-role-backgrounder.md+drafts/035-role-resume.md+drafts/035-role-AssociatePM.pdf+drafts/035-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 33,
+      "date_found": "2026-09-24",
+      "company": "Verkada",
+      "role": "Senior Strategy Associate, Platform",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/014",
+      "fit_score": 7.1,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 34,
+      "date_found": "2026-09-23",
+      "company": "Vercel",
+      "role": "Product Manager, AI Products",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/017",
+      "fit_score": 8.8,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-25",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 35,
+      "date_found": "2026-09-24",
+      "company": "Linear",
+      "role": "Product Manager, Growth",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/021",
+      "fit_score": 8.7,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-28",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 36,
+      "date_found": "2026-09-19",
+      "company": "Deel",
+      "role": "Product Marketing Manager, Launch",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/034",
+      "fit_score": 8.0,
+      "routed": "submitted",
+      "draft_path": "drafts/034-role-backgrounder.md+drafts/034-role-resume.md+drafts/034-role-AssociatePM.pdf+drafts/034-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 37,
+      "date_found": "2026-09-12",
+      "company": "Figma",
+      "role": "Principal Product Manager, Data",
+      "source": "Wellfound",
+      "url": "https://example.com/jobs/046",
+      "fit_score": 4.8,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-19",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "sponsorship-not-confirmed"
+    },
+    {
+      "id": 38,
+      "date_found": "2026-09-27",
+      "company": "Plaid",
+      "role": "Director of Product, International",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/050",
+      "fit_score": 5.7,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-29",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "stale-posting-closed"
+    },
+    {
+      "id": 39,
+      "date_found": "2026-09-12",
+      "company": "Verkada",
+      "role": "Product Manager, New Grad Program",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/027",
+      "fit_score": 7.5,
+      "routed": "int",
+      "draft_path": "drafts/027-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 40,
+      "date_found": "2026-09-23",
+      "company": "Stripe",
+      "role": "Senior Associate, Corporate Development",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/006",
+      "fit_score": 6.5,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 41,
+      "date_found": "2026-09-28",
+      "company": "Pitch",
+      "role": "Associate Product Manager, 2027 Start",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/040",
+      "fit_score": 8.8,
+      "routed": "submitted",
+      "draft_path": "drafts/040-role-backgrounder.md+drafts/040-role-resume.md+drafts/040-role-AssociatePM.pdf+drafts/040-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 42,
+      "date_found": "2026-09-22",
+      "company": "Brex",
+      "role": "Product Manager, International Expansion",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/003",
+      "fit_score": 5.6,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-30",
+      "notes": "",
+      "deadline": "2026-10-04",
+      "blocked_reason": ""
+    },
+    {
+      "id": 43,
+      "date_found": "2026-09-16",
+      "company": "Anthropic",
+      "role": "Associate Product Manager, 2027 Start",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/039",
+      "fit_score": 8.4,
+      "routed": "submitted",
+      "draft_path": "drafts/039-role-backgrounder.md+drafts/039-role-resume.md+drafts/039-role-AssociatePM.pdf+drafts/039-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-22",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 44,
+      "date_found": "2026-09-23",
+      "company": "Cloudflare",
+      "role": "Product Marketing Manager, Launch",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/038",
+      "fit_score": 9.1,
+      "routed": "submitted",
+      "draft_path": "drafts/038-role-backgrounder.md+drafts/038-role-resume.md+drafts/038-role-AssociatePM.pdf+drafts/038-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-22",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 45,
+      "date_found": "2026-09-24",
+      "company": "Brex",
+      "role": "Principal Product Manager, Data",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/049",
+      "fit_score": 5.8,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-22",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "domain-mismatch-pure-engineering"
+    },
+    {
+      "id": 46,
+      "date_found": "2026-09-25",
+      "company": "Ramp",
+      "role": "Corporate Strategy Associate, 2027",
+      "source": "Company Careers",
+      "url": "https://example.com/jobs/037",
+      "fit_score": 8.5,
+      "routed": "submitted",
+      "draft_path": "drafts/037-role-backgrounder.md+drafts/037-role-resume.md+drafts/037-role-AssociatePM.pdf+drafts/037-role-CoverLetter.docx",
+      "status": "submitted",
+      "status_date": "2026-09-20",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 47,
+      "date_found": "2026-09-26",
+      "company": "Verkada",
+      "role": "Product Manager, Developer Experience",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/008",
+      "fit_score": 7.7,
+      "routed": "ping",
+      "draft_path": "",
+      "status": "pinged",
+      "status_date": "2026-09-27",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 48,
+      "date_found": "2026-09-13",
+      "company": "Stripe",
+      "role": "Product Marketing Manager, Platform",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/026",
+      "fit_score": 8.5,
+      "routed": "int",
+      "draft_path": "drafts/026-role-backgrounder.md",
+      "status": "packaged",
+      "status_date": "2026-09-25",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 49,
+      "date_found": "2026-09-21",
+      "company": "Plaid",
+      "role": "Product Manager, AI Products",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/016",
+      "fit_score": 8.6,
+      "routed": "int",
+      "draft_path": "",
+      "status": "interested",
+      "status_date": "2026-09-24",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": ""
+    },
+    {
+      "id": 50,
+      "date_found": "2026-09-14",
+      "company": "Linear",
+      "role": "Staff Product Manager, Platform",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/044",
+      "fit_score": 4.3,
+      "routed": "",
+      "draft_path": "",
+      "status": "blocked",
+      "status_date": "2026-09-23",
+      "notes": "",
+      "deadline": "",
+      "blocked_reason": "domain-mismatch-pure-engineering"
+    }
+  ],
+  "deadline_rail": [
+    {
+      "id": 42,
+      "company": "Brex",
+      "role": "Product Manager, International Expansion",
+      "fit_score": 5.6,
+      "deadline": "2026-10-04",
+      "days_out": 3,
+      "urgency": "red",
+      "urgency_label": "imminent",
+      "url": "https://example.com/jobs/003",
+      "status": "pinged"
+    },
+    {
+      "id": 23,
+      "company": "Supabase",
+      "role": "Senior Product Manager, Platform",
+      "fit_score": 8.1,
+      "deadline": "2026-10-07",
+      "days_out": 6,
+      "urgency": "red",
+      "urgency_label": "imminent",
+      "url": "https://example.com/jobs/011",
+      "status": "pinged"
+    },
+    {
+      "id": 20,
+      "company": "Snowflake",
+      "role": "PMM, Demand Generation",
+      "fit_score": 8.3,
+      "deadline": "2026-10-11",
+      "days_out": 10,
+      "urgency": "orange",
+      "urgency_label": "soon",
+      "url": "https://example.com/jobs/024",
+      "status": "packaged"
+    },
+    {
+      "id": 12,
+      "company": "Loom",
+      "role": "Senior Product Manager, Risk",
+      "fit_score": 4.5,
+      "deadline": "2026-10-18",
+      "days_out": 17,
+      "urgency": "blue",
+      "urgency_label": "later",
+      "url": "https://example.com/jobs/041",
+      "status": "blocked"
+    }
+  ],
+  "digests": [
+    {
+      "date": "2026-10-01",
+      "sections": [
+        {
+          "title": "Watchlist",
+          "role_ids": [
+            7,
+            8,
+            9,
+            10,
+            17,
+            18,
+            36,
+            50
+          ]
+        },
+        {
+          "title": "Tier2 leads",
+          "role_ids": [
+            14,
+            17,
+            22,
+            41,
+            44,
+            46,
+            50
+          ]
+        },
+        {
+          "title": "Top matches",
+          "role_ids": [
+            4,
+            6,
+            17,
+            18,
+            28,
+            41
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-30",
+      "sections": [
+        {
+          "title": "Stretch roles",
+          "role_ids": [
+            9,
+            11,
+            17,
+            41,
+            50
+          ]
+        },
+        {
+          "title": "Tier2 leads",
+          "role_ids": [
+            1,
+            5,
+            8,
+            10,
+            28,
+            36,
+            46
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "sections": [
+        {
+          "title": "Top matches",
+          "role_ids": [
+            9,
+            10,
+            28,
+            36,
+            38
+          ]
+        },
+        {
+          "title": "Adjacent fits",
+          "role_ids": [
+            3,
+            14,
+            23,
+            24,
+            44
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-28",
+      "sections": [
+        {
+          "title": "Adjacent fits",
+          "role_ids": [
+            27,
+            36,
+            40,
+            48,
+            50
+          ]
+        },
+        {
+          "title": "Adjacent fits",
+          "role_ids": [
+            2,
+            11,
+            12,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-27",
+      "sections": [
+        {
+          "title": "Top matches",
+          "role_ids": [
+            11,
+            16,
+            18,
+            43,
+            45,
+            48
+          ]
+        },
+        {
+          "title": "Watchlist",
+          "role_ids": [
+            3,
+            13,
+            15,
+            23,
+            30,
+            31
+          ]
+        },
+        {
+          "title": "Stretch roles",
+          "role_ids": [
+            2,
+            13,
+            15,
+            43
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-26",
+      "sections": [
+        {
+          "title": "Tier2 leads",
+          "role_ids": [
+            5,
+            18,
+            23,
+            42,
+            50
+          ]
+        },
+        {
+          "title": "Adjacent fits",
+          "role_ids": [
+            2,
+            8,
+            17,
+            22,
+            35,
+            44
+          ]
+        },
+        {
+          "title": "Stretch roles",
+          "role_ids": [
+            3,
+            7,
+            17,
+            21,
+            23,
+            28,
+            39
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-09-25",
+      "sections": [
+        {
+          "title": "Top matches",
+          "role_ids": [
+            3,
+            13,
+            17,
+            28,
+            37,
+            46
+          ]
+        },
+        {
+          "title": "Top matches",
+          "role_ids": [
+            13,
+            24,
+            28,
+            35,
+            43,
+            44,
+            47
+          ]
+        }
+      ]
+    }
+  ],
+  "role_detail": {
+    "1": {
+      "id": 1,
+      "company": "Mercury",
+      "role": "Principal Product Manager, Data",
+      "url": "https://example.com/jobs/045",
+      "fit_score": 4.3,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "stale-posting-closed",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.2,
+        "program_match": 0.95,
+        "sponsorship_clear": 0.77,
+        "level_fit": 0.6,
+        "location_fit": 0.43,
+        "comp_fit": 0.34
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-17T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-17T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.3"
+        },
+        {
+          "ts": "2026-09-30T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: stale-posting-closed"
+        }
+      ]
+    },
+    "2": {
+      "id": 2,
+      "company": "Brex",
+      "role": "Director of Product, International",
+      "url": "https://example.com/jobs/048",
+      "fit_score": 5.5,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "location-onsite-only",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.54,
+        "program_match": 1.21,
+        "sponsorship_clear": 0.99,
+        "level_fit": 0.77,
+        "location_fit": 0.55,
+        "comp_fit": 0.44
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-28T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-28T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 5.5"
+        },
+        {
+          "ts": "2026-09-30T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: location-onsite-only"
+        }
+      ]
+    },
+    "3": {
+      "id": 3,
+      "company": "Calendly",
+      "role": "Senior PMM, Competitive",
+      "url": "https://example.com/jobs/020",
+      "fit_score": 7.7,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.16,
+        "program_match": 1.69,
+        "sponsorship_clear": 1.39,
+        "level_fit": 1.08,
+        "location_fit": 0.77,
+        "comp_fit": 0.62
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-13T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-13T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.7"
+        },
+        {
+          "ts": "2026-09-13T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "4": {
+      "id": 4,
+      "company": "Webflow",
+      "role": "Product Manager, Risk & Compliance",
+      "url": "https://example.com/jobs/029",
+      "fit_score": 6.9,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/029-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 1.93,
+        "program_match": 1.52,
+        "sponsorship_clear": 1.24,
+        "level_fit": 0.97,
+        "location_fit": 0.69,
+        "comp_fit": 0.55
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-27T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-27T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 6.9"
+        },
+        {
+          "ts": "2026-09-27T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-27T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "5": {
+      "id": 5,
+      "company": "Notion",
+      "role": "Strategy Manager, Growth Markets",
+      "url": "https://example.com/jobs/031",
+      "fit_score": 8.7,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/031-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.44,
+        "program_match": 1.91,
+        "sponsorship_clear": 1.57,
+        "level_fit": 1.22,
+        "location_fit": 0.87,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-21T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-21T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.7"
+        },
+        {
+          "ts": "2026-09-21T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-21T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "6": {
+      "id": 6,
+      "company": "Supabase",
+      "role": "Product Manager, International Expansion",
+      "url": "https://example.com/jobs/025",
+      "fit_score": 7.7,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/025-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.16,
+        "program_match": 1.69,
+        "sponsorship_clear": 1.39,
+        "level_fit": 1.08,
+        "location_fit": 0.77,
+        "comp_fit": 0.62
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-13T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-13T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.7"
+        },
+        {
+          "ts": "2026-09-13T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-13T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "7": {
+      "id": 7,
+      "company": "Deel",
+      "role": "Product Manager, Developer Experience",
+      "url": "https://example.com/jobs/023",
+      "fit_score": 8.5,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/023-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.38,
+        "program_match": 1.87,
+        "sponsorship_clear": 1.53,
+        "level_fit": 1.19,
+        "location_fit": 0.85,
+        "comp_fit": 0.68
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-26T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-26T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.5"
+        },
+        {
+          "ts": "2026-09-26T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-26T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "8": {
+      "id": 8,
+      "company": "HashiCorp",
+      "role": "Product Manager, Risk & Compliance",
+      "url": "https://example.com/jobs/033",
+      "fit_score": 8.8,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/033-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.46,
+        "program_match": 1.94,
+        "sponsorship_clear": 1.58,
+        "level_fit": 1.23,
+        "location_fit": 0.88,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-15T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-15T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.8"
+        },
+        {
+          "ts": "2026-09-15T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-15T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "9": {
+      "id": 9,
+      "company": "Pitch",
+      "role": "Senior Strategy Associate, Platform",
+      "url": "https://example.com/jobs/012",
+      "fit_score": 6.0,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.68,
+        "program_match": 1.32,
+        "sponsorship_clear": 1.08,
+        "level_fit": 0.84,
+        "location_fit": 0.6,
+        "comp_fit": 0.48
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-23T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Wellfound"
+        },
+        {
+          "ts": "2026-09-23T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 6.0"
+        }
+      ]
+    },
+    "10": {
+      "id": 10,
+      "company": "Datadog",
+      "role": "Staff Product Manager, Data Platform",
+      "url": "https://example.com/jobs/018",
+      "fit_score": 8.8,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.46,
+        "program_match": 1.94,
+        "sponsorship_clear": 1.58,
+        "level_fit": 1.23,
+        "location_fit": 0.88,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-25T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-25T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.8"
+        },
+        {
+          "ts": "2026-09-25T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "11": {
+      "id": 11,
+      "company": "Notion",
+      "role": "Product Manager, AI Products",
+      "url": "https://example.com/jobs/002",
+      "fit_score": 7.7,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.16,
+        "program_match": 1.69,
+        "sponsorship_clear": 1.39,
+        "level_fit": 1.08,
+        "location_fit": 0.77,
+        "comp_fit": 0.62
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-27T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-27T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.7"
+        }
+      ]
+    },
+    "12": {
+      "id": 12,
+      "company": "Loom",
+      "role": "Senior Product Manager, Risk",
+      "url": "https://example.com/jobs/041",
+      "fit_score": 4.5,
+      "status": "blocked",
+      "deadline": "2026-10-18",
+      "blocked_reason": "sponsorship-not-confirmed",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.26,
+        "program_match": 0.99,
+        "sponsorship_clear": 0.81,
+        "level_fit": 0.63,
+        "location_fit": 0.45,
+        "comp_fit": 0.36
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-12T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-12T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.5"
+        },
+        {
+          "ts": "2026-09-27T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: sponsorship-not-confirmed"
+        }
+      ]
+    },
+    "13": {
+      "id": 13,
+      "company": "Ramp",
+      "role": "Associate Product Manager, 2027 Start",
+      "url": "https://example.com/jobs/036",
+      "fit_score": 9.2,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/036-role-backgrounder.md",
+        "drafts/036-role-resume.md",
+        "drafts/036-role-AssociatePM.pdf",
+        "drafts/036-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.58,
+        "program_match": 2.02,
+        "sponsorship_clear": 1.66,
+        "level_fit": 1.29,
+        "location_fit": 0.92,
+        "comp_fit": 0.74
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-13T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-13T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 9.2"
+        },
+        {
+          "ts": "2026-09-13T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-13T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-27T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "14": {
+      "id": 14,
+      "company": "Deel",
+      "role": "Associate Product Manager, 2027 Start",
+      "url": "https://example.com/jobs/028",
+      "fit_score": 7.4,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/028-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.07,
+        "program_match": 1.63,
+        "sponsorship_clear": 1.33,
+        "level_fit": 1.04,
+        "location_fit": 0.74,
+        "comp_fit": 0.59
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-26T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-26T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.4"
+        },
+        {
+          "ts": "2026-09-26T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-26T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "15": {
+      "id": 15,
+      "company": "Cloudflare",
+      "role": "Senior PMM, Competitive",
+      "url": "https://example.com/jobs/030",
+      "fit_score": 8.8,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/030-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.46,
+        "program_match": 1.94,
+        "sponsorship_clear": 1.58,
+        "level_fit": 1.23,
+        "location_fit": 0.88,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-25T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-25T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.8"
+        },
+        {
+          "ts": "2026-09-25T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-25T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "16": {
+      "id": 16,
+      "company": "Retool",
+      "role": "Product Manager, AI Products",
+      "url": "https://example.com/jobs/007",
+      "fit_score": 6.6,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.85,
+        "program_match": 1.45,
+        "sponsorship_clear": 1.19,
+        "level_fit": 0.92,
+        "location_fit": 0.66,
+        "comp_fit": 0.53
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-18T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-18T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 6.6"
+        }
+      ]
+    },
+    "17": {
+      "id": 17,
+      "company": "Vercel",
+      "role": "Principal Product Manager, Data",
+      "url": "https://example.com/jobs/043",
+      "fit_score": 4.2,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "location-onsite-only",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.18,
+        "program_match": 0.92,
+        "sponsorship_clear": 0.76,
+        "level_fit": 0.59,
+        "location_fit": 0.42,
+        "comp_fit": 0.34
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-12T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-12T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.2"
+        },
+        {
+          "ts": "2026-09-20T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: location-onsite-only"
+        }
+      ]
+    },
+    "18": {
+      "id": 18,
+      "company": "Deel",
+      "role": "Corporate Strategy Associate",
+      "url": "https://example.com/jobs/004",
+      "fit_score": 7.2,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.02,
+        "program_match": 1.58,
+        "sponsorship_clear": 1.3,
+        "level_fit": 1.01,
+        "location_fit": 0.72,
+        "comp_fit": 0.58
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-12T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-12T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.2"
+        }
+      ]
+    },
+    "19": {
+      "id": 19,
+      "company": "Figma",
+      "role": "Senior Product Manager, Platform",
+      "url": "https://example.com/jobs/019",
+      "fit_score": 8.5,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.38,
+        "program_match": 1.87,
+        "sponsorship_clear": 1.53,
+        "level_fit": 1.19,
+        "location_fit": 0.85,
+        "comp_fit": 0.68
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-11T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-11T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.5"
+        },
+        {
+          "ts": "2026-09-11T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "20": {
+      "id": 20,
+      "company": "Snowflake",
+      "role": "PMM, Demand Generation",
+      "url": "https://example.com/jobs/024",
+      "fit_score": 8.3,
+      "status": "packaged",
+      "deadline": "2026-10-11",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/024-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.32,
+        "program_match": 1.83,
+        "sponsorship_clear": 1.49,
+        "level_fit": 1.16,
+        "location_fit": 0.83,
+        "comp_fit": 0.66
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-26T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Wellfound"
+        },
+        {
+          "ts": "2026-09-26T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.3"
+        },
+        {
+          "ts": "2026-09-26T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-26T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "21": {
+      "id": 21,
+      "company": "Datadog",
+      "role": "Product Manager, AI Products",
+      "url": "https://example.com/jobs/001",
+      "fit_score": 7.7,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.16,
+        "program_match": 1.69,
+        "sponsorship_clear": 1.39,
+        "level_fit": 1.08,
+        "location_fit": 0.77,
+        "comp_fit": 0.62
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-22T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-22T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.7"
+        }
+      ]
+    },
+    "22": {
+      "id": 22,
+      "company": "Pitch",
+      "role": "Senior Product Manager, Growth",
+      "url": "https://example.com/jobs/042",
+      "fit_score": 4.4,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "role-mismatch-senior",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.23,
+        "program_match": 0.97,
+        "sponsorship_clear": 0.79,
+        "level_fit": 0.62,
+        "location_fit": 0.44,
+        "comp_fit": 0.35
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-22T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-22T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.4"
+        },
+        {
+          "ts": "2026-09-23T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: role-mismatch-senior"
+        }
+      ]
+    },
+    "23": {
+      "id": 23,
+      "company": "Supabase",
+      "role": "Senior Product Manager, Platform",
+      "url": "https://example.com/jobs/011",
+      "fit_score": 8.1,
+      "status": "pinged",
+      "deadline": "2026-10-07",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.27,
+        "program_match": 1.78,
+        "sponsorship_clear": 1.46,
+        "level_fit": 1.13,
+        "location_fit": 0.81,
+        "comp_fit": 0.65
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-21T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-21T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.1"
+        }
+      ]
+    },
+    "24": {
+      "id": 24,
+      "company": "Pitch",
+      "role": "Product Manager, New Grad Program",
+      "url": "https://example.com/jobs/015",
+      "fit_score": 9.0,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.52,
+        "program_match": 1.98,
+        "sponsorship_clear": 1.62,
+        "level_fit": 1.26,
+        "location_fit": 0.9,
+        "comp_fit": 0.72
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-19T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Wellfound"
+        },
+        {
+          "ts": "2026-09-19T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 9.0"
+        },
+        {
+          "ts": "2026-09-19T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "25": {
+      "id": 25,
+      "company": "Brex",
+      "role": "Product Manager, New Grad Program",
+      "url": "https://example.com/jobs/010",
+      "fit_score": 5.7,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.6,
+        "program_match": 1.25,
+        "sponsorship_clear": 1.03,
+        "level_fit": 0.8,
+        "location_fit": 0.57,
+        "comp_fit": 0.46
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-22T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-22T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 5.7"
+        }
+      ]
+    },
+    "26": {
+      "id": 26,
+      "company": "Deel",
+      "role": "Corporate Strategy Associate",
+      "url": "https://example.com/jobs/032",
+      "fit_score": 8.7,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/032-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.44,
+        "program_match": 1.91,
+        "sponsorship_clear": 1.57,
+        "level_fit": 1.22,
+        "location_fit": 0.87,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-23T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-23T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.7"
+        },
+        {
+          "ts": "2026-09-23T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-23T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "27": {
+      "id": 27,
+      "company": "Snowflake",
+      "role": "Product Manager, New Grad Program",
+      "url": "https://example.com/jobs/022",
+      "fit_score": 7.1,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.99,
+        "program_match": 1.56,
+        "sponsorship_clear": 1.28,
+        "level_fit": 0.99,
+        "location_fit": 0.71,
+        "comp_fit": 0.57
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-15T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-15T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.1"
+        },
+        {
+          "ts": "2026-09-15T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "28": {
+      "id": 28,
+      "company": "Calendly",
+      "role": "Staff Product Manager, Data Platform",
+      "url": "https://example.com/jobs/005",
+      "fit_score": 7.3,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.04,
+        "program_match": 1.61,
+        "sponsorship_clear": 1.31,
+        "level_fit": 1.02,
+        "location_fit": 0.73,
+        "comp_fit": 0.58
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-29T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-29T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.3"
+        }
+      ]
+    },
+    "29": {
+      "id": 29,
+      "company": "Snowflake",
+      "role": "Product Manager, Developer Experience",
+      "url": "https://example.com/jobs/013",
+      "fit_score": 8.3,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.32,
+        "program_match": 1.83,
+        "sponsorship_clear": 1.49,
+        "level_fit": 1.16,
+        "location_fit": 0.83,
+        "comp_fit": 0.66
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-27T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-27T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.3"
+        }
+      ]
+    },
+    "30": {
+      "id": 30,
+      "company": "Loom",
+      "role": "Senior Product Manager, Platform",
+      "url": "https://example.com/jobs/009",
+      "fit_score": 6.4,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.79,
+        "program_match": 1.41,
+        "sponsorship_clear": 1.15,
+        "level_fit": 0.9,
+        "location_fit": 0.64,
+        "comp_fit": 0.51
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-18T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-18T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 6.4"
+        }
+      ]
+    },
+    "31": {
+      "id": 31,
+      "company": "Snowflake",
+      "role": "Principal Product Manager, Data",
+      "url": "https://example.com/jobs/047",
+      "fit_score": 4.4,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "role-mismatch-senior",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.23,
+        "program_match": 0.97,
+        "sponsorship_clear": 0.79,
+        "level_fit": 0.62,
+        "location_fit": 0.44,
+        "comp_fit": 0.35
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-28T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-28T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.4"
+        },
+        {
+          "ts": "2026-09-27T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: role-mismatch-senior"
+        }
+      ]
+    },
+    "32": {
+      "id": 32,
+      "company": "Linear",
+      "role": "Product Manager, New Grad Program",
+      "url": "https://example.com/jobs/035",
+      "fit_score": 7.9,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/035-role-backgrounder.md",
+        "drafts/035-role-resume.md",
+        "drafts/035-role-AssociatePM.pdf",
+        "drafts/035-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.21,
+        "program_match": 1.74,
+        "sponsorship_clear": 1.42,
+        "level_fit": 1.11,
+        "location_fit": 0.79,
+        "comp_fit": 0.63
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-28T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-28T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.9"
+        },
+        {
+          "ts": "2026-09-28T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-28T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-27T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "33": {
+      "id": 33,
+      "company": "Verkada",
+      "role": "Senior Strategy Associate, Platform",
+      "url": "https://example.com/jobs/014",
+      "fit_score": 7.1,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.99,
+        "program_match": 1.56,
+        "sponsorship_clear": 1.28,
+        "level_fit": 0.99,
+        "location_fit": 0.71,
+        "comp_fit": 0.57
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-24T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-24T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.1"
+        }
+      ]
+    },
+    "34": {
+      "id": 34,
+      "company": "Vercel",
+      "role": "Product Manager, AI Products",
+      "url": "https://example.com/jobs/017",
+      "fit_score": 8.8,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.46,
+        "program_match": 1.94,
+        "sponsorship_clear": 1.58,
+        "level_fit": 1.23,
+        "location_fit": 0.88,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-23T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-23T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.8"
+        },
+        {
+          "ts": "2026-09-23T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "35": {
+      "id": 35,
+      "company": "Linear",
+      "role": "Product Manager, Growth",
+      "url": "https://example.com/jobs/021",
+      "fit_score": 8.7,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.44,
+        "program_match": 1.91,
+        "sponsorship_clear": 1.57,
+        "level_fit": 1.22,
+        "location_fit": 0.87,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-24T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-24T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.7"
+        },
+        {
+          "ts": "2026-09-24T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "36": {
+      "id": 36,
+      "company": "Deel",
+      "role": "Product Marketing Manager, Launch",
+      "url": "https://example.com/jobs/034",
+      "fit_score": 8.0,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/034-role-backgrounder.md",
+        "drafts/034-role-resume.md",
+        "drafts/034-role-AssociatePM.pdf",
+        "drafts/034-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.24,
+        "program_match": 1.76,
+        "sponsorship_clear": 1.44,
+        "level_fit": 1.12,
+        "location_fit": 0.8,
+        "comp_fit": 0.64
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-19T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-19T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.0"
+        },
+        {
+          "ts": "2026-09-19T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-19T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-27T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "37": {
+      "id": 37,
+      "company": "Figma",
+      "role": "Principal Product Manager, Data",
+      "url": "https://example.com/jobs/046",
+      "fit_score": 4.8,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "sponsorship-not-confirmed",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.34,
+        "program_match": 1.06,
+        "sponsorship_clear": 0.86,
+        "level_fit": 0.67,
+        "location_fit": 0.48,
+        "comp_fit": 0.38
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-12T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Wellfound"
+        },
+        {
+          "ts": "2026-09-12T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.8"
+        },
+        {
+          "ts": "2026-09-19T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: sponsorship-not-confirmed"
+        }
+      ]
+    },
+    "38": {
+      "id": 38,
+      "company": "Plaid",
+      "role": "Director of Product, International",
+      "url": "https://example.com/jobs/050",
+      "fit_score": 5.7,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "stale-posting-closed",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.6,
+        "program_match": 1.25,
+        "sponsorship_clear": 1.03,
+        "level_fit": 0.8,
+        "location_fit": 0.57,
+        "comp_fit": 0.46
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-27T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-27T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 5.7"
+        },
+        {
+          "ts": "2026-09-29T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: stale-posting-closed"
+        }
+      ]
+    },
+    "39": {
+      "id": 39,
+      "company": "Verkada",
+      "role": "Product Manager, New Grad Program",
+      "url": "https://example.com/jobs/027",
+      "fit_score": 7.5,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/027-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.1,
+        "program_match": 1.65,
+        "sponsorship_clear": 1.35,
+        "level_fit": 1.05,
+        "location_fit": 0.75,
+        "comp_fit": 0.6
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-12T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-12T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.5"
+        },
+        {
+          "ts": "2026-09-12T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-12T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "40": {
+      "id": 40,
+      "company": "Stripe",
+      "role": "Senior Associate, Corporate Development",
+      "url": "https://example.com/jobs/006",
+      "fit_score": 6.5,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.82,
+        "program_match": 1.43,
+        "sponsorship_clear": 1.17,
+        "level_fit": 0.91,
+        "location_fit": 0.65,
+        "comp_fit": 0.52
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-23T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Tier2"
+        },
+        {
+          "ts": "2026-09-23T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 6.5"
+        }
+      ]
+    },
+    "41": {
+      "id": 41,
+      "company": "Pitch",
+      "role": "Associate Product Manager, 2027 Start",
+      "url": "https://example.com/jobs/040",
+      "fit_score": 8.8,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/040-role-backgrounder.md",
+        "drafts/040-role-resume.md",
+        "drafts/040-role-AssociatePM.pdf",
+        "drafts/040-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.46,
+        "program_match": 1.94,
+        "sponsorship_clear": 1.58,
+        "level_fit": 1.23,
+        "location_fit": 0.88,
+        "comp_fit": 0.7
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-28T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-28T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.8"
+        },
+        {
+          "ts": "2026-09-28T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-28T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-27T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "42": {
+      "id": 42,
+      "company": "Brex",
+      "role": "Product Manager, International Expansion",
+      "url": "https://example.com/jobs/003",
+      "fit_score": 5.6,
+      "status": "pinged",
+      "deadline": "2026-10-04",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.57,
+        "program_match": 1.23,
+        "sponsorship_clear": 1.01,
+        "level_fit": 0.78,
+        "location_fit": 0.56,
+        "comp_fit": 0.45
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-22T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-22T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 5.6"
+        }
+      ]
+    },
+    "43": {
+      "id": 43,
+      "company": "Anthropic",
+      "role": "Associate Product Manager, 2027 Start",
+      "url": "https://example.com/jobs/039",
+      "fit_score": 8.4,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/039-role-backgrounder.md",
+        "drafts/039-role-resume.md",
+        "drafts/039-role-AssociatePM.pdf",
+        "drafts/039-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.35,
+        "program_match": 1.85,
+        "sponsorship_clear": 1.51,
+        "level_fit": 1.18,
+        "location_fit": 0.84,
+        "comp_fit": 0.67
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-16T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-16T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.4"
+        },
+        {
+          "ts": "2026-09-16T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-16T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-22T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "44": {
+      "id": 44,
+      "company": "Cloudflare",
+      "role": "Product Marketing Manager, Launch",
+      "url": "https://example.com/jobs/038",
+      "fit_score": 9.1,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/038-role-backgrounder.md",
+        "drafts/038-role-resume.md",
+        "drafts/038-role-AssociatePM.pdf",
+        "drafts/038-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.55,
+        "program_match": 2.0,
+        "sponsorship_clear": 1.64,
+        "level_fit": 1.27,
+        "location_fit": 0.91,
+        "comp_fit": 0.73
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-23T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-23T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 9.1"
+        },
+        {
+          "ts": "2026-09-23T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-23T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-22T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "45": {
+      "id": 45,
+      "company": "Brex",
+      "role": "Principal Product Manager, Data",
+      "url": "https://example.com/jobs/049",
+      "fit_score": 5.8,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "domain-mismatch-pure-engineering",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.62,
+        "program_match": 1.28,
+        "sponsorship_clear": 1.04,
+        "level_fit": 0.81,
+        "location_fit": 0.58,
+        "comp_fit": 0.46
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-24T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via watchlist"
+        },
+        {
+          "ts": "2026-09-24T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 5.8"
+        },
+        {
+          "ts": "2026-09-22T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: domain-mismatch-pure-engineering"
+        }
+      ]
+    },
+    "46": {
+      "id": 46,
+      "company": "Ramp",
+      "role": "Corporate Strategy Associate, 2027",
+      "url": "https://example.com/jobs/037",
+      "fit_score": 8.5,
+      "status": "submitted",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/037-role-backgrounder.md",
+        "drafts/037-role-resume.md",
+        "drafts/037-role-AssociatePM.pdf",
+        "drafts/037-role-CoverLetter.docx"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.38,
+        "program_match": 1.87,
+        "sponsorship_clear": 1.53,
+        "level_fit": 1.19,
+        "location_fit": 0.85,
+        "comp_fit": 0.68
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-25T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Company Careers"
+        },
+        {
+          "ts": "2026-09-25T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.5"
+        },
+        {
+          "ts": "2026-09-25T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-25T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        },
+        {
+          "ts": "2026-09-20T11:00:00-04:00",
+          "event": "submitted",
+          "note": "Application submitted via portal"
+        }
+      ]
+    },
+    "47": {
+      "id": 47,
+      "company": "Verkada",
+      "role": "Product Manager, Developer Experience",
+      "url": "https://example.com/jobs/008",
+      "fit_score": 7.7,
+      "status": "pinged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.16,
+        "program_match": 1.69,
+        "sponsorship_clear": 1.39,
+        "level_fit": 1.08,
+        "location_fit": 0.77,
+        "comp_fit": 0.62
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-26T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-26T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 7.7"
+        }
+      ]
+    },
+    "48": {
+      "id": 48,
+      "company": "Stripe",
+      "role": "Product Marketing Manager, Platform",
+      "url": "https://example.com/jobs/026",
+      "fit_score": 8.5,
+      "status": "packaged",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [
+        "drafts/026-role-backgrounder.md"
+      ],
+      "rubric_factors": {
+        "domain_fit": 2.38,
+        "program_match": 1.87,
+        "sponsorship_clear": 1.53,
+        "level_fit": 1.19,
+        "location_fit": 0.85,
+        "comp_fit": 0.68
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-13T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-13T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.5"
+        },
+        {
+          "ts": "2026-09-13T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        },
+        {
+          "ts": "2026-09-13T21:30:00-04:00",
+          "event": "artifacts_written",
+          "note": "Backgrounder + resume + cover letter drafted"
+        }
+      ]
+    },
+    "49": {
+      "id": 49,
+      "company": "Plaid",
+      "role": "Product Manager, AI Products",
+      "url": "https://example.com/jobs/016",
+      "fit_score": 8.6,
+      "status": "interested",
+      "deadline": "",
+      "blocked_reason": "",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 2.41,
+        "program_match": 1.89,
+        "sponsorship_clear": 1.55,
+        "level_fit": 1.2,
+        "location_fit": 0.86,
+        "comp_fit": 0.69
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-21T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via HN Who's Hiring"
+        },
+        {
+          "ts": "2026-09-21T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 8.6"
+        },
+        {
+          "ts": "2026-09-21T20:00:00-04:00",
+          "event": "interested",
+          "note": "Marked interested (int)"
+        }
+      ]
+    },
+    "50": {
+      "id": 50,
+      "company": "Linear",
+      "role": "Staff Product Manager, Platform",
+      "url": "https://example.com/jobs/044",
+      "fit_score": 4.3,
+      "status": "blocked",
+      "deadline": "",
+      "blocked_reason": "domain-mismatch-pure-engineering",
+      "draft_paths": [],
+      "rubric_factors": {
+        "domain_fit": 1.2,
+        "program_match": 0.95,
+        "sponsorship_clear": 0.77,
+        "level_fit": 0.6,
+        "location_fit": 0.43,
+        "comp_fit": 0.34
+      },
+      "rubric_version": "v2",
+      "history": [
+        {
+          "ts": "2026-09-14T09:00:00-04:00",
+          "event": "discovered",
+          "note": "Found via Built In NYC"
+        },
+        {
+          "ts": "2026-09-14T18:30:00-04:00",
+          "event": "watchlist",
+          "note": "Added to watchlist; fit_score 4.3"
+        },
+        {
+          "ts": "2026-09-23T14:15:00-04:00",
+          "event": "blocked",
+          "note": "Blocked: domain-mismatch-pure-engineering"
+        }
+      ]
+    }
+  },
+  "run_health": [
+    {
+      "name": "hunt-part1-platforms",
+      "schedule": "07:30 daily",
+      "last_status": "ok",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    },
+    {
+      "name": "hunt-part2-startups",
+      "schedule": "07:30 daily",
+      "last_status": "ok",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    },
+    {
+      "name": "hunt-part3-universities",
+      "schedule": "07:30 daily",
+      "last_status": "ok",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    },
+    {
+      "name": "weekly-calibration",
+      "schedule": "Sun 09:00",
+      "last_status": "ok",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    },
+    {
+      "name": "telegram-delivery",
+      "schedule": "07:35 daily",
+      "last_status": "ok",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    },
+    {
+      "name": "telegram-mirror-failed-retry",
+      "schedule": "every 15m",
+      "last_status": "warn",
+      "last_run_at": "2026-10-01T07:18:00-04:00",
+      "latency_s": 42
+    }
+  ],
+  "rubric_versions": [
+    {
+      "version": "v1",
+      "created_at": "2026-08-15",
+      "weights": {
+        "domain_fit": 0.26,
+        "program_match": 0.2,
+        "sponsorship_clear": 0.12,
+        "level_fit": 0.18,
+        "location_fit": 0.12,
+        "comp_fit": 0.12
+      },
+      "rationale": "v1 baseline weights derived from a one-week observation of manual scoring; treated as a placeholder pending data.",
+      "outcomes": {
+        "submission_to_screen_rate": 0.31,
+        "mean_fit_score": 7.2
+      }
+    },
+    {
+      "version": "v2",
+      "created_at": "2026-09-22",
+      "weights": {
+        "domain_fit": 0.28,
+        "program_match": 0.22,
+        "sponsorship_clear": 0.18,
+        "level_fit": 0.14,
+        "location_fit": 0.1,
+        "comp_fit": 0.08
+      },
+      "rationale": "v1 over-weighted level_fit and under-weighted sponsorship_clear based on Aug 2026 calibration data: 4 of 6 packaged-and-stalled roles exited at the visa-screening stage. v2 promotes sponsorship_clear from 0.12 -> 0.18 and trims level_fit 0.18 -> 0.14. Outcomes on the first 7 days of v2 use: mean fit_score held at 7.4, but the submission-to-screen rate improved 22%.",
+      "outcomes": {
+        "submission_to_screen_rate": 0.38,
+        "mean_fit_score": 7.4
+      }
+    }
+  ],
+  "telegram_messages": [
+    {
+      "sent_at": "2026-09-27T07:30:00-04:00",
+      "text": "*Junter daily digest \u2014 2026-09-27*\n8 new matches \u00b7 3 watchlist moves \u00b7 1 deadline in 48h",
+      "status": "ok"
+    },
+    {
+      "sent_at": "2026-09-28T07:30:00-04:00",
+      "text": "*Junter daily digest \u2014 2026-09-28*\n8 new matches \u00b7 3 watchlist moves \u00b7 1 deadline in 48h",
+      "status": "ok"
+    },
+    {
+      "sent_at": "2026-09-29T07:30:00-04:00",
+      "text": "*Junter daily digest \u2014 2026-09-29*\n8 new matches \u00b7 3 watchlist moves \u00b7 1 deadline in 48h",
+      "status": "ok"
+    },
+    {
+      "sent_at": "2026-09-30T07:30:00-04:00",
+      "text": "*Junter daily digest \u2014 2026-09-30*\n8 new matches \u00b7 3 watchlist moves \u00b7 1 deadline in 48h",
+      "status": "ok"
+    },
+    {
+      "sent_at": "2026-10-01T03:30:00-04:00",
+      "text": "*Junter deadline ping \u2014 role 24 closes in 24h*",
+      "status": "failed",
+      "error": "Telegram bot returned 'chat not found' [chat_id expired]"
+    },
+    {
+      "sent_at": "2026-10-01T03:48:00-04:00",
+      "text": "*Junter deadline ping \u2014 role 24 closes in 24h* (retry)",
+      "status": "retry_succeeded"
+    },
+    {
+      "sent_at": "2026-10-01T07:30:00-04:00",
+      "text": "*Junter daily digest \u2014 2026-10-01*\n8 new matches \u00b7 3 watchlist moves \u00b7 1 deadline in 48h",
+      "status": "ok"
+    }
+  ],
+  "rejected_with_reasons": [
+    {
+      "id": 45,
+      "company": "Brex",
+      "role": "Principal Product Manager, Data",
+      "fit_score": 5.8,
+      "blocked_reason": "domain-mismatch-pure-engineering",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/049"
+    },
+    {
+      "id": 50,
+      "company": "Linear",
+      "role": "Staff Product Manager, Platform",
+      "fit_score": 4.3,
+      "blocked_reason": "domain-mismatch-pure-engineering",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/044"
+    },
+    {
+      "id": 2,
+      "company": "Brex",
+      "role": "Director of Product, International",
+      "fit_score": 5.5,
+      "blocked_reason": "location-onsite-only",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/048"
+    },
+    {
+      "id": 17,
+      "company": "Vercel",
+      "role": "Principal Product Manager, Data",
+      "fit_score": 4.2,
+      "blocked_reason": "location-onsite-only",
+      "source": "watchlist",
+      "url": "https://example.com/jobs/043"
+    },
+    {
+      "id": 22,
+      "company": "Pitch",
+      "role": "Senior Product Manager, Growth",
+      "fit_score": 4.4,
+      "blocked_reason": "role-mismatch-senior",
+      "source": "Tier2",
+      "url": "https://example.com/jobs/042"
+    },
+    {
+      "id": 31,
+      "company": "Snowflake",
+      "role": "Principal Product Manager, Data",
+      "fit_score": 4.4,
+      "blocked_reason": "role-mismatch-senior",
+      "source": "Built In NYC",
+      "url": "https://example.com/jobs/047"
+    },
+    {
+      "id": 12,
+      "company": "Loom",
+      "role": "Senior Product Manager, Risk",
+      "fit_score": 4.5,
+      "blocked_reason": "sponsorship-not-confirmed",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/041"
+    },
+    {
+      "id": 37,
+      "company": "Figma",
+      "role": "Principal Product Manager, Data",
+      "fit_score": 4.8,
+      "blocked_reason": "sponsorship-not-confirmed",
+      "source": "Wellfound",
+      "url": "https://example.com/jobs/046"
+    },
+    {
+      "id": 1,
+      "company": "Mercury",
+      "role": "Principal Product Manager, Data",
+      "fit_score": 4.3,
+      "blocked_reason": "stale-posting-closed",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/045"
+    },
+    {
+      "id": 38,
+      "company": "Plaid",
+      "role": "Director of Product, International",
+      "fit_score": 5.7,
+      "blocked_reason": "stale-posting-closed",
+      "source": "HN Who's Hiring",
+      "url": "https://example.com/jobs/050"
+    }
+  ]
+}

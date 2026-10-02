@@ -89,7 +89,7 @@ def _score_role():
     REPO_ROOT = HERE.parent                          # hermes-job-hunter/
     if str(REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT))
-    from code.scoring import score
+    from engine.scoring import score
     evidence = {
         "role_type":     2,   # core PM/growth target
         "level_fit":     1,   # 1-2 yrs OR new-grad/APM; 8-yr background makes mid-level plausible
@@ -116,7 +116,7 @@ def _render_docx(src: str, out: str) -> str:
     REPO_ROOT = HERE.parent
     if str(REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT))
-    from code.jobbot_helpers import make_docx as _make_docx
+    from engine.jobbot_helpers import make_docx as _make_docx
     if "\n" in src or " " in src:
         # Looks like in-memory content; route through a temp file.
         import tempfile

@@ -41,16 +41,31 @@ jobs:
 
       - name: Run unit tests with pytest
         run: |
-          python -m pytest code/tests -v
+          python -m pytest engine/tests -v
 
       - name: Run unit tests with unittest discover
         run: |
-          python -m unittest discover code/tests -v -t .
+          python -m unittest discover engine/tests -v -t .
 
       - name: Run synthetic demo (offline, no credentials)
         run: |
-          python code/synth_demo.py
+          python engine/synth_demo.py
         shell: bash
+
+      - name: Run snapshot exporter self-tests
+        run: |
+          python -m unittest discover snapshot-export/tests -v -t .
+
+      - name: Verify synthetic seed generator
+        run: |
+          python synthetic-data/generate.py --self-test
+
+      - name: Verify HTML prototype smoke-tests
+        run: |
+          test -f ui/index.html
+          test -f ui/styles.css
+          test -f ui/app.js
+          python ui/tests/check_seed.py
 
       - name: Verify demo outputs the documented files
         run: |

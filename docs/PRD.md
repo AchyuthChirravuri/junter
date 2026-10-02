@@ -1,6 +1,6 @@
-# PRD — Job Hunter with Hermes
+# Junter — Product Requirements
 
-**Owner:** Achyuth Chirravuri (candidate & system PM) · **Status:** v1 live · **Last updated:** Sept 2026
+**Status:** v1 live · **Last updated:** Sept 2026 · **System owner:** the operator (see README)
 
 ## Problem
 

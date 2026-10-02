@@ -13,7 +13,7 @@ both `pytest` and `unittest discover`.
 """
 import unittest
 
-from code.scoring import (
+from engine.scoring import (
     DENOMINATOR,
     MAX_NORMALIZED,
     MAX_RAW,

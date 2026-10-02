@@ -14,7 +14,7 @@
 | `status` | One-paragraph state: tracker size, pending drafts, last run. |
 | `pause` / `resume` | Stop/restart daily runs (e.g. during exams). |
 
-**IDs** are the row numbers in `~/Hermes-workspace/projects/job-applications/tracker.csv`; every ping includes its id.
+**IDs** are the row numbers in the operator's private tracker file (the canonical tracker is not part of this public repo); every ping includes its id.
 
 ## Your daily involvement (~3 min)
 
@@ -34,7 +34,7 @@
 
 ## Where things live
 
-- Truth source: `~/Hermes-workspace/projects/job-applications/master-resume.md` — update this when your resume changes; drafts follow it.
+- Truth source: the operator's private `master-resume.md` (not in this public repo) — update this when your resume changes; drafts follow it.
 - Rubric: `role-rubric.md` (versioned, you can audit any change). ATS rules: `ats-rules.md`. Full spec: `spec.md`.
 - Drafts per role: `drafts/`. Daily digests: `digests/`. Tracker: `tracker.csv`.
 

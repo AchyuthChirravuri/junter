@@ -57,7 +57,7 @@ the candidate pastes the portal's essay/short-answer questions. Using the backgr
 - `pause` / `resume` → toggle daily runs
 
 ## Tailoring & delivery mechanics
-- Tools: ~/Hermes-workspace/projects/job-applications/jobbot_helpers.py
+- Tools: the helper module shipped at `engine/jobbot_helpers.py` (Telegram document delivery, markdown→docx); the jobs profile owns the secrets and the cron.
   - `make-docx <src.md> <out.docx>` → ATS-safe single-column docx
   - `send-doc <file> <caption>` / `send-text <msg>` → Telegram delivery (chat_id in cache/telegram_chat_id.txt)
 - Per-role files land in drafts/: `<date>-<company>-role-resume.md`, `-resume.docx`, `-letter.md`, `-answers.docx`

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>Junter — Reading Layer (Prototype)</title>
+  <meta name="description" content="Static HTML prototype of the Junter reading layer — Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail, Run Health, Rubric &amp; Calibration, Telegram Mirror. Reads ../synthetic-data/seed.json via fetch; falls back to an inline dataset if the fetch fails or the file contains PII tokens." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <noscript>
+    <div style="padding: var(--space-7); font-family: -apple-system, sans-serif;">
+      <h1>Junter — JavaScript required</h1>
+      <p>This prototype renders all 8 screens via hash routing. Please enable JavaScript or open the file in a browser with JS enabled.</p>
+      <p>Once loaded, the 8 screens are: Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail (per role id), Run Health, Rubric &amp; Calibration, Telegram Mirror.</p>
+    </div>
+  </noscript>
+  <div class="app">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <h1 class="sidebar__brand">Junter</h1>
+      <p style="font-size: var(--text-meta); color: var(--color-text-secondary); margin: 0 0 var(--space-6) 0;">Reading layer · prototype</p>
+      <ul class="sidebar__nav">
+        <li><a class="sidebar__link" href="#/pipeline" data-route="pipeline">Pipeline Board</a></li>
+        <li><a class="sidebar__link" href="#/deadline" data-route="deadline">Deadline Rail</a></li>
+        <li><a class="sidebar__link" href="#/focus" data-route="focus">Focus</a></li>
+        <li><a class="sidebar__link" href="#/digest" data-route="digest">Daily Digest</a></li>
+        <li><a class="sidebar__link" href="#/run-health" data-route="run-health">Run Health</a></li>
+        <li><a class="sidebar__link" href="#/rubric" data-route="rubric">Rubric &amp; Calibration</a></li>
+        <li><a class="sidebar__link" href="#/telegram" data-route="telegram">Telegram Mirror</a></li>
+      </ul>
+      <p class="sidebar__hint">→ see all 8 screens in the wireframe file</p>
+      <div style="margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--color-border); font-size: var(--text-meta); color: var(--color-text-secondary);">
+        <p style="margin: 0 0 var(--space-3) 0;"><strong>Data source:</strong> <code style="font-family: ui-monospace, monospace;">../synthetic-data/seed.json</code></p>
+        <p style="margin: 0 0 var(--space-3) 0;">Falls back to inline FALLBACK dataset if fetch fails or the file contains forbidden PII tokens.</p>
+        <p style="margin: 0;">Role detail URL pattern: <code style="font-family: ui-monospace, monospace;">#/role/&lt;id&gt;</code></p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="screen-pipeline" class="screen" aria-labelledby="pipeline-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-deadline" class="screen" aria-labelledby="deadline-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-focus" class="screen" aria-labelledby="focus-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-digest" class="screen" aria-labelledby="digest-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-role" class="screen" aria-labelledby="role-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-run-health" class="screen" aria-labelledby="run-health-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-rubric" class="screen" aria-labelledby="rubric-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-telegram" class="screen" aria-labelledby="telegram-title">
+        <div class="screen__mount"></div>
+      </section>
+    </main>
+  </div>
+
+  <!--
+    Junter prototype — design notes
+    ==============================
+    Hash routes (URL pattern -> screen):
+      #/pipeline       -> Pipeline Board (5 columns, 50 roles, fit/source/angle)
+      #/deadline       -> Deadline Rail (3 urgency tiers, red/orange/blue)
+      #/focus          -> Focus — Interested (sorted by deadline, soft gate checklist)
+      #/digest         -> Daily Digest (promoted + rejected-with-reasons)
+      #/role/<id>      -> Role Detail (rubric factor bars + history timeline)
+      #/run-health     -> Run Health (cron status, errors block)
+      #/rubric         -> Rubric & Calibration (3-column grid + principle footer)
+      #/telegram       -> Telegram Mirror (failed-only filter + retry recovery)
+
+    Design tokens (see docs/design-tokens.md):
+      Typography: --text-display (32), --text-h1 (24), --text-h2 (18),
+                  --text-body (14), --text-meta (12), --text-mono (13)
+      Spacing:    --space-2 (4), --space-3 (8), --space-4 (12), --space-5 (16),
+                  --space-6 (24), --space-7 (32)
+      Color:      --color-bg, --color-surface, --color-border, --color-text-primary,
+                  --color-text-secondary, --color-accent, --color-warning,
+                  --color-danger, --color-success
+      Corners:    --radius-sm (4), --radius-md (8), --radius-lg (12)
+      Shadow:     --shadow-overlay (one allowed value)
+
+    Urgency tier thresholds (in app.js):
+      RED_MAX = 7     -> red tier  (color-danger)
+      ORANGE_MAX = 14 -> orange tier (color-warning)
+      otherwise       -> blue tier (color-accent)
+
+    The single SPA pattern (hash routing) is from the design notes'
+    Phase F decision: one file per prototype, eight screens, hash routing
+    so back/forward buttons work and the URL is shareable.
+  -->
+
+  <script src="app.js"></script>
+</body>
+</html>

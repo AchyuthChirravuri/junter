@@ -6,14 +6,14 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hermes-job-hunter"
-version = "0.2.0"
-description = "Reproducible engineering scaffold for an autonomous job-search agent system. Synthetic demo only."
+name = "junter"
+version = "0.3.0"
+description = "Junter — an autonomous job-search engine and reading-layer UI prototype. Synthetic-data only."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [{name = "Achyuth Chirravuri"}]
-keywords = ["job-search", "scoring", "resume", "ats", "agent"]
+keywords = ["job-search", "scoring", "resume", "ats", "agent", "junter", "wellness"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -41,16 +41,16 @@ dev = [
 ]
 
 [project.scripts]
-# No console scripts; the demo is invoked as `python3 code/synth_demo.py`.
+# No console scripts; the demo is invoked as `python3 engine/synth_demo.py`.
 
 [tool.setuptools]
-package-dir = {"" = "."}
+package-dir = {"." = "."}
 
 [tool.setuptools.packages.find]
-include = ["code*"]
+include = ["engine*", "synthetic-data*", "snapshot-export*"]
 
 [tool.pytest.ini_options]
 # CI-safe defaults: collect only the test files we ship, no surprises.
-testpaths = ["code/tests"]
+testpaths = ["engine/tests", "snapshot-export/tests"]
 python_files = ["test_*.py"]
 addopts = "-v --tb=short"

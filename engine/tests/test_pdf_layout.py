@@ -35,7 +35,7 @@ title sat on the same line as the company and ran to x=367 mm.
 import unittest
 from pathlib import Path
 
-from code import make_resume_pdf as mrp
+from engine import make_resume_pdf as mrp
 
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
