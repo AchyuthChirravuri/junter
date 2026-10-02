@@ -43,3 +43,7 @@ scripts/
 # Editor backups
 *.bak-*
 *.swp
+
+# Local dev harness (not part of the deployment)
+serve.mjs
+_*.mjs
