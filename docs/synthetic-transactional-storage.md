@@ -1,6 +1,6 @@
 # Synthetic transactional storage contract
 
-Purpose: Junter's public synthetic demo reads and mutates only the Neon Postgres namespace `junter_synthetic`. It must never read, copy, or modify the pre-existing shared Edge Config or tracker data.
+Purpose: Junter's public synthetic demo reads only the Neon Postgres namespace `junter_synthetic`. It must never read, copy, or modify the pre-existing shared Edge Config or tracker data. The production demo is read-only: `/api/action` returns `403 public_demo_read_only` before it opens a store transaction.
 
 ## Configuration
 
@@ -8,8 +8,10 @@ Server-only environment keys:
 
 - `JUNTER_SYNTHETIC_DATABASE_DATABASE_URL` — integration-managed Neon connection URL. Never expose it to the client, logs, source, or task artifacts.
 - `JUNTER_SYNTHETIC_DATABASE_NAMESPACE` — optional identifier; defaults to `junter_synthetic` and accepts only lowercase letters, digits, and underscores.
+- `JUNTER_SYNTHETIC_WRITES_ENABLED` — Preview/test only; must be exactly `true` before a synthetic action can run.
+- `JUNTER_SYNTHETIC_WRITE_TOKEN` — Preview/test only; server-side shared authorization secret accepted in an HTTP header. It is never placed in UI code, a URL, or a client bundle.
 
-The deployment/configuration task may set these keys in `preview` and `production` only. It must not add them to `development`, alter `EDGE_CONFIG`, or deploy before validating the database and seed.
+The database keys may be set in `preview` and `production` only. The two write keys may be set only in a protected Preview/test environment, never in production or development. Production remains read-only even if those write keys are mistakenly present. Do not alter `EDGE_CONFIG` or deploy before validating the database and seed.
 
 ## Schema and seed
 
@@ -23,7 +25,9 @@ The deployment/configuration task may set these keys in `preview` and `productio
 
 ## Transaction semantics
 
-For each POST, the adapter opens one database transaction, locks the idempotency row and target role, mutates the role, records the idempotency result, and appends the audit event before commit. Repeating the same key and payload returns the persisted result; repeating the key with a different payload returns HTTP 409. GET reads the same `roles` table and has `Cache-Control: no-store`.
+In the protected Preview/test path only, each permitted fixed-shape POST opens one database transaction, locks the idempotency row and target role, mutates the role, records the idempotency result, and appends the audit event before commit. The idempotency insert deliberately precedes the audit insert: concurrent first uses collide at the durable idempotency record, roll back the losing transaction, and replay the winner response. An audit failure rolls back the state and idempotency writes with the same transaction. Repeating the same key and payload returns the persisted result; repeating the key with a different payload returns HTTP 409. GET reads the same `roles` table and has `Cache-Control: no-store`.
+
+Free-form `edit_notes` is unavailable in synthetic storage, and `mark_blocked` rejects caller-supplied `reason`. The remaining test actions use only fixed action names and server-owned synthetic state, so neither unauthenticated callers nor authorized preview checks can persist arbitrary text into the demo dataset.
 
 A missing/invalid database configuration returns a safe 503 response. There is no fallback to filesystem locks, process-local state, the UI fixture, or Edge Config for the public routes.
 
@@ -32,4 +36,4 @@ A missing/invalid database configuration returns a safe 503 response. There is n
 1. Use the restricted Neon integration identity for this namespace only; do not grant or use legacy tracker/Edge Config credentials.
 2. Run the migration/seed command once through a secret-managed execution context, then read the role count and confirm it equals the approved synthetic fixture count.
 3. Exercise two independent database clients with the same and conflicting idempotency keys; verify one mutation/audit event and durable replay after reconnect.
-4. Confirm the Vercel keys exist in preview and production without displaying values. Deployment and live browser action verification remain separate gates.
+4. Confirm the database keys exist in preview and production without displaying values, and confirm write keys are absent from production. Any action verification uses a protected Preview/test path; deployment and live browser action verification remain separate gates.

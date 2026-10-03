@@ -14,7 +14,7 @@ process.env.JUNTER_AUDIT_LOG = log;
 let state, writes, conflict, patchCalls;
 function reset() {
   __test.idemBuffer.clear(); __test.rateBuckets.clear();
-  for (const name of ['VERCEL', 'JUNTER_MODE', 'JUNTER_BEARER_TOKEN', 'JUNTER_SANDBOX_CONFIG_ID', 'JUNTER_PERSONAL_CONFIG_ID', 'EDGE_CONFIG', 'JUNTER_VERCEL_API_TOKEN', 'JUNTER_SYNTHETIC_DATABASE_DATABASE_URL', 'JUNTER_SYNTHETIC_DATABASE_NAMESPACE']) delete process.env[name];
+  for (const name of ['VERCEL', 'VERCEL_ENV', 'JUNTER_MODE', 'JUNTER_BEARER_TOKEN', 'JUNTER_SYNTHETIC_WRITE_TOKEN', 'JUNTER_SYNTHETIC_WRITES_ENABLED', 'JUNTER_SANDBOX_CONFIG_ID', 'JUNTER_PERSONAL_CONFIG_ID', 'EDGE_CONFIG', 'JUNTER_VERCEL_API_TOKEN', 'JUNTER_SYNTHETIC_DATABASE_DATABASE_URL', 'JUNTER_SYNTHETIC_DATABASE_NAMESPACE']) delete process.env[name];
   delete globalThis.__junterSyntheticStore;
   process.env.JUNTER_AUDIT_LOG = log;
   state = { roles: [{ id: 1, status: 'pinged', routed: '', angle: 'original', company_research: { application_strategy: { angle: 'original' } } }], lastUpdated: null };
@@ -97,6 +97,44 @@ test('missing synthetic configuration makes the public data route fail closed', 
   assert.equal(res.statusCode, 503);
   assert.deepEqual(res.body.roles, []);
   assert.equal(res.headers['Cache-Control'], 'no-store');
+});
+test('production synthetic demo rejects unauthenticated POST before persistence', async () => {
+  reset();
+  process.env.JUNTER_MODE = 'synthetic';
+  process.env.VERCEL_ENV = 'production';
+  globalThis.__junterSyntheticStore = { async apply() { throw new Error('must not persist'); } };
+  const result = await invoke(body());
+  assert.equal(result.statusCode, 403);
+  assert.equal(result.body.error.code, 'public_demo_read_only');
+});
+test('protected preview rejects free-form notes and reasons without persistence', async () => {
+  reset();
+  process.env.JUNTER_MODE = 'synthetic';
+  process.env.VERCEL_ENV = 'preview';
+  process.env.JUNTER_SYNTHETIC_WRITES_ENABLED = 'true';
+  process.env.JUNTER_SYNTHETIC_WRITE_TOKEN = 'test-only-protected-token';
+  let applies = 0;
+  globalThis.__junterSyntheticStore = { async apply() { applies++; return { status: 200, role: state.roles[0] }; } };
+  const headers = { 'x-junter-token': 'test-only-protected-token' };
+  const oversized = 'x'.repeat(10_000);
+  for (const request of [body('edit_notes', { notes: oversized }), body('mark_blocked', { reason: oversized })]) {
+    const result = await invoke(request, headers);
+    assert.equal(result.statusCode, 400);
+    assert.equal(result.body.error_code, 'validation_failed');
+  }
+  assert.equal(applies, 0);
+});
+test('protected preview can verify a fixed-shape synthetic action', async () => {
+  reset();
+  process.env.JUNTER_MODE = 'synthetic';
+  process.env.VERCEL_ENV = 'preview';
+  process.env.JUNTER_SYNTHETIC_WRITES_ENABLED = 'true';
+  process.env.JUNTER_SYNTHETIC_WRITE_TOKEN = 'test-only-protected-token';
+  let received;
+  globalThis.__junterSyntheticStore = { async apply(command) { received = command; return { status: 200, role: state.roles[0] }; } };
+  const result = await invoke(body('mark_interested'), { authorization: 'Bearer test-only-protected-token' });
+  assert.equal(result.statusCode, 200);
+  assert.equal(received.action, 'mark_interested');
 });
 test('all final audit rows contain requested fields even invalid/method failures', async () => {
   reset(); await invoke(null); await invoke(body(), {}, 'GET');

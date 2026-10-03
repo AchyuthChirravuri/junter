@@ -96,11 +96,41 @@ function authorized(req, context) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+function syntheticWriteAuthorization(req, env = process.env) {
+  // The production URL is a public recruiter demo: it is structurally
+  // read-only even if a write secret is accidentally configured there.
+  if (env.VERCEL_ENV === 'production') {
+    return { ok: false, status: 403, code: 'public_demo_read_only', message: 'public synthetic demo is read-only' };
+  }
+  if (env.JUNTER_SYNTHETIC_WRITES_ENABLED !== 'true') {
+    return { ok: false, status: 403, code: 'protected_preview_required', message: 'synthetic writes require protected preview mode' };
+  }
+  const expected = env.JUNTER_SYNTHETIC_WRITE_TOKEN;
+  const supplied = String(req.headers?.['x-junter-token'] || req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!expected || !supplied) return { ok: false, status: 401, code: 'unauthorized', message: 'protected preview authorization required' };
+  const a = Buffer.from(expected), b = Buffer.from(supplied);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return { ok: false, status: 401, code: 'unauthorized', message: 'protected preview authorization required' };
+  return { ok: true };
+}
+
+function validateSyntheticMutation(body) {
+  const details = {};
+  // Notes are intentionally never a public/demo mutation. Blocking remains
+  // available for action-path verification, but only with its fixed server-side
+  // marker rather than a caller-controlled reason.
+  if (body.action === 'edit_notes') details.action = 'not available in synthetic storage';
+  if (body.action === 'mark_blocked' && Object.hasOwn(body.payload || {}, 'reason')) details['payload.reason'] = 'not available in synthetic storage';
+  return details;
+}
+
 async function executeSynthetic(req, body) {
   if (req.method !== 'POST') return { status: 405, body: { ok: false, error: { code: 'method_not_allowed', message: 'POST only' } } };
+  const access = syntheticWriteAuthorization(req);
+  if (!access.ok) return { status: access.status, body: { ok: false, error: { code: access.code, message: access.message } } };
   const details = validate(body);
   if (Object.keys(details).length) return { status: 400, body: { ok: false, error: 'schema validation failed', error_code: 'validation_failed', details } };
-  if (!authorized(req, { mode: 'synthetic' })) return { status: 401, body: { ok: false, error: { code: 'unauthorized', message: 'bearer token required' } } };
+  const syntheticDetails = validateSyntheticMutation(body);
+  if (Object.keys(syntheticDetails).length) return { status: 400, body: { ok: false, error: 'schema validation failed', error_code: 'validation_failed', details: syntheticDetails } };
   const result = await (await getSyntheticStore()).apply(body);
   return { status: result.status, body: { ok: result.status === 200, role: result.role || null, idempotency_replay: Boolean(result.idempotency_replay), request_id: result.request_id || null, applied_at: result.applied_at || null, ...(result.error ? { error: result.error } : {}) } };
 }
@@ -192,4 +222,4 @@ export default async function handler(req, res) {
   return res.status(result.status).json(result.body);
 }
 
-export const __test = { validate, applyAction, checkIdempotency, checkRateLimit, VALID_ACTIONS, VALID_GATES, VALID_SOURCES, IDEMPOTENCY_KEY_RE, idemBuffer, rateBuckets, appendAudit };
+export const __test = { validate, applyAction, checkIdempotency, checkRateLimit, syntheticWriteAuthorization, validateSyntheticMutation, VALID_ACTIONS, VALID_GATES, VALID_SOURCES, IDEMPOTENCY_KEY_RE, idemBuffer, rateBuckets, appendAudit };
