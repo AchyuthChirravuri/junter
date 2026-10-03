@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "figmaFileKey": "e4kzWfgPUTchpIcuv1o7Y6",
+    "exportedAt": "2026-10-03",
+    "viewportReference": "1440x900 desktop",
+    "tokenSource": "docs/ui-design-tokens.md",
+    "notes": "Text-faithful developer handoff. Every listed string is editable text read from the Figma frame; arrays preserve the screen's visible content hierarchy rather than Figma node IDs."
+  },
+  "tokens": {
+    "colors": ["#FFFFFF", "#F7F8FA", "#E5E7EB", "#111827", "#6B7280", "#2563EB", "#D97706", "#DC2626", "#10B981"],
+    "type": ["Inter 40/48 Semi Bold", "Inter 32/40 Semi Bold", "Inter 24/32 Semi Bold", "Inter 18/26 Semi Bold", "Inter 14/22 Regular", "Inter 12/18 Regular", "Inter 11/16 Regular", "Inter 13/20 Regular"],
+    "spacing": [4, 8, 12, 16, 24, 32],
+    "radii": [4, 8, 12]
+  },
+  "screens": [
+    {"slug":"pipeline","frameId":"3:2","name":"Pipeline Board","size":"1200x775","textContent":["Pipeline","5 columns — every role the bot has surfaced, where it stands","Search roles, companies, angles…","Pinged","Interested","count = routed=='int' || status=='interested'","Packaged","Submitted","Blocked","•••"]},
+    {"slug":"deadline","frameId":"8:2","name":"Deadline Rail","size":"1200x1259","textContent":["Deadline Rail","3 within 7 days · 4 within 14 days · 9 within 30 days","This week (≤7 days)","Next week (8–14 days)","This month (15–30 days)","Open","→"]},
+    {"slug":"focus","frameId":"5:2","name":"Focus","size":"1200x947","textContent":["Focus","Roles you marked interested — sorted by deadline, closest first","Gate progress is self-reported (your checks). Engine-written artifacts live in drafts/ — this checklist is a planning aid, not source of truth.","Ready-to-submit gates (your checks)","Backgrounder","Resume","Cover letter","Portal questions","Submitted","click →"]},
+    {"slug":"digest","frameId":"10:2","name":"Daily Digest","size":"1200x1460","textContent":["Daily Digest","Every morning’s 7:30am Telegram message, archived and searchable.","Morning digest — 7:30am ET run","New roles","Rejected with reasons","View source ↗"]},
+    {"slug":"run-health","frameId":"13:2","name":"Run Health","size":"1200x1128","textContent":["Run Health","Is the bot still working? Every cron run, every queue depth, every error — at a glance.","All systems OK","Cron schedule","Daily digest","Backgrounder","Weekly calibration","View last run ↗","Queue"]},
+    {"slug":"rubric","frameId":"14:2","name":"Rubric & Calibration","size":"1200x792","textContent":["Rubric & Calibration","Versions","v1 → v2 diff","▾ expand","Outcomes (after v2)","Calibration principle","Reweighting only happens when interaction data exists. If a week produces 0 pings, 0 submissions, and 0 rejections — no reweight. Drift on thin data is worse than holding the line."]},
+    {"slug":"telegram","frameId":"15:2","name":"Telegram Mirror","size":"1200x1107","textContent":["Telegram Mirror","Every message the bot sent, chronological. Verbatim — same wording as your Telegram chat.","Failed only","▾ expand error","sent","failed","Retry"]},
+    {"slug":"role-detail","frameId":"11:2","name":"Role Detail","size":"1200x981","textContent":["Mark Interested","Mark Packaged","Mark Submitted","Mark Blocked","Edit Notes","Company backgrounder","Drafts","Why this scored 8.9","History"]},
+    {"slug":"backgrounder","frameId":"29:2","name":"Account Backgrounder","size":"1440x900","textContent":["Stripe","Senior Product Manager — Payments Infrastructure","FIT","8.9","Researched on 2026-10-02","Latest News","Company Info","Application Strategy","Fitment (rubric breakdown)","Skill Gap","Last updated 14:02 · source: cache/companies/stripe.json"]},
+    {"slug":"boards","frameId":"30:2","name":"Job Boards","size":"1200x599","textContent":["Job Boards","7 sources · 72 roles today (12 new since yesterday)","Hacker News — Who's Hiring","Built In NYC","Wellfound","University career pages","Tier 2 watchlist","Operator watchlist","Custom (manual)","Count","Median fit","Last discovery","Filter Pipeline ↗"]},
+    {"slug":"research","frameId":"29:175","name":"Research Hub","size":"1200x739","textContent":["Research library","12 companies · 8 drafts · 35 digests · 72 tracker rows","Tracker","Companies","Drafts","Digests","View all 72 tracker rows ↗","View all 12 companies ↗","View all 8 drafts ↗","View all 35 digests ↗"]}
+  ]
+}
