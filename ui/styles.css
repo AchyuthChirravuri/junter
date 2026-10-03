@@ -552,6 +552,58 @@ button { font-family: inherit; cursor: pointer; }
 .tg-msg__status--failed { color: var(--color-danger); }
 .tg-msg__status--retry { color: var(--color-success); }
 
+/* Research hub (T8) */
+.research-hub { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); margin-top: var(--space-5); }
+@media (max-width: 1100px) { .research-hub { grid-template-columns: 1fr; } }
+.research-card {
+  display: block;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.research-card:hover { border-color: var(--color-accent); transform: translateY(-1px); }
+.research-card__label {
+  font-size: var(--text-meta);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+}
+.research-card__num {
+  font-size: var(--text-display-large);
+  font-weight: var(--text-display-large-weight);
+  line-height: var(--text-display-large-lh);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-3);
+}
+.research-card__source {
+  font-size: var(--text-meta);
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, monospace;
+  margin-bottom: var(--space-4);
+  word-break: break-word;
+}
+.research-card__cta {
+  font-size: var(--text-body);
+  color: var(--color-accent);
+  font-weight: 500;
+}
+.research-card--tracker { border-top: 3px solid var(--color-accent); }
+.research-card--companies { border-top: 3px solid var(--color-success); }
+.research-card--drafts { border-top: 3px solid var(--color-warning); }
+.research-card--digests { border-top: 3px solid var(--color-text-secondary); }
+
+.research-distribution { margin-top: var(--space-5); padding: var(--space-6); }
+.research-status { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.research-status__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); }
+.research-status__label { font-size: var(--text-body); color: var(--color-text-secondary); }
+.research-status__num { font-size: var(--text-h2); font-weight: var(--text-h2-weight); color: var(--color-text-primary); font-variant-numeric: tabular-nums; }
+
 /* Hidden by default; JS shows one screen at a time */
 .screen { display: none; }
 .screen.is-active { display: block; }

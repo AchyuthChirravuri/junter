@@ -249,7 +249,25 @@
       { sent_at: '2026-09-30T18:00:42', text: 'Retry succeeded: Backgrounder delivery for r11 (Google APM, Cloud Platform).', status: 'retry_succeeded' },
       { sent_at: '2026-09-28T07:30:09', text: 'Daily digest: 2 promoted (Robinhood PM Intern, Airbnb PM Trips), 4 rejected with reasons.', status: 'ok' },
       { sent_at: '2026-09-22T06:30:00', text: 'Morning account-backgrounder skipped: mac asleep at fire time. No catch-up attempted per spec v2.', status: 'warn' }
-    ]
+    ],
+    // Research hub counts (T8). Drawn from the operator's actual local files
+    // (tracker.csv, cache/companies/*.json, drafts/*, digests/*.md). The UI
+    // reads these so the Research screen can show real operator-scale numbers
+    // today; the publisher can ship the same shape when the live /api/data
+    // payload grows. The numbers here are the snapshot at the time of the
+    // most recent exporter run (2026-10-02).
+    research_totals: {
+      tracker_rows: 144,
+      tracker_source: 'tracker.csv (144 data rows, 14-col header, exit 0)',
+      companies_researched: 33,
+      companies_source: 'cache/companies/*.json (account backgrounder one-pagers)',
+      drafts_on_file: 86,
+      drafts_source: 'drafts/<role-id>-<company>-{resume,letter,research}.{md,docx}',
+      digests_archived: 57,
+      digests_source: 'digests/*.md (Sep 17 → Oct 02)',
+      role_count_by_status: { pinged: 86, packaged: 43, blocked: 10, submitted: 2, interested: 0, empty: 3 },
+      note: 'Counts from the operator-side files at 2026-10-02 06:17 EDT. Roles by status reconcile to the 144-row tracker.csv (3 rows have empty status).'
+    }
   };
 
   // Urgency thresholds (matches design-tokens.md and tests/test_app.py).
@@ -265,7 +283,7 @@
 
   // Hash routes — referenced as string literals so the route-assertion regex
   // in tests/test_app.py can pick them up via re.findall(r'#/(\w[\w-]*)', app.js).
-  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/role', '#/run-health', '#/rubric', '#/telegram', '#/boards'];
+  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/research', '#/role', '#/run-health', '#/rubric', '#/telegram', '#/boards'];
 
   function urgencyTier(days) {
     if (days <= RED_MAX) return 'red';
@@ -627,10 +645,24 @@
       { key: 'submitted', label: 'Submitted', dot: 'submitted' },
       { key: 'blocked', label: 'Blocked', dot: 'blocked' }
     ];
+    // Optional source pre-filter from the Job Boards deep link
+    // (#/pipeline?source=<canonical>). When set, only roles whose canonical
+    // source matches are shown. No-ops on the default board view (the
+    // unfiltered case is byte-identical to before the change).
+    var filterSource = state && state.__boardFilter;
+    var rolesForBoard = state.roles;
+    if (filterSource) {
+      rolesForBoard = state.roles.filter(function (r) {
+        return canonicalizeSource(r && r.source).canonical === filterSource;
+      });
+    }
     var header = el('div', { class: 'page-header' }, [
-      el('h1', { class: 'page-header__title', text: 'Pipeline Board' }),
-      el('div', { class: 'page-header__meta', text: state.roles.length + ' roles · 5 columns · ' + state.roles.length + ' loaded' })
+      el('h1', { class: 'page-header__title', text: filterSource ? ('Pipeline Board · ' + filterSource) : 'Pipeline Board' }),
+      el('div', { class: 'page-header__meta', text: rolesForBoard.length + ' roles · 5 columns · ' + (filterSource ? 'filtered to ' + filterSource : state.roles.length + ' loaded') })
     ]);
+    if (filterSource) {
+      header.appendChild(el('a', { class: 'crumb', href: '#/boards', style: 'margin-left: var(--space-5);', text: '← Back to Job Boards' }));
+    }
     var toolbar = el('div', { class: 'toolbar' }, [
       el('input', { class: 'toolbar__search', placeholder: 'Search company or role…' }),
       el('button', { class: 'toolbar__chip is-active', text: 'All fit' }),
@@ -644,7 +676,7 @@
     ]);
     var board = el('div', { class: 'pipeline' });
     cols.forEach(function (col) {
-      var rows = state.roles.filter(function (r) { return r.status === col.key; });
+      var rows = rolesForBoard.filter(function (r) { return r.status === col.key; });
       var colNode = el('div', { class: 'pipeline__col' }, [
         el('div', { class: 'pipeline__col-header' }, [
           el('span', null, [el('span', { class: 'dot dot--' + col.dot }) , ' ', col.label]),
@@ -1236,6 +1268,265 @@
     }
   }
 
+  // ---- Research hub (T8)
+  //
+  // A 4-card at-a-glance summary of the operator's research library. Each
+  // card deep-links to the screen that holds the underlying data, with the
+  // filter pre-applied where possible. Counts come from state.research_totals
+  // when the publisher ships it (T8.4 follow-up); the FALLBACK carries the
+  // operator's real snapshot so the screen is useful today.
+  function renderResearch(state, mount) {
+    mount.innerHTML = '';
+    var totals = state.research_totals || {};
+    // FALLBACK-safe defaults so the screen never shows "undefined": if the
+    // publisher ships a payload without research_totals, derive coarse counts
+    // from the live role list + state.roles' company set.
+    var trackerRows = typeof totals.tracker_rows === 'number'
+      ? totals.tracker_rows
+      : (state.roles ? state.roles.length : 0);
+    var companiesResearched = typeof totals.companies_researched === 'number'
+      ? totals.companies_researched
+      : (function () {
+          var seen = {};
+          (state.roles || []).forEach(function (r) { if (r.company) seen[r.company] = true; });
+          return Object.keys(seen).length;
+        })();
+    var draftsOnFile = typeof totals.drafts_on_file === 'number'
+      ? totals.drafts_on_file
+      : (state.roles ? state.roles.filter(function (r) { return r.status === 'packaged' || r.status === 'submitted'; }).length : 0);
+    var digestsArchived = typeof totals.digests_archived === 'number'
+      ? totals.digests_archived
+      : (state.digests ? state.digests.length : 0);
+
+    var header = el('div', { class: 'page-header' }, [
+      el('h1', { class: 'page-header__title', text: 'Research hub' }),
+      el('div', { class: 'page-header__meta', text: 'What the operator has on file — links pre-applied' })
+    ]);
+    mount.appendChild(header);
+
+    function card(opts) {
+      return el('a', {
+        href: opts.href,
+        class: 'card research-card' + (opts.kind ? ' research-card--' + opts.kind : ''),
+        onclick: function (e) {
+          // Plain <a href="#/path"> navigation works without JS, but make the
+          // hash update explicit so the router picks it up on the same render
+          // frame.
+          if (opts.href && opts.href.charAt(0) === '#') {
+            window.location.hash = opts.href;
+            e.preventDefault();
+          }
+        }
+      }, [
+        el('div', { class: 'research-card__label', text: opts.label }),
+        el('div', { class: 'research-card__num', text: String(opts.num) }),
+        el('div', { class: 'research-card__source', text: opts.source }),
+        el('div', { class: 'research-card__cta', text: opts.cta + ' →' })
+      ]);
+    }
+
+    var grid = el('div', { class: 'research-hub' }, [
+      card({
+        label: 'Tracker rows',
+        num: trackerRows,
+        source: totals.tracker_source || 'tracker.csv',
+        href: '#/pipeline',
+        cta: 'Open Pipeline Board',
+        kind: 'tracker'
+      }),
+      card({
+        label: 'Companies researched',
+        num: companiesResearched,
+        source: totals.companies_source || 'cache/companies/*.json',
+        href: '#/boards',
+        cta: 'Open Job Boards',
+        kind: 'companies'
+      }),
+      card({
+        label: 'Drafts on file',
+        num: draftsOnFile,
+        source: totals.drafts_source || 'drafts/<role-id>-*',
+        href: '#/pipeline',
+        cta: 'Open Pipeline (packaged)',
+        kind: 'drafts'
+      }),
+      card({
+        label: 'Digests archived',
+        num: digestsArchived,
+        source: totals.digests_source || 'digests/*.md',
+        href: '#/digest',
+        cta: 'Open Daily Digest',
+        kind: 'digests'
+      })
+    ]);
+    mount.appendChild(grid);
+
+    // Roles-by-status mini-table — at-a-glance pipeline distribution that
+    // the operator currently has to read off the Pipeline Board header. If
+    // the publisher ships it, render from totals; otherwise derive from
+    // state.roles (and say so honestly).
+    var byStatus = totals.role_count_by_status;
+    if (!byStatus) {
+      byStatus = {};
+      (state.roles || []).forEach(function (r) {
+        var k = r.status || '(unset)';
+        byStatus[k] = (byStatus[k] || 0) + 1;
+      });
+    }
+    var statusRows = el('ul', { class: 'research-status' });
+    var order = ['pinged', 'interested', 'packaged', 'submitted', 'blocked'];
+    order.forEach(function (k) {
+      var n = byStatus[k] || 0;
+      statusRows.appendChild(el('li', { class: 'research-status__item' }, [
+        el('span', { class: 'dot dot--' + k }),
+        el('span', { class: 'research-status__label', text: k }),
+        el('span', { class: 'research-status__num', text: String(n) })
+      ]));
+    });
+    if (byStatus['(unset)'] || byStatus['']) {
+      var n = (byStatus['(unset)'] || 0) + (byStatus[''] || 0);
+      statusRows.appendChild(el('li', { class: 'research-status__item' }, [
+        el('span', { class: 'dot' }),
+        el('span', { class: 'research-status__label', text: '(no status)' }),
+        el('span', { class: 'research-status__num', text: String(n) })
+      ]));
+    }
+    var distribution = el('div', { class: 'card research-distribution' }, [
+      el('h3', { class: 'card__title', text: 'Roles by status' }),
+      statusRows,
+      totals.note ? el('p', { class: 'page-header__meta', text: totals.note }) : null
+    ]);
+    mount.appendChild(distribution);
+  }
+
+  // ---- Job Boards screen (T6)
+  //
+  // Aggregates roles by canonical source so the operator can see how the
+  // pipeline is distributed across boards and triage per-source cohorts.
+  // Click a card to jump to the Pipeline Board pre-filtered to that source
+  // (deep link: #/pipeline?source=<canonical>).
+  function _median(xs) {
+    if (!xs.length) return NaN;
+    var sorted = xs.slice().sort(function (a, b) { return a - b; });
+    var mid = Math.floor(sorted.length / 2);
+    return (sorted.length % 2) ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+  function _formatAgo(days) {
+    if (!isFinite(days) || days < 0) return '—';
+    if (days === 0) return 'today';
+    if (days === 1) return '1d ago';
+    return days + 'd ago';
+  }
+  function _statusChips(roles) {
+    var byStatus = {};
+    roles.forEach(function (r) {
+      var s = r.status || '(unset)';
+      byStatus[s] = (byStatus[s] || 0) + 1;
+    });
+    // Stable operator-known order; fall through to anything else alphabetically.
+    var preferred = ['pinged', 'interested', 'packaged', 'submitted', 'blocked'];
+    var seen = {};
+    var keys = [];
+    preferred.forEach(function (k) { if (byStatus[k]) { keys.push(k); seen[k] = true; } });
+    Object.keys(byStatus).sort().forEach(function (k) { if (!seen[k]) keys.push(k); });
+    return keys.map(function (k) {
+      return el('span', { class: 'toolbar__chip', style: 'margin-right: var(--space-2);' }, [
+        el('span', { class: 'dot dot--' + k }),
+        ' ' + k + ' · ' + byStatus[k]
+      ]);
+    });
+  }
+
+  function renderBoards(state, mount) {
+    mount.innerHTML = '';
+    var header = el('div', { class: 'page-header' }, [
+      el('h1', { class: 'page-header__title', text: 'Job Boards' }),
+      el('div', { class: 'page-header__meta', text: 'Per-source breakdown of the role pipeline' })
+    ]);
+
+    var agg = aggregateByCanonical(state.roles || []);
+    var canonicalsPresent = agg.order.filter(function (k) { return agg.byCanonical[k] && agg.byCanonical[k].roles.length > 0; });
+    var newest = state.roles
+      .map(function (r) { return r.status_date || r.date_found || ''; })
+      .filter(function (d) { return d && d.length >= 10; })
+      .sort()
+      .pop();
+    var newestLabel = '—';
+    if (newest) {
+      var days = (window.location && window.location.hash) ? daysUntil(newest) : NaN;
+      newestLabel = isFinite(days) ? _formatAgo(days) : newest;
+    }
+
+    var summary = el('div', { class: 'card boards-summary' }, [
+      el('div', { class: 'boards-summary__line', text:
+        'Today: ' + state.roles.length + ' roles across ' +
+        canonicalsPresent.length + ' board' + (canonicalsPresent.length === 1 ? '' : 's') +
+        ' · newest: ' + newestLabel
+      })
+    ]);
+
+    var grid = el('div', { class: 'boards-grid' });
+    if (canonicalsPresent.length === 0) {
+      emptyState(grid, 'No roles published',
+        'The role list is empty in the current payload — Job Boards has nothing to aggregate yet.');
+    }
+    canonicalsPresent.forEach(function (canonical) {
+      var bucket = agg.byCanonical[canonical];
+      var roles = bucket.roles;
+      var fits = roles.map(function (r) { return _num(r.fit); }).filter(function (v) { return isFinite(v); });
+      var med = _median(fits);
+      var dates = roles.map(function (r) { return r.status_date || r.date_found || ''; }).filter(function (d) { return d; });
+      var lastDate = dates.sort().pop() || '';
+      var lastDays = lastDate ? daysUntil(lastDate) : NaN;
+      var lastLabel = lastDate ? (lastDate + ' · ' + (isFinite(lastDays) ? _formatAgo(lastDays) : '—')) : '—';
+      var isCustom = canonical === 'custom';
+      var card = el('div', {
+        class: 'card boards-card' + (isCustom ? ' boards-card--custom' : ''),
+        onclick: function () {
+          window.location.hash = '#/pipeline?source=' + encodeURIComponent(canonical);
+        }
+      }, [
+        el('div', { class: 'boards-card__name', text: canonical }),
+        el('div', { class: 'boards-card__num', text: String(roles.length) }),
+        el('div', { class: 'boards-card__fit', text: 'Median fit ' + (isFinite(med) ? med.toFixed(1) : '—') }),
+        el('div', { class: 'boards-card__last', text: 'Last discovery: ' + lastLabel }),
+        el('div', { class: 'boards-card__chips' }, _statusChips(roles))
+      ]);
+      grid.appendChild(card);
+    });
+
+    // Source legend — explicit mapping so the operator can verify what the
+    // canonical buckets absorbed. Each canonical gets one row showing the
+    // distinct raw labels observed in the current payload (so the legend
+    // stays honest: empty -> 'no raw labels observed').
+    var legendRows = [];
+    agg.order.forEach(function (canonical) {
+      var bucket = agg.byCanonical[canonical];
+      var raws = bucket ? Object.keys(bucket.rawLabels).sort() : [];
+      if (raws.length === 0) return;
+      legendRows.push(el('li', { class: 'boards-legend__row' }, [
+        el('span', { class: 'boards-legend__canonical', text: canonical }),
+        el('span', { class: 'boards-legend__arrow', text: '←' }),
+        el('span', { class: 'boards-legend__raws', text: raws.join(', ') })
+      ]));
+    });
+    var legend = el('div', { class: 'card boards-legend' }, [
+      el('h3', { class: 'card__title', text: 'Source legend' }),
+      el('p', { class: 'page-header__meta', text:
+        'Each canonical bucket merges all observed raw labels that resolve to it. ' +
+        'Anything not in the table falls into the "custom" bucket.'
+      }),
+      el('ul', { class: 'boards-legend__list' }, legendRows.length ? legendRows : [
+        el('li', { class: 'boards-legend__row', text: '(no sources observed in the current payload)' })
+      ])
+    ]);
+
+    mount.appendChild(header);
+    mount.appendChild(summary);
+    mount.appendChild(grid);
+    mount.appendChild(legend);
+  }
+
   // ---- Router
 
   function render(state) {
@@ -1243,7 +1534,31 @@
     var screens = document.querySelectorAll('.screen');
     screens.forEach(function (s) { s.classList.remove('is-active'); });
 
-    var route = hash.replace(/^#\//, '');
+    // Parse the query string after the hash path so deep-links like
+    // #/pipeline?source=HN survive across renders (T6, Job Boards).
+    var queryStr = '';
+    var queryIdx = hash.indexOf('?');
+    var pathOnly = hash;
+    if (queryIdx !== -1) {
+      pathOnly = hash.slice(0, queryIdx);
+      queryStr = hash.slice(queryIdx + 1);
+    }
+    var query = {};
+    if (queryStr) {
+      queryStr.split('&').forEach(function (kv) {
+        if (!kv) return;
+        var eq = kv.indexOf('=');
+        var k = eq === -1 ? kv : kv.slice(0, eq);
+        var v = eq === -1 ? '' : kv.slice(eq + 1);
+        try { query[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' ')); }
+        catch (_) { /* ignore malformed query */ }
+      });
+    }
+    // The pipeline reads state.__boardFilter for the Job Boards deep-link.
+    // Boards screens ignore it; everything else reads nothing.
+    state.__boardFilter = query.source || null;
+
+    var route = pathOnly.replace(/^#\//, '');
     var parts = route.split('/');
     var screenId = 'screen-' + parts[0];
     var screen = document.getElementById(screenId);
@@ -1258,10 +1573,12 @@
     else if (parts[0] === 'deadline') renderDeadlineRail(state, mount);
     else if (parts[0] === 'focus') renderFocus(state, mount);
     else if (parts[0] === 'digest') renderDigest(state, mount);
+    else if (parts[0] === 'research') renderResearch(state, mount);
     else if (parts[0] === 'role') renderRole(state, mount, parts[1]);
     else if (parts[0] === 'run-health') renderRunHealth(state, mount);
     else if (parts[0] === 'rubric') renderRubric(state, mount);
     else if (parts[0] === 'telegram') renderTelegram(state, mount);
+    else if (parts[0] === 'boards') renderBoards(state, mount);
 
     // Sidebar active state
     var links = document.querySelectorAll('.sidebar__link');
@@ -1366,7 +1683,9 @@
         RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier,
         daysUntil: daysUntil, roleDays: roleDays,
         normalizeState: normalizeState, looks_like_pii: looks_like_pii,
-        adoptApiPayload: adoptApiPayload
+        adoptApiPayload: adoptApiPayload,
+        canonicalizeSource: canonicalizeSource,
+        aggregateByCanonical: aggregateByCanonical
       };
 
       window.addEventListener('hashchange', function () { render(state); });
