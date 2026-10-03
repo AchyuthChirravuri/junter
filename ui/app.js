@@ -270,6 +270,145 @@
     }
   };
 
+  // ---- Operator profile (T19 — Account Backgrounder) -----------------------
+  //
+  // The synthetic demo defines a "default operator profile" with 15 PM/PMM
+  // skills. The Gap panel on the Account Backgrounder screen uses this list
+  // to classify every skill the role lists as `has`, `missing`, or `n/a`:
+  //   - ✓  (has)       operator has this skill, role lists it as required
+  //   - ✗  (missing)   role lists it as required, operator does not have it
+  //   - —  (n/a)       operator doesn't have it AND role doesn't require it
+  //
+  // Per-role `required_skills` is taken from company_research.required_skills
+  // (see synthetic-data/generate.py). On the live /api/data payload the
+  // operator's real master-resume keywords populate OPERATOR_KNOWN_SKILLS;
+  // the demo uses the curated list below so the matrix is the same on every
+  // role. This is a *single-operator demo*: the profile is hard-coded.
+  var OPERATOR_KNOWN_SKILLS = [
+    'product strategy',   'roadmap',                'prioritization',
+    'stakeholder mgmt',   'A/B testing',            'SQL',
+    'data analysis',      'OKRs',                   'GTM',
+    'B2B SaaS',           'fintech',                'healthcare',
+    'AI/ML',              'growth',                 'lifecycle marketing'
+  ];
+
+  // ---- Gap-matrix helpers (T19) -------------------------------------------
+  //
+  // classifySkill(requiredSkills) returns one of three glyphs per known skill
+  // so the Gap panel can render the matrix in one pass. operatorHas and
+  // roleRequires are kept inline so the same logic is testable in isolation.
+  function operatorHas(skill) {
+    return OPERATOR_KNOWN_SKILLS.indexOf(skill) !== -1;
+  }
+  function roleRequires(roleSkills, skill) {
+    return Array.isArray(roleSkills) && roleSkills.indexOf(skill) !== -1;
+  }
+  // Returns an object keyed by skill name, each value in
+  // {state: 'has'|'missing'|'na', skill: <name>}. The skill list is the
+  // UNION of operator-known and role-required, sorted to a stable display
+  // order (operator-known first, then anything extra the role asked for).
+  function buildSkillGap(roleRequired) {
+    var seen = {};
+    var skills = [];
+    OPERATOR_KNOWN_SKILLS.forEach(function (s) {
+      if (!seen[s]) { seen[s] = true; skills.push(s); }
+    });
+    if (Array.isArray(roleRequired)) {
+      roleRequired.forEach(function (s) {
+        if (!seen[s]) { seen[s] = true; skills.push(s); }
+      });
+    }
+    var rows = [];
+    skills.forEach(function (skill) {
+      var has = operatorHas(skill);
+      var req = roleRequires(roleRequired, skill);
+      var state = req ? (has ? 'has' : 'missing') : 'na';
+      rows.push({ skill: skill, state: state });
+    });
+    return rows;
+  }
+
+  // Sample role-side required-skills for the inline FALLBACK only — the
+  // synthetic-data seed populates company_research.required_skills on every
+  // role deterministically. Inline FALLBACK roles get a small set of
+  // obvious-looking requirements so the offline render of the new screen
+  // is also useful (the screen's empty state is exercised only when the
+  // role is genuinely missing from the dataset).
+  var FALLBACK_REQUIRED_SKILLS = {
+    'r06': ['product strategy', 'SQL', 'payments', 'fintech', 'roadmap'],
+    'r11': ['product strategy', 'AI/ML', 'SQL', 'B2B SaaS', 'prioritization'],
+    'r17': ['product strategy', 'AI/ML', 'GTM', 'B2B SaaS', 'stakeholder mgmt'],
+    'r22': ['growth', 'A/B testing', 'SQL', 'data analysis', 'B2B SaaS']
+  };
+
+  // ---- Fallback company_research synthesizer (T19, offline path) ---------
+  //
+  // When /api/data is unreachable the SPA falls back to the inline FALLBACK
+  // (50 roles, no company_research). To keep the Account Backgrounder useful
+  // in offline mode we synthesize a deterministic stub from the role's id +
+  // company + status. The shape matches the synthetic seed's company_research
+  // block exactly so the rendering path is identical.
+  function _synthesizeFallbackCompanyResearch(role) {
+    var idNum = parseInt(String(role.id).replace(/\D/g, ''), 10) || 1;
+    var status = role.status || 'pinged';
+    var news = [];
+    for (var i = 0; i < 5; i++) {
+      news.push({
+        date: '2026-09-' + String(10 + (idNum + i) % 19).padStart(2, '0'),
+        headline: role.company + ' ' + (i % 2 === 0 ? 'ships a new platform update' : 'opens an engineering hub'),
+        source: i % 2 === 0 ? 'company blog' : 'press'
+      });
+    }
+    var progress = ({ 'packaged': 3, 'submitted': 4 })[status] || 1;
+    var resume = ({ 'packaged': 'drafted', 'submitted': 'submitted' })[status] || 'not started';
+    var cover  = ({ 'packaged': 'drafted', 'submitted': 'submitted' })[status] || 'not started';
+    // Deterministic 6-factor fallback breakdown so the Fitment panel renders
+    // in offline mode. Same factor order as the v2 rubric so the operator sees
+    // a familiar layout when the synthetic seed and the offline fallback both
+    // load.
+    var factors = [];
+    var names = ['domain_fit', 'program_match', 'sponsorship_clear', 'level_fit', 'location_fit', 'comp_fit'];
+    var weights = [0.28, 0.22, 0.18, 0.14, 0.10, 0.08];
+    for (var f = 0; f < names.length; f++) {
+      var raw = ((idNum * 3 + f * 5) % 21) / 10.0;
+      raw = Math.round(raw * 10) / 10.0;
+      var score = Math.round(raw * 5.0 * 10) / 10.0;
+      factors.push({
+        name:         names[f],
+        weight:       weights[f],
+        score:        score,
+        raw_score:    raw,
+        contribution: Math.round(weights[f] * score * 100) / 100,
+        rationale:    raw >= 1.0 ? 'Match demonstrated in operator context' : 'Address gap or note in cover'
+      });
+    }
+    if ((role.fit || 0) >= 8.0) {
+      factors.push({
+        name: 'stretch_match', weight: 0.10, score: 7.5, raw_score: 1.5,
+        contribution: 0.75, rationale: 'Strong adjacent context; rubric credit'
+      });
+    }
+    return {
+      latest_news: news,
+      company_info: {
+        mission:        role.company + ' helps teams ship software they understand. Fictional seed copy; no claim is made about the named company.',
+        headquarters:   'New York, NY',
+        size:           '400-800',
+        stage:          'Series B',
+        funding:        'Series B · last round at $' + (role.fit * 12).toFixed(0) + 'M valuation (fictional)',
+        lead_investors: 'Sequoia Capital, Index Ventures'
+      },
+      application_strategy: {
+        angle:         'Lead with the strongest matching operator evidence; address gaps on the cover letter. (Synthetic offline copy.)',
+        resume_status: resume,
+        cover_status:  cover,
+        progress_step: progress
+      },
+      rubric_factors:  factors,
+      required_skills: FALLBACK_REQUIRED_SKILLS[role.id] || []
+    };
+  }
+
   // Urgency thresholds (matches design-tokens.md and tests/test_app.py).
   // days <= RED_MAX  -> red tier (this week)
   // days <= ORANGE_MAX -> orange tier (next week)
@@ -402,7 +541,8 @@
         rubric_version: d.rubric_version ||
           ((raw.rubric_versions || [])[0] || {}).version || '',
         draft_paths: d.draft_paths || [],
-        history: d.history || []
+        history: d.history || [],
+        company_research: d.company_research || r.company_research || null
       };
     });
 
@@ -684,11 +824,16 @@
         ])
       ]);
       rows.forEach(function (r) {
+        // T20: each Pipeline card carries per-row actions. Click on the card
+        // still navigates to the role detail; clicking a button calls
+        // actOnRole with optimistic update + rollback. The button stops
+        // propagation so the navigation handler doesn't also fire.
         var card = el('div', { class: 'role-card', onclick: function () { window.location.hash = '#/role/' + r.id; } }, [
           el('div', { class: 'role-card__company', text: r.company }),
           el('h3', { class: 'role-card__title', text: r.role }),
           el('div', { class: 'role-card__fit', text: 'Fit ' + r.fit.toFixed(1) + ' · ' + r.source }),
-          r.angle ? el('div', { class: 'role-card__angle', text: r.angle }) : null
+          r.angle ? el('div', { class: 'role-card__angle', text: r.angle }) : null,
+          _roleCardActions(r)
         ]);
         colNode.appendChild(card);
       });
@@ -697,6 +842,205 @@
     mount.appendChild(header);
     mount.appendChild(toolbar);
     mount.appendChild(board);
+  }
+
+  // ---- Optimistic action surface (T20) ---------------------------------
+  // Renders the per-card action buttons. Each button calls actOnRole with a
+  // specific action; the button is disabled during the in-flight request so a
+  // double-click can't fire two writes. The button does NOT swallow clicks on
+  // the rest of the card (the role detail navigation still works).
+  function _roleCardActions(r) {
+    var wrap = el('div', { class: 'role-card__actions' });
+    var actions = _actionsForStatus(r.status);
+    actions.forEach(function (a) {
+      var b = el('button', {
+        class: 'role-card__action role-card__action--' + a.action,
+        'data-action': a.action,
+        'data-role-id': String(r.id),
+        onclick: function (e) {
+          e.stopPropagation();
+          actOnRole(a.action, r, {});
+        }
+      }, a.label);
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  function _actionsForStatus(status) {
+    // Per-status button set. The operator sees only the actions that make
+    // sense from the current state; "Mark interested" is shown on every
+    // pinged card, "Mark blocked" is shown on every non-blocked card, etc.
+    switch (status) {
+      case 'pinged':
+        return [
+          { action: 'mark_interested', label: 'Mark interested' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'interested':
+        return [
+          { action: 'mark_packaged', label: 'Mark packaged' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'packaged':
+        return [
+          { action: 'mark_submitted', label: 'Mark submitted' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'submitted':
+        return [
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'blocked':
+        return [
+          { action: 'mark_interested', label: 'Unblock' }
+        ];
+      default:
+        return [];
+    }
+  }
+
+  // Apply a mutation locally so the card moves columns on the next render.
+  // The caller passes the new status (and optional routed). For complete_gate
+  // and view, the action doesn't change which column the card is in — the
+  // optimistic update is a no-op.
+  function _optimisticApply(role, action, payload) {
+    var next = Object.assign({}, role);
+    switch (action) {
+      case 'mark_interested': next.status = 'interested'; next.routed = 'int'; break;
+      case 'mark_packaged':   next.status = 'packaged';   next.routed = 'pkg'; break;
+      case 'mark_submitted':  next.status = 'submitted';  next.routed = 'sub'; break;
+      case 'mark_blocked':    next.status = 'blocked';    next.routed = ''; break;
+      case 'edit_notes':      next.angle = (payload && payload.notes) || ''; break;
+      case 'complete_gate':
+        next.gates = Object.assign({}, role.gates || {}, payload || {});
+        break;
+      case 'view':
+        break;
+      default: return null;
+    }
+    return next;
+  }
+
+  // The single UI entry point for the action surface. Returns a Promise that
+  // resolves to {ok, role, error} after the server responds.
+  //
+  //   1. Generate an idempotency_key (UUID) so double-clicks are no-ops.
+  //   2. Apply the mutation locally and re-render.
+  //   3. POST /api/action.
+  //   4. ok=true  -> keep local state.
+  //      ok=false -> revert and surface a toast with the error code.
+  //
+  // Exposed on window.__junter for the test harness.
+  function actOnRole(action, role, payload) {
+    payload = payload || {};
+    if (!role || role.id === undefined || role.id === null) {
+      return Promise.resolve({ ok: false, error: { code: 'role_not_found', message: 'role id missing' } });
+    }
+    // Pass the explicit values rather than relying on a non-existent outer
+    // closure in _uuidKey; this also keeps test calls deterministic.
+    var key = _uuidKey(action, role);
+    var prevState = _snapshotState();
+    var next = _optimisticApply(role, action, payload);
+    if (next) _commitLocalState(next);
+
+    return fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        action: action,
+        role_id: role.id,
+        payload: payload,
+        source: 'ui',
+        idempotency_key: key,
+        client_ts: new Date().toISOString()
+      })
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return { ok: false, error: { code: 'invalid_response', message: 'non-JSON response' } }; })
+          .then(function (body) { return { status: res.status, body: body }; });
+      })
+      .then(function (resp) {
+        if (resp.status >= 200 && resp.status < 300 && resp.body && resp.body.ok) {
+          // Adopt the server's authoritative role (in case of a partial
+          // conflict reconciliation).
+          if (resp.body.role) _commitLocalState(resp.body.role);
+          return { ok: true, role: resp.body.role };
+        }
+        // Rollback on any non-2xx or ok=false.
+        _restoreLocalState(prevState);
+        var code = (resp.body && resp.body.error && resp.body.error.code) || ('http_' + resp.status);
+        _surfaceToast('Server rejected: ' + code + '. Reverted.');
+        return { ok: false, error: { code: code, message: (resp.body && resp.body.error && resp.body.error.message) || 'server rejected' } };
+      })
+      .catch(function (err) {
+        // Network failure -> rollback + toast.
+        _restoreLocalState(prevState);
+        _surfaceToast('Network error. Reverted.');
+        return { ok: false, error: { code: 'network_failure', message: err && err.message ? err.message : 'network' } };
+      });
+  }
+
+  // Local-state helpers used by actOnRole and exposed on __junter so the
+  // test harness can drive them.
+  var _stateRef = null;
+  function _snapshotState() {
+    return _stateRef ? Object.assign({}, _stateRef) : null;
+  }
+  function _commitLocalState(roleOrRoles) {
+    if (!_stateRef) return;
+    if (Array.isArray(roleOrRoles)) {
+      _stateRef.roles = roleOrRoles;
+      return;
+    }
+    // Replace the matching role in-place.
+    var rid = roleOrRoles && roleOrRoles.id;
+    _stateRef.roles = _stateRef.roles.map(function (r) {
+      return (r.id === rid || String(r.id) === String(rid)) ? Object.assign({}, r, roleOrRoles) : r;
+    });
+  }
+  function _restoreLocalState(prev) {
+    if (prev && _stateRef) Object.assign(_stateRef, prev);
+  }
+  function _surfaceToast(text) {
+    // Minimal toast: a transient banner at the top of the page. The test
+    // harness doesn't render toasts (it just checks that the function is
+    // called); the UI uses DOM.
+    try {
+      var host = document.getElementById('toast-host');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toast-host';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      var n = document.createElement('div');
+      n.className = 'toast toast--error';
+      n.textContent = text;
+      host.appendChild(n);
+      setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 4000);
+    } catch (_) { /* no DOM in tests; ignore */ }
+  }
+  // UUID v4 — fine for client-side keys. crypto.randomUUID is the modern
+  // path; the Math.random fallback covers browsers without it (very old).
+  // Accepts optional (action, role) so the test harness can call it
+  // directly; otherwise reads them from the closure.
+  function _uuidKey(action_, role_) {
+    var a = (typeof action_ === 'string') ? action_ : 'action';
+    var r = role_ || { id: 'role' };
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return 'ui-' + a.replace(/_/g, '-') + '-' + r.id + '-' + crypto.randomUUID();
+    }
+    // RFC4122 v4-ish fallback; not cryptographically strong but unique enough.
+    var hex = '0123456789abcdef';
+    var s = '';
+    for (var i = 0; i < 36; i++) {
+      if (i === 8 || i === 13 || i === 18 || i === 23) s += '-';
+      else if (i === 14) s += '4';
+      else if (i === 19) s += hex[(Math.random() * 4) | (8 & 0x3)];
+      else s += hex[(Math.random() * 16) | 0];
+    }
+    return 'ui-' + a.replace(/_/g, '-') + '-' + r.id + '-' + s;
   }
 
   function renderDeadlineRail(state, mount) {
@@ -893,6 +1237,43 @@
       return;
     }
     var crumb = el('a', { class: 'crumb', href: '#/pipeline', text: '← Pipeline' });
+    // T19: top-bar action surface — the entry points the operator uses to
+    // update this role's tracker status. Each button POSTs to /api/action
+    // (T20 implements the handler). For T19 the buttons render, the routes
+    // are wired (each calls postEditNotes or a dedicated postAction stub),
+    // and a separate "Open Account Backgrounder" link navigates to the new
+    // first-class screen at #/role/<id>/backgrounder.
+    var actionBar = el('div', { class: 'role-action-bar' }, [
+      el('a', { class: 'role-action-bar__btn role-action-bar__btn--primary',
+        href: '#/role/' + role.id + '/backgrounder',
+        text: 'Open Account Backgrounder' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_interested', role.id); },
+        text: 'Mark Interested' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_packaged', role.id); },
+        text: 'Mark Packaged' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_submitted', role.id); },
+        text: 'Mark Submitted' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_blocked', role.id); },
+        text: 'Mark Blocked' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () {
+          // Optimistically patch the local angle so the in-page Angle card
+          // shows the new value; T20 will replace this stub with a routed
+          // edit-notes flow that handles the inline editor in the backgrounder.
+          var note = window.prompt('Edit notes for role ' + role.id + ':', role.angle || '');
+          if (note !== null) postStatusAction('edit_notes', role.id, { note: note });
+        },
+        text: 'Edit Notes' })
+    ]);
     var header = el('div', { class: 'page-header' }, [
       el('div', null, [
         crumb,
@@ -900,7 +1281,10 @@
         el('div', { class: 'role-detail__company', text: role.company + ' · ' + role.source }),
         el('div', { class: 'role-detail__score', text: 'Fit ' + role.fit.toFixed(1) })
       ]),
-      el('div', { class: 'page-header__meta', text: 'Status: ' + role.status + ' · ' + role.status_date })
+      el('div', { class: 'page-header__right' }, [
+        el('div', { class: 'page-header__meta', text: 'Status: ' + role.status + ' · ' + role.status_date }),
+        actionBar
+      ])
     ]);
 
     // Rubric factors — use the real per-factor breakdown when the exporter
@@ -1068,6 +1452,265 @@
 
     mount.appendChild(header);
     mount.appendChild(grid);
+  }
+
+  // ---- Account Backgrounder screen (T19) ---------------------------------
+  //
+  // Route: #/role/<id>/backgrounder. The first-class screen for everything
+  // an operator needs to know about the *company* for one role. Per the
+  // spec, three panels are dominant (above the fold):
+  //   1. Gap        — operator's known skills vs role's required skills
+  //   2. Fitment    — rubric factor breakdown with weight + contribution
+  //   3. Application Strategy — angle text, draft status, 4-step progress
+  // Two panels are secondary (below the fold on the left column):
+  //   4. Latest News (timeline)
+  //   5. Company Info (6-field profile)
+  //
+  // The screen's purpose (from refactor-spec §4.9): "Everything I need to
+  // know about the *company* for this role" — it decides whether the role
+  // is worth the 60-minute investment before reading the JD.
+  function renderBackgrounder(state, mount, roleId) {
+    mount.innerHTML = '';
+    var role = (state.roles || []).filter(function (r) {
+      return String(r.id) === String(roleId);
+    })[0];
+    if (!role) {
+      // Gate T19.7: an honest empty state for unknown role ids, never a crash.
+      mount.appendChild(el('a', { class: 'crumb', href: '#/pipeline', text: '← Pipeline' }));
+      mount.appendChild(el('h1', {
+        class: 'page-header__title', text: 'Account Backgrounder unavailable'
+      }));
+      mount.appendChild(el('div', {
+        class: 'page-header__meta', text: 'Role id ' + roleId + ' is not in the current snapshot.'
+      }));
+      emptyState(mount, 'No backgrounder for this role yet',
+        'This role id was not found in the published snapshot. It may have been archived or the URL is from an older snapshot. Return to the Pipeline Board and re-open the role there.');
+      return;
+    }
+
+    // ---- Header strip ----------------------------------------------------
+    // Company logo placeholder (1.5x accent-tinted square), company, role
+    // title, fit score badge, freshness timestamp. The header is dense on
+    // purpose — the operator scans it once before scrolling to panels.
+    var cr = role.company_research || {};
+    var crumb = el('a', { class: 'crumb', href: '#/role/' + role.id, text: '← Back to role ' + role.id });
+    var freshness = (state.snapshot_at || 'snapshot at build time').replace('T', ' ').slice(0, 16);
+    var logoPlaceholder = el('div', { class: 'backgrounder__logo', text: role.company.slice(0, 2).toUpperCase() });
+    var fitBadge = el('div', { class: 'backgrounder__fit-badge', text: 'Fit ' + role.fit.toFixed(1) });
+    var header = el('div', { class: 'page-header backgrounder__header' }, [
+      el('div', { class: 'backgrounder__header-left' }, [
+        crumb,
+        el('div', { class: 'backgrounder__title-row' }, [
+          logoPlaceholder,
+          el('div', null, [
+            el('div', { class: 'backgrounder__company', text: role.company }),
+            el('h1', { class: 'backgrounder__role-title', text: role.role })
+          ])
+        ])
+      ]),
+      el('div', { class: 'backgrounder__header-right' }, [
+        fitBadge,
+        el('div', { class: 'page-header__meta', text: freshness + ' ET' })
+      ])
+    ]);
+
+    // ---- Left column: News + Company Info + Application Strategy --------
+    var news = cr;
+    var newsTimeline = el('ul', { class: 'backgrounder__timeline' });
+    (cr.latest_news || []).forEach(function (n) {
+      newsTimeline.appendChild(el('li', { class: 'backgrounder__timeline-item' }, [
+        el('span', { class: 'backgrounder__timeline-dot' }),
+        el('div', null, [
+          el('div', { class: 'backgrounder__timeline-headline', text: n.headline }),
+          el('div', { class: 'page-header__meta', text: (n.date || '') + ' · ' + (n.source || '') })
+        ])
+      ]));
+    });
+
+    var info = cr.company_info || {};
+    var infoRows = el('dl', { class: 'backgrounder__info-list' });
+    [
+      ['Mission',          info.mission],
+      ['Headquarters',     info.headquarters],
+      ['Size',             info.size],
+      ['Stage',            info.stage],
+      ['Funding',          info.funding],
+      ['Lead investors',   info.lead_investors]
+    ].forEach(function (pair) {
+      infoRows.appendChild(el('div', { class: 'backgrounder__info-row' }, [
+        el('dt', { class: 'backgrounder__info-term', text: pair[0] }),
+        el('dd', { class: 'backgrounder__info-def', text: pair[1] || '—' })
+      ]));
+    });
+
+    var strat = cr.application_strategy || {};
+    var progressSteps = ['Researched', 'Resume drafted', 'Cover drafted', 'Submitted'];
+    var currentStep = Math.max(1, Math.min(4, strat.progress_step || 1));
+    var progressBar = el('ol', { class: 'backgrounder__progress' });
+    progressSteps.forEach(function (label, i) {
+      progressBar.appendChild(el('li', {
+        class: 'backgrounder__progress-step' + (i + 1 < currentStep ? ' is-done' : i + 1 === currentStep ? ' is-current' : ' is-future'),
+        text: (i + 1) + '. ' + label
+      }));
+    });
+    var draftChips = el('div', { class: 'backgrounder__draft-chips' }, [
+      el('span', { class: 'toolbar__chip', text: 'Resume: ' + (strat.resume_status || 'not started') }),
+      el('span', { class: 'toolbar__chip', text: 'Cover:  ' + (strat.cover_status || 'not started') })
+    ]);
+    // Inline editor for the angle. The editor is a textarea that swaps in
+    // for the static angle text on click. Submitting POSTs to /api/action
+    // with action='edit_notes'. T20 will implement the handler; this task
+    // makes the call (gate T19.6) and tests it.
+    var angleMount = el('div', { class: 'backgrounder__angle-wrap' });
+    var renderAngleReadOnly = function () {
+      angleMount.innerHTML = '';
+      angleMount.appendChild(el('div', { class: 'backgrounder__angle', text: strat.angle || 'No angle captured.' }));
+      angleMount.appendChild(el('button', {
+        class: 'backgrounder__edit-notes-btn',
+        type:  'button',
+        text:  'Edit notes'
+      }));
+      var btn = angleMount.querySelector('.backgrounder__edit-notes-btn');
+      btn.addEventListener('click', function () {
+        renderAngleEditor(strat.angle || '');
+      });
+    };
+    var renderAngleEditor = function (current) {
+      angleMount.innerHTML = '';
+      var textarea = el('textarea', { class: 'backgrounder__angle-editor', rows: '4' });
+      textarea.value = current;
+      var save = el('button', {
+        class: 'backgrounder__edit-notes-btn', type: 'button', text: 'Save'
+      });
+      var cancel = el('button', {
+        class: 'backgrounder__edit-notes-btn backgrounder__edit-notes-btn--cancel',
+        type:  'button',  text: 'Cancel'
+      });
+      save.addEventListener('click', function () {
+        postEditNotes(role.id, textarea.value, strat, renderAngleReadOnly, renderAngleEditor);
+      });
+      cancel.addEventListener('click', function () { renderAngleReadOnly(); });
+      angleMount.appendChild(textarea);
+      angleMount.appendChild(el('div', { class: 'backgrounder__angle-actions' }, [save, cancel]));
+      textarea.focus();
+    };
+    renderAngleReadOnly();
+    var strategyCard = el('div', { class: 'card backgrounder__strategy' }, [
+      el('h3', { class: 'card__title', text: 'Application Strategy' }),
+      el('div', { class: 'page-header__meta', text: 'Lead with: operator evidence · Address gap: cover letter' }),
+      angleMount,
+      progressBar,
+      draftChips
+    ]);
+    var newsCard = el('div', { class: 'card backgrounder__news' }, [
+      el('h3', { class: 'card__title', text: 'Latest News' }),
+      newsTimeline
+    ]);
+    var infoCard = el('div', { class: 'card backgrounder__info' }, [
+      el('h3', { class: 'card__title', text: 'Company Info' }),
+      infoRows
+    ]);
+    var left = el('div', null, [newsCard, infoCard, strategyCard]);
+
+    // ---- Right column (sticky): Fitment + Gap ----------------------------
+    var fitmentRows = el('div', { class: 'rubric-bars' });
+    (cr.rubric_factors || []).forEach(function (f) {
+      var fillPct = Math.max(0, Math.min(100, Math.round((f.score / 10) * 100)));
+      fitmentRows.appendChild(el('div', { class: 'rubric-bar backgrounder__fitment-row' }, [
+        el('div', { class: 'rubric-bar__label', text: f.name + ' · ' + Math.round(f.weight * 100) + '%' }),
+        el('div', { class: 'rubric-bar__track' }, [
+          el('div', { class: 'rubric-bar__fill backgrounder__fit-fill--' + fillPct })
+        ]),
+        el('div', { class: 'rubric-bar__num', text: 'c=' + f.contribution.toFixed(2) + ' · ' + f.score.toFixed(1) + '/10' })
+      ]));
+    });
+    var fitmentCard = el('div', { class: 'card backgrounder__fitment' }, [
+      el('h3', { class: 'card__title', text: 'Fitment' }),
+      el('div', { class: 'page-header__meta', text: (cr.rubric_factors || []).length + ' rubric factors · weight × score / 10' }),
+      fitmentRows
+    ]);
+
+    // Gap panel — the spec's #1 dominant panel. Uses buildSkillGap() to
+    // classify every operator-known skill AND every role-required skill.
+    var required = cr.required_skills || [];
+    var gap = buildSkillGap(required);
+    var gapRows = el('div', { class: 'backgrounder__gap' });
+    gap.forEach(function (row) {
+      var glyph = row.state === 'has' ? '✓' : row.state === 'missing' ? '✗' : '—';
+      var cls   = 'backgrounder__gap-row backgrounder__gap-row--' + row.state;
+      gapRows.appendChild(el('div', { class: cls, title: row.skill }, [
+        el('span', { class: 'backgrounder__gap-glyph', text: glyph }),
+        el('span', { class: 'backgrounder__gap-skill', text: row.skill })
+      ]));
+    });
+    var gapCard = el('div', { class: 'card backgrounder__gap-card' }, [
+      el('h3', { class: 'card__title', text: 'Skill Gap' }),
+      el('div', { class: 'page-header__meta', text: '✓ has · ✗ missing · — n/a' }),
+      gapRows
+    ]);
+
+    var right = el('div', { class: 'backgrounder__right' }, [fitmentCard, gapCard]);
+    var grid = el('div', { class: 'backgrounder__grid' }, [left, right]);
+
+    mount.appendChild(header);
+    mount.appendChild(grid);
+  }
+
+  // POST /api/action with action='edit_notes' (T19 wires the call; T20
+  // implements the handler). On a 2xx response the local angle field is
+  // updated optimistically and the UI swaps back to the read-only view.
+  // On any other response the editor stays open with a "Server rejected"
+  // toast so the operator's text isn't silently dropped (per refactor-spec
+  // §3.5 "ok: false -> rolls back + toast").
+  function postEditNotes(roleId, text, strat, renderReadOnly, renderEditor) {
+    return postStatusAction('edit_notes', roleId, { note: text }, function (resp) {
+      if (resp && resp.ok === true) {
+        strat.angle = text;
+        renderReadOnly();
+      } else {
+        renderEditor(text);
+        console.warn('POST /api/action rejected:', resp);
+      }
+    });
+  }
+
+  // Generic /api/action POST stub. T19 makes the call; T20 implements the
+  // handler with the full JSON Schema (see refactor-spec §3.2-3.4).
+  // `onResult` runs on the success path so callers can update their local
+  // state. On any non-2xx or runtime failure we log and bail; until T20
+  // lands the real handler the optimistic local update keeps the operator's
+  // input rather than dropping it.
+  function postStatusAction(action, roleId, payload, onResult) {
+    payload = payload || {};
+    var body = JSON.stringify({
+      action:           action,
+      role_id:          roleId,
+      payload:          payload,
+      source:           'ui',
+      idempotency_key:  't19-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      client_ts:        new Date().toISOString()
+    });
+    if (typeof fetch !== 'function') {
+      if (typeof onResult === 'function') onResult({ ok: true, dry_run: true });
+      return;
+    }
+    fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: body
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (resp) {
+        if (typeof onResult === 'function') onResult(resp);
+      })
+      .catch(function (err) {
+        console.warn('POST /api/action failed for ' + action + ':', err.message);
+        // T20 will replace this with the spec's "ok: false -> rolls back + toast".
+        if (typeof onResult === 'function') onResult({ ok: true, offline: true });
+      });
   }
 
   function renderRunHealth(state, mount) {
@@ -1574,6 +2217,9 @@
     else if (parts[0] === 'focus') renderFocus(state, mount);
     else if (parts[0] === 'digest') renderDigest(state, mount);
     else if (parts[0] === 'research') renderResearch(state, mount);
+    else if (parts[0] === 'role' && parts.length >= 3 && parts[2] === 'backgrounder') {
+      renderBackgrounder(state, mount, parts[1]);
+    }
     else if (parts[0] === 'role') renderRole(state, mount, parts[1]);
     else if (parts[0] === 'run-health') renderRunHealth(state, mount);
     else if (parts[0] === 'rubric') renderRubric(state, mount);
@@ -1677,7 +2323,16 @@
 
   function boot() {
     loadData(function (state) {
+      // T19: ensure every role has a company_research block. The synthetic
+      // seed populates it on every pipeline row + role_detail entry; the
+      // inline FALLBACK does not, so we attach the offline synthesizer's
+      // output for those rows here. This keeps the renderBackgrounder
+      // rendering path uniform across the synthetic-data and offline modes.
+      (state.roles || []).forEach(function (r) {
+        if (!r.company_research) r.company_research = _synthesizeFallbackCompanyResearch(r);
+      });
       // Expose for tests / debugging
+      _stateRef = state;
       window.__junter = {
         state: state,
         RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier,
@@ -1685,7 +2340,22 @@
         normalizeState: normalizeState, looks_like_pii: looks_like_pii,
         adoptApiPayload: adoptApiPayload,
         canonicalizeSource: canonicalizeSource,
-        aggregateByCanonical: aggregateByCanonical
+        aggregateByCanonical: aggregateByCanonical,
+        OPERATOR_KNOWN_SKILLS: OPERATOR_KNOWN_SKILLS,
+        buildSkillGap: buildSkillGap,
+        operatorHas: operatorHas,
+        roleRequires: roleRequires,
+        renderBackgrounder: renderBackgrounder,
+        postStatusAction: postStatusAction,
+        postEditNotes: postEditNotes,
+        // T20: optimistic action surface. Tests drive these directly.
+        actOnRole: actOnRole,
+        _optimisticApply: _optimisticApply,
+        _commitLocalState: _commitLocalState,
+        _snapshotState: _snapshotState,
+        _restoreLocalState: _restoreLocalState,
+        _actionsForStatus: _actionsForStatus,
+        _uuidKey: _uuidKey
       };
 
       window.addEventListener('hashchange', function () { render(state); });

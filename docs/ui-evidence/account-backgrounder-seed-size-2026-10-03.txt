@@ -1,0 +1,14 @@
+Account Backgrounder synthetic seed size evidence
+
+Measured while extending company_research with deterministic required_skills for the Gap matrix.
+
+Before regeneration: 414,817 bytes
+After regeneration:  427,319 bytes
+Delta:               12,502 bytes
+
+Command context:
+  cp synthetic-data/seed.json /tmp/t19-seed-before.json
+  python3 synthetic-data/generate.py
+  wc -c /tmp/t19-seed-before.json synthetic-data/seed.json
+
+The before file was the prior deterministic T19 seed. The after file has company_research on all 50 roles, including latest_news, company_info, required_skills, application_strategy, and rubric_factors.

@@ -483,6 +483,7 @@ def _build_role_detail(roles: list) -> dict:
             },
             "rubric_version": "v2",
             "history":        history,
+            "company_research": role.get("company_research", {}),
         }
     return detail
 
@@ -599,6 +600,245 @@ def _build_rejected_block(rng: random.Random, roles: list) -> list:
 
 
 # ----------------------------------------------------------------------------
+# Company research (T19) — per-role one-pager for the Account Backgrounder
+# screen. Deterministic from (role_id, seed) so the seed stays byte-identical.
+# ----------------------------------------------------------------------------
+
+# Fictional news headlines, indexed by company family (watchlist stand-ins get
+# a tagged headline; everyone else pulls from a deterministic rotation). These
+# are illustrative copy only — there is no claim that the named companies
+# issued these announcements.
+_NEWS_TEMPLATES = [
+    "Launches {name} AI for the {area} surface",
+    "Opens a {city} engineering hub, hires 80 locally",
+    "Closes Series {next_stage} at {mult}x prior valuation",
+    "Publishes a {quarterly} transparency report on platform safety",
+    "Hosts first {event} for early-career PMs",
+    "Expands {area} partner program with 12 launch vendors",
+    "Names a new {role} lead; promotes two VPs to SVP",
+    "Releases a public {area} roadmap for the next four quarters",
+    "Acquires a small {area} tooling startup; team joins {name}",
+    "Publishes a 'What we're NOT building' memo; draws product-craft praise",
+]
+
+_CITIES = ["New York", "San Francisco", "Toronto", "London", "Berlin", "Austin"]
+_QUARTERS = ["Q3", "Q4", "Q1", "Q2"]
+_STAGES  = ["A", "B", "C", "D"]
+_AREAS   = [
+    "platform", "onboarding", "growth", "search", "billing",
+    "trust & safety", "developer experience", "data infra",
+    "ads", "identity", "marketplace", "discovery",
+]
+
+# Per-status progress_step: Researched → Resume drafted → Cover drafted →
+# Submitted. Step 1 is the default for every role (we have at minimum a
+# company backgrounder). Status advances the step.
+_PROGRESS_STEP = {
+    "pinged":     1,
+    "interested": 1,
+    "packaged":   3,
+    "submitted":  4,
+    "blocked":    1,
+}
+
+_RESUME_STATUS = {
+    "pinged":     "not started",
+    "interested": "not started",
+    "packaged":   "drafted",
+    "submitted":  "submitted",
+    "blocked":    "not started",
+}
+
+_COVER_STATUS = {
+    "pinged":     "not started",
+    "interested": "not started",
+    "packaged":   "drafted",
+    "submitted":  "submitted",
+    "blocked":    "not started",
+}
+
+# Deterministic stub facts per status. Status drives the application
+# strategy text so the same role always renders the same copy.
+_STRATEGY_BY_STATUS = {
+    "pinged":     "Reach out for a 30-minute intro call; confirm sponsorship path and role expectations before any drafting.",
+    "interested": "Lead with the strongest matching operator evidence (Hatch conversational AI work + Hill Holliday performance-marketing instinct). Address the gap on enterprise PM experience with the 4-year SaaS agency record.",
+    "packaged":   "Resume + cover letter are drafted; tomorrow's queue is to re-run the angle against the live JD and tighten the opener. Operator's strongest demonstrated context for this role is on the company blog post.",
+    "submitted":  "Application submitted via portal on {date}; awaiting recruiter screen. Tracker moved to submitted.",
+    "blocked":    "Do not draft. Reason on file: '{reason}'. Revisit only if the block resolves (sponsorship confirmed or role-level expectation revised).",
+}
+
+
+def _build_news_items(role_id: int, company: str, today: _dt.date) -> list:
+    """5 deterministic news items for the company timeline panel.
+
+    Determinism: items are derived from `role_id` only (no RNG), so the seed
+    regenerates byte-identically regardless of the rng stream order.
+    """
+    items = []
+    base_offset = (role_id * 7) % 11  # varies the template rotation
+    for i in range(5):
+        tpl = _NEWS_TEMPLATES[(base_offset + i * 3) % len(_NEWS_TEMPLATES)]
+        headline = tpl.format(
+            name=company,
+            city=_CITIES[(role_id + i) % len(_CITIES)],
+            area=_AREAS[(role_id + i * 2) % len(_AREAS)],
+            next_stage=_STAGES[(role_id + i) % len(_STAGES)],
+            mult=(role_id % 4) + 2,
+            quarterly=_QUARTERS[(role_id + i) % len(_QUARTERS)],
+            event="open house" if i % 2 == 0 else "AMA session",
+            role="Product" if i % 2 == 0 else "Engineering",
+        )
+        days_ago = 2 + i * 4 + (role_id % 3)
+        items.append({
+            "date":     (today - _dt.timedelta(days=days_ago)).isoformat(),
+            "headline": headline,
+            "source":   "company blog" if i % 2 == 0 else "press",
+        })
+    return items
+
+
+def _build_company_info(role_id: int, company: str, fit_score: float) -> dict:
+    """6-field company profile derived deterministically from role_id.
+
+    No RNG — the field set is fixed by role_id so the seed regenerates
+    byte-identically regardless of RNG stream consumption order.
+    """
+    buckets = ["Pre-seed", "Series A", "Series B", "Series C", "Series D", "Public"]
+    size_band = ["200-400", "400-800", "800-1.5k", "1.5k-3k", "3k-6k", "6k+"]
+    hqs = ["New York, NY", "San Francisco, CA", "Brooklyn, NY",
+           "Seattle, WA", "Austin, TX", "Toronto, ON"]
+    lead_investors = [
+        "Sequoia Capital, Index Ventures",
+        "Andreessen Horowitz, Accel",
+        "Benchmark, Lightspeed",
+        "Founders Fund, Khosla Ventures",
+        "Greylock, NEA",
+        "Tiger Global, Coatue",
+    ]
+    bucket = buckets[role_id % len(buckets)]
+    return {
+        "mission":        (
+            f"{company} helps teams ship software they understand. "
+            f"Fictional seed copy; no claim is made about the named company."
+        ),
+        "headquarters":   hqs[role_id % len(hqs)],
+        "size":           size_band[role_id % len(size_band)],
+        "stage":          bucket,
+        "funding":        (
+            f"{bucket} · last round at ${(fit_score * 12):.0f}M valuation "
+            f"(fictional)"
+        ),
+        "lead_investors": lead_investors[role_id % len(lead_investors)],
+    }
+
+
+def _build_application_strategy(role_id: int, status: str, fit_score: float,
+                                blocked_reason: str, today: _dt.date) -> dict:
+    """Application Strategy section. Status-driven copy; deterministic from
+    role_id for any time-derived fields."""
+    base = _STRATEGY_BY_STATUS.get(status, _STRATEGY_BY_STATUS["pinged"])
+    angle = base.format(
+        date=today.isoformat(),
+        reason=blocked_reason or "no reason recorded",
+    )
+    return {
+        "angle":         angle,
+        "resume_status": _RESUME_STATUS.get(status, "not started"),
+        "cover_status":  _COVER_STATUS.get(status, "not started"),
+        "progress_step": _PROGRESS_STEP.get(status, 1),
+    }
+
+
+def _build_rubric_factors_for_backgrounder(role_id: int, fit_score: float) -> list:
+    """5-7 rubric factor rows for the Fitment panel.
+
+    Uses the same RUBRIC_V2_WEIGHTS table that drives the rubric_factors dict
+    already emitted on role_detail; emits one row per factor with name,
+    weight (decimal), score (0-10 normalized), and contribution.
+    Contribution = weight × score / 10 (so all contributions sum to fit_score).
+    """
+    rows = []
+    # Factor order: deterministic, role_id seeded but the order itself is
+    # fixed so the table looks the same across all roles.
+    factor_order = list(RUBRIC_V2_WEIGHTS.keys())
+    # Always include 6 factors (matches the v2 table). Score is a 0-2 raw
+    # number derived deterministically from role_id; we normalize to a 0-10
+    # bar (same shape the operator-facing rubric already prints).
+    for i, name in enumerate(factor_order):
+        weight = RUBRIC_V2_WEIGHTS[name]
+        # Raw 0-2 score: deterministic per (role_id, factor). Round to 1
+        # decimal place so the bar fills in noticeable increments.
+        raw = ((role_id * 3 + i * 5) % 21) / 10.0  # 0.0..2.0
+        raw = round(raw, 1)
+        score = round(raw * 5.0, 1)  # 0..10
+        contribution = round(weight * score, 2)
+        rows.append({
+            "name":         name,
+            "weight":       round(weight, 2),
+            "score":        score,
+            "raw_score":    raw,
+            "contribution": contribution,
+            "rationale": (
+                "Deterministic if seed match" if raw >= 1.0 else
+                "Hit the gap or note it on the application"
+            ),
+        })
+    # The spec asks for 5-7 rows; we currently have 6, which is in range.
+    # If we ever wanted to vary it we'd add 1-2 role-specific stretch rows
+    # (a junior-fit stretch or a skills-stretch) for the high-fit roles.
+    if fit_score >= 8.0:
+        rows.append({
+            "name":         "stretch_match",
+            "weight":       0.10,
+            "score":        7.5,
+            "raw_score":    1.5,
+            "contribution": round(0.10 * 7.5, 2),
+            "rationale":    "Strong adjacent context; rubric credit but not a primary requirement.",
+        })
+    return rows
+
+
+def _build_company_research(roles: list, today: _dt.date) -> list:
+    """Per-role company_research block. Emitted alongside each pipeline row.
+
+    Returns a list parallel to `roles` with one research block each, so the
+    caller can attach it. Built without RNG: every value is a function of
+    role_id (which is the post-shuffle position), company name, fit_score,
+    status, blocked_reason, and the fixed today anchor.
+    """
+    out = []
+    # The synthetic role requirements deliberately mix skills the default
+    # operator profile has with a role-specific stretch requirement. This
+    # makes the Gap panel an honest three-state matrix (has / missing / n-a),
+    # not a generic boolean.
+    known_skill_rotation = [
+        "product strategy", "roadmap", "prioritization", "stakeholder management",
+        "A/B testing", "SQL", "data analysis", "OKRs", "GTM", "B2B SaaS",
+        "fintech", "healthcare", "AI/ML", "growth", "lifecycle marketing",
+    ]
+    stretch_skill_rotation = [
+        "developer tooling", "enterprise security", "payments infrastructure",
+        "machine learning operations", "regulated compliance",
+    ]
+    for r in roles:
+        rid = r["id"]
+        out.append({
+            "latest_news":          _build_news_items(rid, r["company"], today),
+            "company_info":         _build_company_info(rid, r["company"], r["fit_score"]),
+            "required_skills":      [
+                known_skill_rotation[rid % len(known_skill_rotation)],
+                known_skill_rotation[(rid * 3) % len(known_skill_rotation)],
+                stretch_skill_rotation[rid % len(stretch_skill_rotation)],
+            ],
+            "application_strategy": _build_application_strategy(
+                rid, r["status"], r["fit_score"], r.get("blocked_reason", ""), today,
+            ),
+            "rubric_factors":       _build_rubric_factors_for_backgrounder(rid, r["fit_score"]),
+        })
+    return out
+
+
+# ----------------------------------------------------------------------------
 # Top-level builder
 # ----------------------------------------------------------------------------
 
@@ -607,6 +847,11 @@ def build_snapshot(seed: int = 42) -> dict:
     rng = random.Random(seed)
     today = _today_anchor(rng)
     roles = _build_roles(rng, today)
+    # T19: per-role company_research block. Built without RNG (deterministic
+    # from role_id, company, status) so the seed regenerates byte-identically.
+    company_research = _build_company_research(roles, today)
+    for i, role in enumerate(roles):
+        role["company_research"] = company_research[i]
 
     snapshot = {
         "snapshot_at":       _dt.datetime.combine(
