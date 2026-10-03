@@ -178,6 +178,11 @@ Every row maps to a file or test that exists in this repository.
 | CI workflow that parses its own YAML and self-checks `.gitignore` | Implemented in code, runs on every push/PR | `.github/workflows/tests.yml` (jobs: python matrix 3.9–3.12, `yaml.safe_load` self-parse step, 4-grep `.gitignore` coverage step) |
 | `.gitignore` covering `.DS_Store`, env files (incl. `.env.*`), `out/`, `.venv/`, `node_modules/`, `.vercel/`, `__pycache__/`, editor backups (`*.bak-*`, `*.swp`) | Implemented and CI-verified on every push | `.gitignore`; verified by `.github/workflows/tests.yml` step "Verify .gitignore covers required paths" |
 | Serverless `/api/data` route (Edge Config-backed, empty-safe, schema-locked envelope) | Implemented and deployed; tested | `api/data.js`, `tests/api/route_test.mjs`, `tests/api/pii_guard_test.mjs` |
+| Personal `/api/action` write route | Implemented locally; not deployed from the public synthetic project | `api/action.js`, `api/tests/test_action_meta.py`, `ui/tests/test_app.py` |
+
+### Personal action-surface contract
+
+On the token-gated personal deployment, the UI and Telegram both `POST /api/action` with an action, role ID, object payload, source label, and client-generated idempotency key. The UI applies the change optimistically, then keeps the server-authoritative role on success or restores its prior state and shows an error on failure; the public synthetic deployment does not expose this write route.
 
 The repo is honest about this split: the **method** (specs, rubric,
 templates, the engine + scoring + tests, the reading-layer UI prototype,
