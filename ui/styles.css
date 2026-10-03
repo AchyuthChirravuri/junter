@@ -607,3 +607,35 @@ button { font-family: inherit; cursor: pointer; }
 /* Hidden by default; JS shows one screen at a time */
 .screen { display: none; }
 .screen.is-active { display: block; }
+
+/* Job Boards (T6) — per-source breakdown screen. Reuses .card,
+   .page-header, .toolbar__chip, .dot. The grid is a CSS auto-fit so it
+   reflows at the design-width=1200 desktop viewport without breaking at
+   800-900px. */
+.boards-summary { margin-top: var(--space-5); padding: var(--space-5) var(--space-6); }
+.boards-summary__line { font-size: var(--text-h2); font-weight: var(--text-h2-weight); line-height: var(--text-h2-lh); color: var(--color-text-primary); }
+.boards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+.boards-card {
+  padding: var(--space-5) var(--space-6);
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+.boards-card:hover { border-color: var(--color-accent); }
+.boards-card__name { font-size: var(--text-h2); font-weight: var(--text-h2-weight); line-height: var(--text-h2-lh); color: var(--color-text-primary); }
+.boards-card__num { font-size: var(--text-display); font-weight: var(--text-display-weight); line-height: var(--text-display-lh); color: var(--color-accent); margin-top: var(--space-3); }
+.boards-card__fit { font-size: var(--text-meta); color: var(--color-text-secondary); margin-top: var(--space-2); }
+.boards-card__last { font-size: var(--text-meta); color: var(--color-text-secondary); margin-top: var(--space-2); }
+.boards-card__chips { margin-top: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.boards-card--custom .boards-card__name { color: var(--color-warning); }
+
+.boards-legend { margin-top: var(--space-6); padding: var(--space-5) var(--space-6); }
+.boards-legend__list { list-style: none; padding: 0; margin: var(--space-4) 0 0 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.boards-legend__row { font-size: var(--text-meta); display: flex; gap: var(--space-3); align-items: baseline; }
+.boards-legend__canonical { font-weight: 600; color: var(--color-text-primary); min-width: 110px; }
+.boards-legend__arrow { color: var(--color-text-secondary); }
+.boards-legend__raws { color: var(--color-text-secondary); font-family: ui-monospace, monospace; flex: 1; word-break: break-word; }
