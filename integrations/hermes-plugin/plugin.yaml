@@ -1,0 +1,7 @@
+name: junter-actions
+kind: standalone
+version: "0.1.0"
+description: "Route authorized Telegram role commands through the shared action endpoint."
+author: Junter
+provides_hooks:
+  - pre_gateway_dispatch
