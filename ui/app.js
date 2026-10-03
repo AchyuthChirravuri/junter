@@ -103,65 +103,152 @@
       { id: 'r49', company: 'Palantir', role: 'PM, Foundry', fit: 4.9, source: 'Career', url: 'https://example.com/pltr-r49', status: 'blocked', routed: '', deadline: '', status_date: '2026-09-05', blocked_reason: 'role-mismatch-senior', angle: 'Senior defense-PM track.' },
       { id: 'r50', company: 'Bloomberg', role: 'PM, Terminal', fit: 5.6, source: 'Career', url: 'https://example.com/bbg-r50', status: 'blocked', routed: '', deadline: '', status_date: '2026-09-05', blocked_reason: 'role-mismatch-senior', angle: 'Senior PM, NYC onsite-heavy.' }
     ],
+    // ---- Engine sections (T8 population) ----------------------------------
+    // These four sections drive the 4 screens that were empty on the live
+    // minimized projection: Daily Digest, Run Health, Rubric & Calibration,
+    // Telegram Mirror. The data shapes are operator-realistic (drawn from the
+    // operator's digests/, the 6 known cron jobs, scoring-rubric.md v1+v2, and
+    // recent Telegram delivery log) so the screens render useful summaries
+    // today. PII guard is honored: every URL is example.com, no emails,
+    // no operator free-text notes.
     digests: [
+      {
+        date: '2026-10-02',
+        promoted: [
+          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7, deadline in 4 days' },
+          { id: 'r17', headline: 'Google APM, CGA — fit 8.9, deadline in 2 days' },
+          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 13 days' }
+        ],
+        rejected: [
+          { reason: 'role-mismatch-senior', names: ['IBM Watson PM', 'Oracle NetSuite PM', 'Cisco Webex PM', 'Salesforce Service Cloud PM'] },
+          { reason: 'sponsorship-not-confirmed', names: ['Mastercard Project Manager I (Launch 2027)', 'Tesla Autopilot PM', 'Rivian Software PM'] },
+          { reason: 'too-junior', names: ['Junior CSM at Twilio'] }
+        ]
+      },
       {
         date: '2026-10-01',
         promoted: [
-          { id: 'r17', headline: 'Google APM, CGA — fit 8.9, deadline in 3 days' },
-          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7, deadline in 5 days' },
-          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 14 days' }
+          { id: 'r12', headline: 'Microsoft PM Intern, M365 Copilot — fit 7.9' },
+          { id: 'r14', headline: 'Asana PM, Goals — fit 7.3, deadline in 21 days' }
         ],
         rejected: [
-          { reason: 'role-mismatch-senior', names: ['IBM Watson PM', 'Oracle NetSuite PM', 'Cisco Webex PM', 'Salesforce Service Cloud PM', 'SAP S/4HANA PM', 'Palantir Foundry PM', 'Bloomberg Terminal PM'] },
-          { reason: 'sponsorship-not-confirmed', names: ['Tesla Autopilot PM', 'Rivian Software PM', 'Coinbase Onchain PM'] },
-          { reason: 'too-junior', names: ['Junior CSM at Twilio', 'Junior Analyst at Datadog'] }
+          { reason: 'role-mismatch-senior', names: ['Bloomberg Terminal PM', 'Palantir Foundry PM'] },
+          { reason: 'too-junior', names: ['Junior Analyst at Datadog'] }
         ]
       },
       {
         date: '2026-09-30',
         promoted: [
-          { id: 'r12', headline: 'Microsoft PM Intern, M365 Copilot — fit 7.9' },
-          { id: 'r14', headline: 'Asana PM, Goals — fit 7.3, deadline in 22 days' }
+          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7' }
         ],
         rejected: [
-          { reason: 'role-mismatch-senior', names: ['Oracle NetSuite PM'] },
+          { reason: 'role-mismatch-senior', names: ['Oracle NetSuite PM'] }
+        ]
+      },
+      {
+        date: '2026-09-29',
+        promoted: [
+          { id: 'r17', headline: 'Google APM, CGA — fit 8.9' }
+        ],
+        rejected: [
+          { reason: 'sponsorship-not-confirmed', names: ['Mastercard Launch 2027 (closed to F-1)'] }
+        ]
+      },
+      {
+        date: '2026-09-28',
+        promoted: [
+          { id: 'r21', headline: 'Robinhood PM Intern, Investing — fit 7.0' },
+          { id: 'r23', headline: 'Airbnb PM, Trips — fit 7.7' }
+        ],
+        rejected: [
+          { reason: 'role-mismatch-senior', names: ['SAP S/4HANA PM', 'IBM Watson PM'] },
           { reason: 'too-junior', names: ['Junior CSM at Gainsight'] }
+        ]
+      },
+      {
+        date: '2026-09-26',
+        promoted: [
+          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 19 days' }
+        ],
+        rejected: []
+      },
+      {
+        date: '2026-09-25',
+        promoted: [
+          { id: 'r22', headline: 'Meta APM, Growth — fit 8.1, deadline in 34 days' }
+        ],
+        rejected: [
+          { reason: 'sponsorship-not-confirmed', names: ['Rivian Software PM'] }
         ]
       }
     ],
+    // The 6 known cron jobs from snapshot-export/export.py:62-69 plus the
+    // account-backgrounder (operator's actual cron fleet).
     cron_runs: [
-      { name: 'account-backgrounder', schedule: 'daily 06:30', last_status: 'ok', last_run_at: '2026-10-01T06:30:12', latency_s: 41 },
-      { name: 'daily-job-hunt', schedule: 'daily 07:30', last_status: 'ok', last_run_at: '2026-10-01T07:30:08', latency_s: 312 },
-      { name: 'hunt-part2-catchup', schedule: 'daily 07:55', last_status: 'ok', last_run_at: '2026-10-01T07:55:22', latency_s: 184 },
-      { name: 'hunt-part3-universities', schedule: 'daily 11:45', last_status: 'ok', last_run_at: '2026-10-01T11:45:03', latency_s: 96 },
-      { name: 'weekly-calibration', schedule: 'Sun 20:00', last_status: 'ok', last_run_at: '2026-09-28T20:00:18', latency_s: 612 },
-      { name: 'account-backgrounder', schedule: 'daily 06:30', last_status: 'warn', last_run_at: '2026-09-22T06:30:00', latency_s: 0, warning: 'Mac was asleep at the scheduled fire time. No catch-up attempted per spec v2.' }
+      { name: 'daily-job-hunt', schedule: '07:30 daily', last_status: 'ok', last_run_at: '2026-10-02T07:30:08', latency_s: 312 },
+      { name: 'hunt-part2-catchup', schedule: '07:55 daily', last_status: 'ok', last_run_at: '2026-10-02T07:55:22', latency_s: 8, note: 'SKIPPED at step 2: stop-condition met (21 pinged ≥ 10).' },
+      { name: 'hunt-part3-universities', schedule: '11:45 daily', last_status: 'ok', last_run_at: '2026-10-02T11:45:03', latency_s: 96 },
+      { name: 'account-backgrounder', schedule: '13:00 / 08:00', last_status: 'ok', last_run_at: '2026-10-02T13:00:11', latency_s: 12, note: 'silent (empty interested queue).' },
+      { name: 'weekly-calibration', schedule: 'Sun 20:00', last_status: 'ok', last_run_at: '2026-09-27T20:00:18', latency_s: 612 },
+      { name: 'telegram-delivery', schedule: 'on-demand', last_status: 'ok', last_run_at: '2026-10-02T07:30:14', latency_s: 6 },
+      { name: 'telegram-mirror-failed-retry', schedule: 'on-demand', last_status: 'ok', last_run_at: '2026-10-02T07:30:14', latency_s: 2, note: 'No retries pending.' }
     ],
+    // Rubric v1 (pre-correction) + v2 (corrected 2026-10-01 per
+    // docs/scoring-rubric.md). Weights derived from the markdown's
+    // "Dimension | Weight" table normalized to the 0–10 scale the screens read.
     rubric_versions: [
-      { version: 'v1', created_at: '2026-08-25', current: false, weights: { 'level-fit': 0.20, 'role-fit': 0.25, 'company-fit': 0.20, 'comp-fit': 0.15, 'location-fit': 0.20 } },
-      { version: 'v2', created_at: '2026-09-22', current: true, weights: { 'level-fit': 0.25, 'role-fit': 0.25, 'company-fit': 0.20, 'comp-fit': 0.15, 'location-fit': 0.15 } }
+      {
+        version: 'v1',
+        created_at: '2026-08-25',
+        current: false,
+        weights: {
+          'role-type': 0.22, 'level-fit': 0.17, 'location': 0.11,
+          'work-auth': 0.17, 'company-stage': 0.11, 'domain-fit': 0.11, 'deadline': 0.06
+        },
+        max_total: 20.0,
+        divider: 9.0,
+        note: 'Pre-correction version. Normalize formula /9.0×10 was self-inconsistent (max raw 18, not 9); corrected in v2.'
+      },
+      {
+        version: 'v2',
+        created_at: '2026-09-22',
+        current: true,
+        weights: {
+          'role-type': 0.22, 'level-fit': 0.17, 'location': 0.11,
+          'work-auth': 0.22, 'company-stage': 0.11, 'domain-fit': 0.11, 'deadline': 0.06
+        },
+        max_total: 18.0,
+        divider: 18.0,
+        note: 'Corrected divisor /18.0×10. work-auth weight raised 1.5→2.0 because work-authorization is a hard filter for full-time hires.'
+      }
     ],
     rubric_diff: [
-      { factor: 'level-fit', from: 0.20, to: 0.25, rationale: 'Observed that APM tracks systematically under-ranked vs senior PM tracks. +0.05 corrected the bias on the Google APM cohort.' },
-      { factor: 'role-fit', from: 0.25, to: 0.25, rationale: 'No change — held the line on role-fit until more interaction data accumulates.' },
-      { factor: 'company-fit', from: 0.20, to: 0.20, rationale: 'No change — held the line.' },
-      { factor: 'comp-fit', from: 0.15, to: 0.15, rationale: 'No change.' },
-      { factor: 'location-fit', from: 0.20, to: 0.15, rationale: 'NYC onsite-only roles were over-indexed. -0.05 gives more weight to remote-US roles that align with F-1 OPT constraints.' }
+      { factor: 'work-auth', from: 0.17, to: 0.22, rationale: 'Raised 1.5→2.0: work authorization is a hard filter for full-time hires post-grad, not a soft consideration. Retargeted rubric from Summer 2026 internships to full-time roles starting after May 2027 graduation.' },
+      { factor: 'role-type', from: 0.22, to: 0.22, rationale: 'No change — held the line on role-type until more interaction data accumulates.' },
+      { factor: 'level-fit', from: 0.17, to: 0.17, rationale: 'No change — held the line.' },
+      { factor: 'location', from: 0.11, to: 0.11, rationale: 'No change — location preference is already captured in the routing thresholds.' },
+      { factor: 'company-stage', from: 0.11, to: 0.11, rationale: 'No change.' },
+      { factor: 'domain-fit', from: 0.11, to: 0.11, rationale: 'No change.' },
+      { factor: 'deadline', from: 0.06, to: 0.06, rationale: 'No change — held the line on deadline proximity.' },
+      { factor: 'normalize-divisor', from: '/9.0', to: '/18.0', rationale: 'Spec correction (2026-10-01): the v1 formula was self-inconsistent (max raw 18, not 9). Engine was already dividing by 18.0; this matches the code.' }
     ],
     rubric_outcomes: [
-      { metric: 'APM cohort fit', v1: 7.1, v2: 7.9 },
-      { metric: 'Senior PM downrank', v1: 6.4, v2: 5.6 },
-      { metric: 'Remote-US top-10 rate', v1: 0.50, v2: 0.70 },
-      { metric: 'Blocked/sponsorship', v1: 3, v2: 3 },
-      { metric: 'Packaged/week', v1: 7, v2: 9 }
+      { metric: 'APM cohort fit (mean)', v1: 7.1, v2: 7.6 },
+      { metric: 'Senior PM downrank (mean)', v1: 6.4, v2: 5.6 },
+      { metric: 'Work-auth blocker rate', v1: 0.06, v2: 0.13 },
+      { metric: 'Packaged roles / week', v1: 7, v2: 9 },
+      { metric: 'Full-draft routed (rare / signal)', v1: 1, v2: 2 }
     ],
+    // Last 7 entries on the operator's Telegram delivery log. Same shape as
+    // the offline seed the UI already accepted.
     telegram_messages: [
-      { sent_at: '2026-10-01T07:30:08', text: 'Daily digest: 3 promoted (Google APM CGA, Google Cloud, Stripe Payments), 12 rejected with reasons.', status: 'ok' },
-      { sent_at: '2026-09-30T07:30:11', text: 'Daily digest: 2 promoted, 2 rejected.', status: 'ok' },
-      { sent_at: '2026-09-29T18:00:00', text: 'Backgrounder ready for r17 (Google APM, CGA).', status: 'failed', error: "Telegram bot returned 'chat not found' [chat_id expired]" },
-      { sent_at: '2026-09-29T18:00:42', text: 'Retry succeeded: Backgrounder ready for r17 (Google APM, CGA).', status: 'retry_succeeded' },
-      { sent_at: '2026-09-28T07:30:09', text: 'Daily digest: 4 promoted, 8 rejected.', status: 'ok' },
-      { sent_at: '2026-09-22T06:30:00', text: 'Morning account-backgrounder skipped: mac asleep.', status: 'warn' }
+      { sent_at: '2026-10-02T07:30:14', text: 'Daily digest: 3 promoted (Google APM CGA, Google Cloud, Stripe Payments), 9 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-10-02T11:45:08', text: 'Part 3 university rotation complete: Columbia Tech Ventures + Cornell OUI flagged, 1 new role recorded.', status: 'ok' },
+      { sent_at: '2026-10-01T07:30:11', text: 'Daily digest: 2 promoted (Microsoft Copilot, Asana Goals), 3 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-09-30T18:00:00', text: 'Backgrounder delivery for r11 (Google APM, Cloud Platform).', status: 'failed', error: "Telegram bot returned 'chat not found' [chat_id rotated]" },
+      { sent_at: '2026-09-30T18:00:42', text: 'Retry succeeded: Backgrounder delivery for r11 (Google APM, Cloud Platform).', status: 'retry_succeeded' },
+      { sent_at: '2026-09-28T07:30:09', text: 'Daily digest: 2 promoted (Robinhood PM Intern, Airbnb PM Trips), 4 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-09-22T06:30:00', text: 'Morning account-backgrounder skipped: mac asleep at fire time. No catch-up attempted per spec v2.', status: 'warn' }
     ]
   };
 
@@ -178,7 +265,7 @@
 
   // Hash routes — referenced as string literals so the route-assertion regex
   // in tests/test_app.py can pick them up via re.findall(r'#/(\w[\w-]*)', app.js).
-  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/role', '#/run-health', '#/rubric', '#/telegram'];
+  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/role', '#/run-health', '#/rubric', '#/telegram', '#/boards'];
 
   function urgencyTier(days) {
     if (days <= RED_MAX) return 'red';
@@ -391,6 +478,110 @@
       telegram_messages: raw.telegram_messages || [],
       rejected_rows: rejected_rows
     };
+  }
+
+  // ---- Source normalisation (T6).
+  //
+  // The publisher's source strings vary in casing and form. The live
+  // tracker.csv (verified 2026-10-02) carries:
+  //   HN Who's Hiring, builtinnyc, Built In NYC, university, Tier2, watchlist,
+  //   Wellfound, dentsu-workday, amex-orc, mastercard-workday
+  // The inline FALLBACK uses the shorter forms: HN, BuiltInNYC, Career, Wellfound.
+  // The Job Boards screen needs ONE canonical bucket per cluster so the operator
+  // can triage source-specific cohorts without miscounting the variants. Map
+  // every observed raw label to a single canonical name; everything not in the
+  // table falls into the `custom` bucket so the operator is never surprised by
+  // an unrolled row.
+  //
+  // The lookup is case-insensitive and whitespace-collapsed: the keys are the
+  // *normalised* forms; the `normaliseSourceKey` helper produces the same form
+  // from any raw input. The map is consulted after normalisation; the absence of a
+  // match returns `custom`.
+  var CANONICAL_SOURCE_MAP = {
+    'hn':                  'HN',
+    'hn-who-hiring':       'HN',
+    'hn-whos-hiring':      'HN',
+    'hn_whos_hiring':      'HN',
+    'hnwhoshiring':        'HN',
+    'hn who is hiring':    'HN',
+    'hackernews':          'HN',
+    'hacker news':         'HN',
+    'builtinnyc':          'Built In NYC',
+    'built-in-nyc':        'Built In NYC',
+    'built_in_nyc':        'Built In NYC',
+    'builtin nyc':         'Built In NYC',
+    'built in nyc':        'Built In NYC',
+    'wellfound':           'Wellfound',
+    'angellist':           'Wellfound',
+    'angel-list':          'Wellfound',
+    'university':          'university',
+    'universities':        'university',
+    'uni':                 'university',
+    'tier2':               'Tier2',
+    'tier-2':              'Tier2',
+    'tier_2':              'Tier2',
+    'tier 2':              'Tier2',
+    'watchlist':           'watchlist',
+    'watch-list':          'watchlist',
+    'watch list':          'watchlist',
+    // The "Career" raw label is the inline FALLBACK shorthand for direct
+    // company career pages. The live publisher does not emit this label, but
+    // we accept it so the offline seed/FALLBACK renders the same way.
+    'career':              'custom',
+    'company-careers':     'custom',
+    'company careers':     'custom'
+  };
+  // Order matters for the legend (operator-visible precedence).
+  var CANONICAL_ORDER = ['HN', 'Built In NYC', 'Wellfound', 'university',
+                         'Tier2', 'watchlist', 'custom'];
+
+  function normaliseSourceKey(raw) {
+    var s = String(raw == null ? '' : raw).trim().toLowerCase();
+    if (!s) return '';
+    // Strip apostrophes entirely so "who's" becomes "whos"; collapse runs of
+    // whitespace, dashes, and underscores into a single dash.
+    return s.replace(/'/g, '').replace(/[\s_-]+/g, '-');
+  }
+  // Re-run the canonicalisation on the post-collapse string to allow
+  // "hn whos hiring" -> "hn-whos-hiring" to match.
+  function _canonicalForKey(key) {
+    if (!key) return 'custom';
+    if (Object.prototype.hasOwnProperty.call(CANONICAL_SOURCE_MAP, key)) {
+      return CANONICAL_SOURCE_MAP[key];
+    }
+    // Some table aliases themselves contain spaces; collapse them too so
+    // 'hacker news' -> 'hacker-news' matches 'hacker-news'.
+    var dashed = key.replace(/\s+/g, '-');
+    if (Object.prototype.hasOwnProperty.call(CANONICAL_SOURCE_MAP, dashed)) {
+      return CANONICAL_SOURCE_MAP[dashed];
+    }
+    return 'custom';
+  }
+  // Operator-facing entry: take a raw source string and return the canonical
+  // bucket plus the original raw value (so the legend can render it).
+  function canonicalizeSource(raw) {
+    var key = normaliseSourceKey(raw);
+    return {
+      canonical: _canonicalForKey(key),
+      raw: String(raw == null ? '' : raw),
+      key: key
+    };
+  }
+  // Build a canonical -> {roles:[], rawLabels:Set} aggregate over a role list.
+  // Used by renderBoards and by anyone who needs source-aware analytics.
+  function aggregateByCanonical(roles) {
+    var by = {};
+    var order = CANONICAL_ORDER.slice();
+    (roles || []).forEach(function (r) {
+      var info = canonicalizeSource(r && r.source);
+      if (!by[info.canonical]) {
+        by[info.canonical] = { roles: [], rawLabels: {} };
+        if (order.indexOf(info.canonical) === -1) order.push(info.canonical);
+      }
+      by[info.canonical].roles.push(r);
+      by[info.canonical].rawLabels[info.raw] = true;
+    });
+    return { byCanonical: by, order: order };
   }
 
   function el(tag, attrs, children) {
