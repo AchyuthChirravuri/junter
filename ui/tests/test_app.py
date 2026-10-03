@@ -1270,51 +1270,29 @@ class BackgrounderEditNotesTests(unittest.TestCase):
         self.assertTrue(res.get("has_pen"), "postEditNotes must be exposed on __junter")
 
     def test_edit_notes_posts_to_api_action(self):
-        """The Edit Notes button in the Account Backgrounder calls postEditNotes
-        which POSTs /api/action. We patch fetch and assert the body contains
-        action='edit_notes', role_id, payload.note, source='ui', and an
-        idempotency_key."""
-        fetch_js = (
-            "function f(url, opts) {"
-            " global.__lastFetch = {url: url, body: opts && opts.body};"
-            " return Promise.resolve({"
-            "   ok: true, status: 200,"
-            "   json: function () { return Promise.resolve({ok: true}); }"
-            " });"
-            "}"
-        )
-        res = _run_app_js(
-            "(function(){"
-            " global.__lastFetch = null;"
-            " J.postStatusAction('edit_notes', '17', {note: 'new angle text'}, function () {});"
-            " var captured = global.__lastFetch;"
-            " if (!captured) return {err: 'no-fetch-called'};"
-            " var body = {};"
-            " try { body = JSON.parse(captured.body); } catch (e) { return {err: 'parse: ' + e.message}; }"
-            " return {"
-            "   url: captured.url,"
-            "   action: body.action,"
-            "   role_id: body.role_id,"
-            "   source: body.source,"
-            "   note: body.payload && body.payload.note,"
-            "   has_idempotency_key: typeof body.idempotency_key === 'string'"
-            " };"
-            "})()",
-            fetch_js=fetch_js,
-        )
-        self.assertNotIn("__error__", res, f"node run failed: {res}")
-        self.assertEqual(res.get("url"), "/api/action",
-                         "POST must target /api/action")
-        self.assertEqual(res.get("action"), "edit_notes",
-                         "action field must be 'edit_notes'")
-        self.assertEqual(res.get("role_id"), "17",
-                         "role_id must match the input")
-        self.assertEqual(res.get("source"), "ui",
-                         "source must be 'ui' for the audit log")
-        self.assertEqual(res.get("note"), "new angle text",
-                         "payload.note must round-trip through the POST")
-        self.assertTrue(res.get("has_idempotency_key"),
-                        "POST body must carry an idempotency_key")
+        """Exercise the real async client; notes plural is the T17 payload."""
+        fetch_js = """function (url, opts) {
+          if (url === '/api/data') return Promise.reject(new Error('offline'));
+          global.__lastFetch = {url: url, body: JSON.parse(opts.body)};
+          return Promise.resolve({status: 200, json: function () {
+            return Promise.resolve({ok: true, role: window.__junter.state.roles[0]});
+          }});
+        }"""
+        res = _boot_with_actOnRole("""
+          J.state.roles[0].id = 1;
+          return J.postStatusAction('edit_notes', 1, {notes: 'new angle text'}).then(function () {
+            return global.__lastFetch;
+          });
+        """, fetch_js=fetch_js)
+        self.assertNotIn('__error__', res)
+        self.assertEqual(res['url'], '/api/action?mode=sandbox')
+        body = res['body']
+        self.assertEqual(body['action'], 'edit_notes')
+        self.assertEqual(body['role_id'], 1)
+        self.assertEqual(body['source'], 'ui')
+        self.assertEqual(body['payload'], {'notes': 'new angle text'})
+        self.assertRegex(body['idempotency_key'],
+                         r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
 
     def test_mark_actions_reference_correct_action_names(self):
         """The Mark Interested / Packaged / Submitted / Blocked buttons call
@@ -1481,205 +1459,35 @@ class ActionSurfaceClientTests(unittest.TestCase):
     # ----- Test 1: optimistic UI moves the role on success --------------
 
     def test_optimistic_ui_moves_role_on_success(self):
-        """Clicking 'Mark interested' on a synthetic pinged role moves it
-        to the Interested column before the POST resolves; on a successful
-        2xx, the local state is kept and the POST carried the right contract."""
-        response_body = {
-            "ok": True,
-            "request_id": "test-uuid-0001",
-            "applied_at": "2026-10-03T01:23:45.000Z",
-            "role": {
-                "id": "r01", "company": "Notion", "role": "Associate PM, Collaboration",
-                "fit": 7.4, "source": "HN", "url": "https://example.com/notion-r01",
-                "status": "interested", "routed": "int", "deadline": "",
-                "status_date": "2026-09-29", "angle": "Cloud + platform work."
-            },
-            "idempotency_replay": False,
-        }
-        fetch_js = textwrap.dedent("""
-            function (url, opts) {
-              var u = (typeof url === 'string') ? url : (url && url.url) || '';
-              if (u.indexOf('/api/action') !== -1) {
-                globalThis.__captured = globalThis.__captured || [];
-                try { globalThis.__captured.push(JSON.parse(opts.body)); } catch (_) {}
-                return Promise.resolve({
-                  ok: true, status: 200,
-                  json: function () { return Promise.resolve(__RESPONSE__); }
-                });
-              }
-              return Promise.reject(new Error('no-network-in-test'));
-            }
-        """).replace("__RESPONSE__", json.dumps(response_body))
-        driver = textwrap.dedent("""
-            var role = J.state.roles.find(function (r) { return String(r.id) === 'r01'; });
-            if (!role) return Promise.resolve({ __error__: 'NO_ROLE' });
-            var beforeStatus = role.status;
-            return J.actOnRole('mark_interested', role, {}).then(function (result) {
-              var after = J.state.roles.find(function (r) { return String(r.id) === 'r01'; });
-              var captured = (globalThis.__captured || []);
-              var first = captured[0] || {};
-              return {
-                ok: result.ok,
-                error_code: (result.error && result.error.code) || null,
-                before_status: beforeStatus,
-                after_status: after.status,
-                after_routed: after.routed,
-                captured_count: captured.length,
-                captured_action: first.action,
-                captured_source: first.source,
-                captured_role_id: first.role_id,
-                captured_key_len: (first.idempotency_key || '').length
-              };
-            });
-        """)
-        result = _boot_with_actOnRole(driver, fetch_js=fetch_js)
-        self.assertNotIn("__error__", result, f"node run failed: {result}")
-        self.assertTrue(result.get("ok"), f"actOnRole should resolve ok=True: {result}")
-        self.assertEqual(result["before_status"], "pinged", "r01 starts as pinged (FALLBACK)")
-        self.assertEqual(result["after_status"], "interested",
-                         "after success, r01 must be in Interested")
-        self.assertEqual(result["after_routed"], "int")
-        # POST contract checks.
-        self.assertEqual(result["captured_count"], 1, "exactly one POST to /api/action")
-        self.assertEqual(result["captured_action"], "mark_interested")
-        self.assertEqual(result["captured_source"], "ui")
-        self.assertEqual(result["captured_role_id"], "r01")
-        self.assertGreaterEqual(result["captured_key_len"], 16,
-                                "idempotency_key must be >=16 chars")
-
-    # ----- Test 2: failed POST reverts the role -------------------------
+        """Actual Pipeline button moves an integer-ID fixture before response."""
+        assert NODE is not None
+        result = subprocess.run([NODE, str(UI_DIR / 'tests' / 'action_client_harness.cjs'),
+                                 'visual_success'], capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(json.loads(result.stdout)['ok'])
 
     def test_failed_post_reverts_role(self):
-        """A 409 (conflict) response from /api/action MUST revert the role
-        to its prior status and surface a non-ok result to the caller."""
-        error_response = {
-            "ok": False,
-            "error": {"code": "conflict", "message": "concurrent write"},
-            "request_id": "test-uuid-0002",
-        }
-        fetch_js = textwrap.dedent("""
-            function (url, opts) {
-              var u = (typeof url === 'string') ? url : (url && url.url) || '';
-              if (u.indexOf('/api/action') !== -1) {
-                return Promise.resolve({
-                  ok: false, status: 409,
-                  json: function () { return Promise.resolve(__RESPONSE__); }
-                });
-              }
-              return Promise.reject(new Error('no-network-in-test'));
-            }
-        """).replace("__RESPONSE__", json.dumps(error_response))
-        driver = textwrap.dedent("""
-            var role = J.state.roles.find(function (r) { return String(r.id) === 'r01'; });
-            var before = { status: role.status, routed: role.routed };
-            return J.actOnRole('mark_interested', role, {}).then(function (result) {
-              var after = J.state.roles.find(function (r) { return String(r.id) === 'r01'; });
-              return {
-                ok: result.ok,
-                error_code: (result.error && result.error.code) || null,
-                before_status: before.status,
-                before_routed: before.routed,
-                after_status: after.status,
-                after_routed: after.routed
-              };
-            });
-        """)
-        result = _boot_with_actOnRole(driver, fetch_js=fetch_js)
-        self.assertNotIn("__error__", result, f"node run failed: {result}")
-        self.assertFalse(result["ok"], f"failed POST must resolve ok=False: {result}")
-        self.assertEqual(result["error_code"], "conflict",
-                         f"error.code should be 'conflict': {result}")
-        # Reverted to prior status.
-        self.assertEqual(result["before_status"], result["after_status"],
-                         f"role status must revert: {result}")
-        self.assertEqual(result["before_routed"], result["after_routed"],
-                         f"role routed must revert: {result}")
-        self.assertEqual(result["after_status"], "pinged",
-                         f"after rollback, r01 must still be pinged: {result}")
+        """Real client handles HTTP errors without restoring other roles."""
+        assert NODE is not None
+        result = subprocess.run([NODE, str(UI_DIR / 'tests' / 'action_client_harness.cjs'),
+                                 'failures'], capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(json.loads(result.stdout)['ok'])
 
     # ----- Test 3: idempotent re-click is a no-op -----------------------
 
     def test_idempotent_reclick_is_a_noop(self):
-        """Two actOnRole calls with the SAME idempotency_key produce two
-        POSTs (client doesn't dedupe) but the second POST is marked
-        idempotency_replay=true by the server, and the local state is only
-        mutated once."""
-        response_body = {
-            "ok": True,
-            "request_id": "test-uuid-0003",
-            "applied_at": "2026-10-03T01:23:45.000Z",
-            "role": {
-                "id": "r02", "company": "Vercel", "role": "PM Intern, Frontend Platform",
-                "fit": 7.1, "source": "BuiltInNYC", "url": "https://example.com/vercel-r02",
-                "status": "interested", "routed": "int", "deadline": "",
-                "status_date": "2026-09-29"
-            },
-            "idempotency_replay": False,
-        }
-        replay_body = dict(response_body)
-        replay_body["idempotency_replay"] = True
-        fetch_js = textwrap.dedent("""
-            (function () {
-              globalThis.__count = 0;
-              globalThis.__keys = [];
-              return function (url, opts) {
-                var u = (typeof url === 'string') ? url : (url && url.url) || '';
-                if (u.indexOf('/api/action') !== -1) {
-                  globalThis.__count += 1;
-                  var body = JSON.parse(opts.body);
-                  globalThis.__keys.push(body.idempotency_key);
-                  var respBody = globalThis.__count > 1 ? __REPLAY__ : __FIRST__;
-                  return Promise.resolve({
-                    ok: true, status: 200,
-                    json: function () { return Promise.resolve(respBody); }
-                  });
-                }
-                return Promise.reject(new Error('no-network-in-test'));
-              };
-            })()
-        """).replace("__FIRST__", json.dumps(response_body)).replace("__REPLAY__", json.dumps(replay_body))
-        driver = textwrap.dedent("""
-            var role = J.state.roles.find(function (r) { return String(r.id) === 'r02'; });
-            // Build a single UUID key, fire two clicks with it.
-            var key = J._uuidKey('mark_interested', role);
-            function click() {
-              return fetch('/api/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'mark_interested', role_id: role.id,
-                                       payload: {}, source: 'ui', idempotency_key: key })
-              }).then(function (r) { return r.json(); }).then(function (b) {
-                if (b.ok && b.role) J._commitLocalState(b.role);
-                return b;
-              });
-            }
-            return click().then(function (first) {
-              return click().then(function (second) {
-                return {
-                  count: globalThis.__count,
-                  keys_equal: globalThis.__keys[0] === globalThis.__keys[1],
-                  first_ok: first.ok,
-                  first_replay: first.idempotency_replay === true,
-                  second_ok: second.ok,
-                  second_replay: second.idempotency_replay === true,
-                  after_status: J.state.roles.find(function (r) { return String(r.id) === 'r02'; }).status
-                };
-              });
-            });
-        """)
-        result = _boot_with_actOnRole(driver, fetch_js=fetch_js)
-        self.assertNotIn("__error__", result, f"node run failed: {result}")
-        self.assertEqual(result["count"], 2, "both POSTs fire (client doesn't dedupe)")
-        self.assertTrue(result["keys_equal"],
-                        f"both POSTs must carry the same idempotency_key: {result}")
-        self.assertTrue(result["first_ok"])
-        self.assertFalse(result["first_replay"],
-                         f"first call must NOT be a replay: {result}")
-        self.assertTrue(result["second_ok"])
-        self.assertTrue(result["second_replay"],
-                        f"second call (same key) MUST be marked replay: {result}")
-        self.assertEqual(result["after_status"], "interested",
-                         f"after both calls, r02 must be in Interested: {result}")
+        """Two clicks on one pending logical action use the real client once.
+
+        Server replay semantics are verified in the API suite, not fabricated
+        by a fetch stub here.
+        """
+        assert NODE is not None
+        result = subprocess.run(
+            [NODE, str(UI_DIR / 'tests' / 'action_client_harness.cjs'), 'duplicate'],
+            capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(json.loads(result.stdout)['ok'])
 
 
 if __name__ == "__main__":

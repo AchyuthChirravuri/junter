@@ -536,6 +536,7 @@
         status_date: r.status_date || r.date_found || '',
         blocked_reason: r.blocked_reason || d.blocked_reason || '',
         angle: r.notes || '',
+        gates: r.gates || d.gates || {},
         summary: d.company_summary || '',
         rubric_factors: d.rubric_factors || null,
         rubric_version: d.rubric_version ||
@@ -748,6 +749,7 @@
       Object.keys(attrs).forEach(function (k) {
         if (k === 'class') node.className = attrs[k];
         else if (k === 'text') node.textContent = attrs[k];
+        else if (k === 'disabled') node.disabled = !!attrs[k];
         else if (k === 'html') node.innerHTML = attrs[k];
         else if (k.indexOf('on') === 0) node.addEventListener(k.slice(2), attrs[k]);
         else if (k === 'href') node.setAttribute('href', attrs[k]);
@@ -816,7 +818,10 @@
     ]);
     var board = el('div', { class: 'pipeline' });
     cols.forEach(function (col) {
-      var rows = rolesForBoard.filter(function (r) { return r.status === col.key; });
+      var rows = rolesForBoard.filter(function (r) {
+        var status = r.routed === 'int' || r.status === 'interested' ? 'interested' : r.status;
+        return status === col.key;
+      });
       var colNode = el('div', { class: 'pipeline__col' }, [
         el('div', { class: 'pipeline__col-header' }, [
           el('span', null, [el('span', { class: 'dot dot--' + col.dot }) , ' ', col.label]),
@@ -851,7 +856,7 @@
   // the rest of the card (the role detail navigation still works).
   function _roleCardActions(r) {
     var wrap = el('div', { class: 'role-card__actions' });
-    var actions = _actionsForStatus(r.status);
+    var actions = _actionsForStatus(r.routed === 'int' ? 'interested' : r.status);
     actions.forEach(function (a) {
       var b = el('button', {
         class: 'role-card__action role-card__action--' + a.action,
@@ -861,7 +866,7 @@
           e.stopPropagation();
           actOnRole(a.action, r, {});
         }
-      }, a.label);
+      }, [a.label]);
       wrap.appendChild(b);
     });
     return wrap;
@@ -900,147 +905,172 @@
     }
   }
 
-  // Apply a mutation locally so the card moves columns on the next render.
-  // The caller passes the new status (and optional routed). For complete_gate
-  // and view, the action doesn't change which column the card is in — the
-  // optimistic update is a no-op.
+  // Per-role queues keep requests ordered, while all pending mutations remain
+  // visible. A failed operation removes only its own overlay, never another role
+  // or a newer action. Retries reuse the original immutable request body/key.
+  var _actionQueues = Object.create(null);
+  var _stateRef = null;
+  var _actionSequence = 0;
   function _optimisticApply(role, action, payload) {
     var next = Object.assign({}, role);
     switch (action) {
       case 'mark_interested': next.status = 'interested'; next.routed = 'int'; break;
-      case 'mark_packaged':   next.status = 'packaged';   next.routed = 'pkg'; break;
-      case 'mark_submitted':  next.status = 'submitted';  next.routed = 'sub'; break;
-      case 'mark_blocked':    next.status = 'blocked';    next.routed = ''; break;
-      case 'edit_notes':      next.angle = (payload && payload.notes) || ''; break;
+      case 'mark_packaged': next.status = 'packaged'; next.routed = 'pkg'; break;
+      case 'mark_submitted': next.status = 'submitted'; next.routed = 'sub'; break;
+      case 'mark_blocked': next.status = 'blocked'; next.routed = ''; break;
+      case 'edit_notes':
+        next.angle = payload.notes;
+        next.notes = payload.notes;
+        if (role.company_research) {
+          next.company_research = Object.assign({}, role.company_research, {
+            application_strategy: Object.assign({}, role.company_research.application_strategy || {}, { angle: payload.notes })
+          });
+        }
+        break;
       case 'complete_gate':
-        next.gates = Object.assign({}, role.gates || {}, payload || {});
+        next.gates = Object.assign({}, role.gates || {});
+        next.gates[payload.gate] = true;
         break;
-      case 'view':
-        break;
+      case 'view': break;
       default: return null;
     }
     return next;
   }
-
-  // The single UI entry point for the action surface. Returns a Promise that
-  // resolves to {ok, role, error} after the server responds.
-  //
-  //   1. Generate an idempotency_key (UUID) so double-clicks are no-ops.
-  //   2. Apply the mutation locally and re-render.
-  //   3. POST /api/action.
-  //   4. ok=true  -> keep local state.
-  //      ok=false -> revert and surface a toast with the error code.
-  //
-  // Exposed on window.__junter for the test harness.
-  function actOnRole(action, role, payload) {
-    payload = payload || {};
-    if (!role || role.id === undefined || role.id === null) {
-      return Promise.resolve({ ok: false, error: { code: 'role_not_found', message: 'role id missing' } });
-    }
-    // Pass the explicit values rather than relying on a non-existent outer
-    // closure in _uuidKey; this also keeps test calls deterministic.
-    var key = _uuidKey(action, role);
-    var prevState = _snapshotState();
-    var next = _optimisticApply(role, action, payload);
-    if (next) _commitLocalState(next);
-
-    return fetch('/api/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        action: action,
-        role_id: role.id,
-        payload: payload,
-        source: 'ui',
-        idempotency_key: key,
-        client_ts: new Date().toISOString()
-      })
-    })
-      .then(function (res) {
-        return res.json().catch(function () { return { ok: false, error: { code: 'invalid_response', message: 'non-JSON response' } }; })
-          .then(function (body) { return { status: res.status, body: body }; });
-      })
-      .then(function (resp) {
-        if (resp.status >= 200 && resp.status < 300 && resp.body && resp.body.ok) {
-          // Adopt the server's authoritative role (in case of a partial
-          // conflict reconciliation).
-          if (resp.body.role) _commitLocalState(resp.body.role);
-          return { ok: true, role: resp.body.role };
-        }
-        // Rollback on any non-2xx or ok=false.
-        _restoreLocalState(prevState);
-        var code = (resp.body && resp.body.error && resp.body.error.code) || ('http_' + resp.status);
-        _surfaceToast('Server rejected: ' + code + '. Reverted.');
-        return { ok: false, error: { code: code, message: (resp.body && resp.body.error && resp.body.error.message) || 'server rejected' } };
-      })
-      .catch(function (err) {
-        // Network failure -> rollback + toast.
-        _restoreLocalState(prevState);
-        _surfaceToast('Network error. Reverted.');
-        return { ok: false, error: { code: 'network_failure', message: err && err.message ? err.message : 'network' } };
-      });
+  function _currentRole(id) {
+    return _stateRef && _stateRef.roles.find(function (r) { return String(r.id) === String(id); });
   }
-
-  // Local-state helpers used by actOnRole and exposed on __junter so the
-  // test harness can drive them.
-  var _stateRef = null;
-  function _snapshotState() {
-    return _stateRef ? Object.assign({}, _stateRef) : null;
-  }
-  function _commitLocalState(roleOrRoles) {
+  function _commitLocalState(role) {
     if (!_stateRef) return;
-    if (Array.isArray(roleOrRoles)) {
-      _stateRef.roles = roleOrRoles;
-      return;
-    }
-    // Replace the matching role in-place.
-    var rid = roleOrRoles && roleOrRoles.id;
     _stateRef.roles = _stateRef.roles.map(function (r) {
-      return (r.id === rid || String(r.id) === String(rid)) ? Object.assign({}, r, roleOrRoles) : r;
+      return String(r.id) === String(role.id) ? role : r;
+    });
+    render(_stateRef);
+  }
+  function _snapshotState() { return _stateRef ? Object.assign({}, _stateRef) : null; }
+  function _restoreLocalState(prev) { if (prev && _stateRef) { Object.assign(_stateRef, prev); render(_stateRef); } }
+  function _renderActionQueue(q) {
+    var role = q.base;
+    q.pending.forEach(function (op) { role = _optimisticApply(role, op.action, op.payload); });
+    _commitLocalState(role);
+  }
+  function _authoritativeRole(raw, base) {
+    if (!raw || String(raw.id) !== String(base.id)) return null;
+    // Public client must reject an action response with real contact/URL data,
+    // just as it rejects an unsafe /api/data snapshot. Never echo server text.
+    if (looks_like_pii(JSON.stringify(raw))) return null;
+    var role = Object.assign({}, base, raw);
+    if (raw.fit_score !== undefined) role.fit = Number(raw.fit_score);
+    if (raw.notes !== undefined) role.angle = raw.notes;
+    if (role.company_research && raw.notes !== undefined) {
+      role = _optimisticApply(role, 'edit_notes', { notes: raw.notes });
+    }
+    return role;
+  }
+  function actOnRole(action, role, payload) {
+    var current = role && _currentRole(role.id);
+    payload = JSON.parse(JSON.stringify(payload || {}));
+    if (!current || !_optimisticApply(current, action, payload)) {
+      return Promise.resolve({ ok: false, error: { code: 'validation_failed' } });
+    }
+    var id = String(current.id);
+    var apiId = /^\d+$/.test(id) ? Number(id) : NaN;
+    if (!Number.isSafeInteger(apiId) || apiId < 1) {
+      _surfaceToast('Offline sample is read-only. Reload when the sandbox dataset is available to save actions.');
+      return Promise.resolve({ ok: false, error: { code: 'offline_sample' } });
+    }
+    var q = _actionQueues[id];
+    if (!q || !q.pending.length) {
+      q = _actionQueues[id] = { base: current, pending: [], latest: 0 };
+    }
+    var signature = action + ':' + JSON.stringify(payload);
+    var duplicate = q.pending.find(function (op) { return op.signature === signature; });
+    if (duplicate) return duplicate.promise;
+    var op = {
+      action: action, payload: payload, signature: signature,
+      sequence: ++_actionSequence, createdAt: Date.now(),
+      body: JSON.stringify({ action: action, role_id: apiId,
+        payload: payload, source: 'ui', idempotency_key: _uuidKey(), client_ts: new Date().toISOString() })
+    };
+    return _enqueueAction(q, op);
+  }
+  function _enqueueAction(q, op) {
+    q.latest = op.sequence;
+    op.promise = new Promise(function (resolve) { op.resolve = resolve; });
+    q.pending.push(op);
+    _renderActionQueue(q);
+    if (q.pending.length === 1) _sendAction(q, op);
+    return op.promise;
+  }
+  function _sendAction(q, op) {
+    // This bundle is the public synthetic client. No feature flag, query from
+    // location, token, or fallback may select a personal write path.
+    Promise.resolve().then(function () {
+      return fetch('/api/action?mode=sandbox', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: op.body
+      });
+    }).then(function (res) {
+      return res.json().then(function (body) { return { status: res.status, body: body }; });
+    }).then(function (resp) {
+      var body = resp.body || {};
+      var authoritative = _authoritativeRole(body.role, q.base);
+      var success = resp.status >= 200 && resp.status < 300 && body.ok === true && authoritative;
+      var conflict = resp.status === 409 && authoritative;
+      if (success || conflict) q.base = authoritative;
+      var allowed = ['validation_failed', 'role_not_found', 'conflict', 'rate_limited', 'unauthorized'];
+      var rawCode = body.error_code || (body.error && body.error.code);
+      var code = allowed.indexOf(rawCode) >= 0 ? rawCode : (resp.status === 409 ? 'conflict' : 'http_' + resp.status);
+      _finishAction(q, op, success ? { ok: true, role: authoritative, idempotency_replay: body.idempotency_replay === true } :
+        { ok: false, error: { code: code }, reconciled: !!conflict }, !!conflict);
+    }).catch(function () {
+      _finishAction(q, op, { ok: false, error: { code: 'network_failure' } }, false);
     });
   }
-  function _restoreLocalState(prev) {
-    if (prev && _stateRef) Object.assign(_stateRef, prev);
+  function _finishAction(q, op, result, conflict) {
+    q.pending.shift();
+    _renderActionQueue(q);
+    if (!result.ok && !conflict) {
+      var retryable = result.error.code === 'network_failure' || /^http_5/.test(result.error.code);
+      var retry = retryable ? function () {
+        if (Date.now() - op.createdAt >= 60000) {
+          _surfaceToast('Retry window expired. Reload and review server state before taking a new action.');
+          return Promise.resolve({ ok: false, error: { code: 'retry_expired' } });
+        }
+        if (q.pending.length || q.latest !== op.sequence || _actionQueues[String(q.base.id)] !== q) {
+          _surfaceToast('A newer action exists. Review the current role before trying again.');
+          return Promise.resolve({ ok: false, error: { code: 'superseded' } });
+        }
+        q.base = _currentRole(q.base.id);
+        return _enqueueAction(q, op);
+      } : null;
+      result.retry = retry;
+      _surfaceToast(retryable ? 'Action failed. Reverted this change. Retry when connected.' :
+        'Action rejected (' + result.error.code + '). Reverted this change. Review the role and try again.', retry);
+    }
+    op.resolve(result);
+    if (q.pending.length) _sendAction(q, q.pending[0]);
   }
-  function _surfaceToast(text) {
-    // Minimal toast: a transient banner at the top of the page. The test
-    // harness doesn't render toasts (it just checks that the function is
-    // called); the UI uses DOM.
+  function _surfaceToast(text, retry) {
     try {
       var host = document.getElementById('toast-host');
       if (!host) {
-        host = document.createElement('div');
-        host.id = 'toast-host';
-        host.className = 'toast-host';
+        host = document.createElement('div'); host.id = 'toast-host'; host.className = 'toast-host';
         document.body.appendChild(host);
       }
-      var n = document.createElement('div');
-      n.className = 'toast toast--error';
-      n.textContent = text;
+      var n = document.createElement('div'); n.className = 'toast toast--error';
+      n.setAttribute('role', 'alert'); n.textContent = text;
+      if (retry) n.appendChild(el('button', { type: 'button', text: 'Retry', onclick: function () {
+        n.remove(); retry();
+      } }));
       host.appendChild(n);
-      setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 4000);
-    } catch (_) { /* no DOM in tests; ignore */ }
+      // Retry remains available until explicitly dismissed or selected.
+      if (!retry) setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 6000);
+    } catch (_) { /* headless DOM */ }
   }
-  // UUID v4 — fine for client-side keys. crypto.randomUUID is the modern
-  // path; the Math.random fallback covers browsers without it (very old).
-  // Accepts optional (action, role) so the test harness can call it
-  // directly; otherwise reads them from the closure.
-  function _uuidKey(action_, role_) {
-    var a = (typeof action_ === 'string') ? action_ : 'action';
-    var r = role_ || { id: 'role' };
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return 'ui-' + a.replace(/_/g, '-') + '-' + r.id + '-' + crypto.randomUUID();
-    }
-    // RFC4122 v4-ish fallback; not cryptographically strong but unique enough.
-    var hex = '0123456789abcdef';
-    var s = '';
-    for (var i = 0; i < 36; i++) {
-      if (i === 8 || i === 13 || i === 18 || i === 23) s += '-';
-      else if (i === 14) s += '4';
-      else if (i === 19) s += hex[(Math.random() * 4) | (8 & 0x3)];
-      else s += hex[(Math.random() * 16) | 0];
-    }
-    return 'ui-' + a.replace(/_/g, '-') + '-' + r.id + '-' + s;
+  function _uuidKey() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.floor(Math.random() * 16); return (c === 'x' ? r : (r & 3) | 8).toString(16);
+    });
   }
 
   function renderDeadlineRail(state, mount) {
@@ -1152,7 +1182,17 @@
             var ul = el('ul', { class: 'gate-list' });
             ['Backgrounder read', 'Resume drafted', 'Cover letter drafted', 'References notified', 'Submission logged'].forEach(function (g, i) {
               ul.appendChild(el('li', { class: 'gate-list__item' }, [
-                el('span', { class: 'gate-list__check' + (i < 2 ? ' is-on' : '') }),
+                (function () {
+                  var gate = ['backgrounder_read', 'resume_drafted', 'cover_letter_drafted', 'references_notified', 'submission_logged'][i];
+                  var done = !!(r.gates && r.gates[gate]) ||
+                    (i < 2 && (r.routed === 'pkg' || r.routed === 'sub')) ||
+                    ((i === 2 || i === 4) && r.routed === 'sub');
+                  return el('button', { type: 'button',
+                    class: 'gate-list__check' + (done ? ' is-on' : ''),
+                    'aria-label': 'Complete ' + g, disabled: done,
+                    onclick: function () { actOnRole('complete_gate', r, { gate: gate }); }
+                  });
+                })(),
                 el('span', { text: g })
               ]));
             });
@@ -1270,7 +1310,7 @@
           // shows the new value; T20 will replace this stub with a routed
           // edit-notes flow that handles the inline editor in the backgrounder.
           var note = window.prompt('Edit notes for role ' + role.id + ':', role.angle || '');
-          if (note !== null) postStatusAction('edit_notes', role.id, { note: note });
+          if (note !== null) postStatusAction('edit_notes', role.id, { notes: note });
         },
         text: 'Edit Notes' })
     ]);
@@ -1587,7 +1627,7 @@
         type:  'button',  text: 'Cancel'
       });
       save.addEventListener('click', function () {
-        postEditNotes(role.id, textarea.value, strat, renderAngleReadOnly, renderAngleEditor);
+        postEditNotes(role.id, textarea.value);
       });
       cancel.addEventListener('click', function () { renderAngleReadOnly(); });
       angleMount.appendChild(textarea);
@@ -1656,61 +1696,18 @@
     mount.appendChild(grid);
   }
 
-  // POST /api/action with action='edit_notes' (T19 wires the call; T20
-  // implements the handler). On a 2xx response the local angle field is
-  // updated optimistically and the UI swaps back to the read-only view.
-  // On any other response the editor stays open with a "Server rejected"
-  // toast so the operator's text isn't silently dropped (per refactor-spec
-  // §3.5 "ok: false -> rolls back + toast").
-  function postEditNotes(roleId, text, strat, renderReadOnly, renderEditor) {
-    return postStatusAction('edit_notes', roleId, { note: text }, function (resp) {
-      if (resp && resp.ok === true) {
-        strat.angle = text;
-        renderReadOnly();
-      } else {
-        renderEditor(text);
-        console.warn('POST /api/action rejected:', resp);
-      }
-    });
+  // The queue updates/reconciles the active screen; callbacks into a detached
+  // editor would otherwise repaint stale text after a newer action.
+  function postEditNotes(roleId, text) {
+    return postStatusAction('edit_notes', roleId, { notes: text });
   }
 
-  // Generic /api/action POST stub. T19 makes the call; T20 implements the
-  // handler with the full JSON Schema (see refactor-spec §3.2-3.4).
-  // `onResult` runs on the success path so callers can update their local
-  // state. On any non-2xx or runtime failure we log and bail; until T20
-  // lands the real handler the optimistic local update keeps the operator's
-  // input rather than dropping it.
+  // All supported controls share the same optimistic client and sandbox path.
   function postStatusAction(action, roleId, payload, onResult) {
-    payload = payload || {};
-    var body = JSON.stringify({
-      action:           action,
-      role_id:          roleId,
-      payload:          payload,
-      source:           'ui',
-      idempotency_key:  't19-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
-      client_ts:        new Date().toISOString()
+    return actOnRole(action, _currentRole(roleId), payload).then(function (result) {
+      if (typeof onResult === 'function') onResult(result);
+      return result;
     });
-    if (typeof fetch !== 'function') {
-      if (typeof onResult === 'function') onResult({ ok: true, dry_run: true });
-      return;
-    }
-    fetch('/api/action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: body
-    })
-      .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(function (resp) {
-        if (typeof onResult === 'function') onResult(resp);
-      })
-      .catch(function (err) {
-        console.warn('POST /api/action failed for ' + action + ':', err.message);
-        // T20 will replace this with the spec's "ok: false -> rolls back + toast".
-        if (typeof onResult === 'function') onResult({ ok: true, offline: true });
-      });
   }
 
   function renderRunHealth(state, mount) {

@@ -1,6 +1,29 @@
 /* Junter — Design Tokens v1, emitted 1:1 from docs/design-tokens.md.
    Do not invent tokens. Do not rename. Do not use raw hex where a token exists. */
 
+/* Action feedback remains visible above the active screen. */
+.toast-host {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 100;
+  max-width: min(30rem, calc(100vw - var(--space-4) * 2));
+}
+.toast {
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-overlay);
+}
+.toast button {
+  margin-left: var(--space-3);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
 :root {
   /* Typography */
   --text-display: 32px;
