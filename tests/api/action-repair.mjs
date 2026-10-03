@@ -107,6 +107,22 @@ test('production synthetic demo rejects unauthenticated POST before persistence'
   assert.equal(result.statusCode, 403);
   assert.equal(result.body.error.code, 'public_demo_read_only');
 });
+test('synthetic writes fail closed outside Preview before validation or persistence', async () => {
+  for (const environment of ['development', undefined, 'staging']) {
+    reset();
+    process.env.JUNTER_MODE = 'synthetic';
+    if (environment !== undefined) process.env.VERCEL_ENV = environment;
+    process.env.JUNTER_SYNTHETIC_WRITES_ENABLED = 'true';
+    process.env.JUNTER_SYNTHETIC_WRITE_TOKEN = 'test-only-protected-token';
+    let applies = 0;
+    globalThis.__junterSyntheticStore = { async apply() { applies++; return { status: 200, role: state.roles[0] }; } };
+
+    const result = await invoke({ invalid: true }, { 'x-junter-token': 'test-only-protected-token' });
+    assert.equal(result.statusCode, 403, `environment ${environment ?? 'unset'} must be rejected`);
+    assert.equal(result.body.error.code, 'protected_preview_required');
+    assert.equal(applies, 0);
+  }
+});
 test('protected preview rejects free-form notes and reasons without persistence', async () => {
   reset();
   process.env.JUNTER_MODE = 'synthetic';

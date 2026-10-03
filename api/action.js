@@ -102,6 +102,12 @@ function syntheticWriteAuthorization(req, env = process.env) {
   if (env.VERCEL_ENV === 'production') {
     return { ok: false, status: 403, code: 'public_demo_read_only', message: 'public synthetic demo is read-only' };
   }
+  // Durable synthetic writes are deployed only to protected Vercel Preview.
+  // An exact allowlist keeps development, unset, and unknown environments
+  // outside the write path before request validation or store access.
+  if (env.VERCEL_ENV !== 'preview') {
+    return { ok: false, status: 403, code: 'protected_preview_required', message: 'synthetic writes require protected preview mode' };
+  }
   if (env.JUNTER_SYNTHETIC_WRITES_ENABLED !== 'true') {
     return { ok: false, status: 403, code: 'protected_preview_required', message: 'synthetic writes require protected preview mode' };
   }
