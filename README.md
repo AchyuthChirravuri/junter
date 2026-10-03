@@ -130,6 +130,10 @@ fully-functional reading-layer UI prototype running against synthetic
 data. Metrics (roles processed, hours saved, reply rates) will be
 published here once the system has accumulated a meaningful baseline.
 
+## Verification
+
+The repository has a stdlib-only pre-deploy verification suite covering the approved Figma export, CSS tokens, synthetic-payload privacy, action-contract behavior, visible product mechanisms, and screenshot baselines. Run `bash tests/verify/run_all.sh` from the repository root before an authorized deployment. This offline gate reports `LIVE_ACCEPTANCE=PENDING`; post-deploy probes require the exact new deployment URL and source SHA, and are deliberately not counted as passed beforehand. See `docs/pre-deploy-checklist.md` for the 12 evidence-backed release checks.
+
 ## Guardrails worth reading
 
 The rules that make this system trustworthy are in the PRD, but the
