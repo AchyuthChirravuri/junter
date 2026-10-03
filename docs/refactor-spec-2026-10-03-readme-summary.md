@@ -1,0 +1,3 @@
+# What changed in this refactor (100 words)
+
+The Junter reading-layer UI now reads as a public demo on synthetic data at `junter-xi.vercel.app`, with operator data on a separate token-gated Vercel project — making the public/private split structural, not policy. The UI became an alternative action surface: a single `POST /api/action` endpoint takes marks, notes, and gate completions from both UI and Telegram (one write surface, one audit log). Pipeline Board's Interested-column bug is fixed; Daily Digest, Run Health, Rubric, and Telegram Mirror populate from widened `/api/data`; Account Backgrounder ships as the most visually rich screen with Skill Gap, Fitment, and Application Strategy.

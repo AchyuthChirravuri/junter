@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Junter — Reading Layer (Prototype)</title>
-  <meta name="description" content="Static HTML prototype of the Junter reading layer — Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail, Run Health, Rubric &amp; Calibration, Telegram Mirror. Reads live tracker JSON from the same-origin /api/data endpoint; falls back to an embedded synthetic dataset if the API is unavailable, malformed, or reports an error." />
+  <meta name="description" content="Static HTML prototype of the Junter reading layer — Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail, Run Health, Job Boards, Rubric &amp; Calibration, Telegram Mirror. Reads live tracker JSON from the same-origin /api/data endpoint; falls back to an embedded synthetic dataset if the API is unavailable, malformed, or reports an error." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <noscript>
     <div style="padding: var(--space-7); font-family: -apple-system, sans-serif;">
       <h1>Junter — JavaScript required</h1>
-      <p>This prototype renders all 8 screens via hash routing. Please enable JavaScript or open the file in a browser with JS enabled.</p>
-      <p>Once loaded, the 8 screens are: Pipeline Board, Deadline Rail, Focus, Daily Digest, Role Detail (per role id), Run Health, Rubric &amp; Calibration, Telegram Mirror.</p>
+      <p>This prototype renders all 10 screens via hash routing. Please enable JavaScript or open the file in a browser with JS enabled.</p>
+      <p>Once loaded, the 10 screens are: Pipeline Board, Deadline Rail, Focus, Daily Digest, Research, Role Detail (per role id), Run Health, Job Boards, Rubric &amp; Calibration, Telegram Mirror.</p>
     </div>
   </noscript>
   <div class="app">
@@ -24,11 +24,13 @@
         <li><a class="sidebar__link" href="#/deadline" data-route="deadline">Deadline Rail</a></li>
         <li><a class="sidebar__link" href="#/focus" data-route="focus">Focus</a></li>
         <li><a class="sidebar__link" href="#/digest" data-route="digest">Daily Digest</a></li>
+        <li><a class="sidebar__link" href="#/research" data-route="research">Research</a></li>
         <li><a class="sidebar__link" href="#/run-health" data-route="run-health">Run Health</a></li>
+        <li><a class="sidebar__link" href="#/boards" data-route="boards">Job Boards</a></li>
         <li><a class="sidebar__link" href="#/rubric" data-route="rubric">Rubric &amp; Calibration</a></li>
         <li><a class="sidebar__link" href="#/telegram" data-route="telegram">Telegram Mirror</a></li>
       </ul>
-      <p class="sidebar__hint">→ see all 8 screens in the wireframe file</p>
+      <p class="sidebar__hint">→ see all 10 screens in the wireframe file</p>
       <div style="margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--color-border); font-size: var(--text-meta); color: var(--color-text-secondary);">
         <p style="margin: 0 0 var(--space-3) 0;"><strong>Data source:</strong> <code style="font-family: ui-monospace, monospace;">/api/data</code> (same-origin)</p>
         <p style="margin: 0 0 var(--space-3) 0;">Falls back to an embedded synthetic dataset if the API is unavailable, returns a non-2xx status, is malformed, reports an error, or carries no roles.</p>
@@ -49,10 +51,19 @@
       <section id="screen-digest" class="screen" aria-labelledby="digest-title">
         <div class="screen__mount"></div>
       </section>
+      <section id="screen-research" class="screen" aria-labelledby="research-title">
+        <div class="screen__mount"></div>
+      </section>
       <section id="screen-role" class="screen" aria-labelledby="role-title">
         <div class="screen__mount"></div>
       </section>
+      <section id="screen-backgrounder" class="screen" aria-labelledby="backgrounder-title">
+        <div class="screen__mount"></div>
+      </section>
       <section id="screen-run-health" class="screen" aria-labelledby="run-health-title">
+        <div class="screen__mount"></div>
+      </section>
+      <section id="screen-boards" class="screen" aria-labelledby="boards-title">
         <div class="screen__mount"></div>
       </section>
       <section id="screen-rubric" class="screen" aria-labelledby="rubric-title">
@@ -72,8 +83,11 @@
       #/deadline       -> Deadline Rail (3 urgency tiers, red/orange/blue)
       #/focus          -> Focus — Interested (sorted by deadline, soft gate checklist)
       #/digest         -> Daily Digest (promoted + rejected-with-reasons)
+      #/research       -> Research hub (4 summary cards: tracker rows, companies, drafts, digests)
       #/role/<id>      -> Role Detail (rubric factor bars + history timeline)
+      #/role/<id>/backgrounder -> Account Backgrounder (Gap + Fitment + Application Strategy; first-class screen)
       #/run-health     -> Run Health (cron status, errors block)
+      #/boards         -> Job Boards (per-source breakdown; click -> Pipeline filtered to that source)
       #/rubric         -> Rubric & Calibration (3-column grid + principle footer)
       #/telegram       -> Telegram Mirror (failed-only filter + retry recovery)
 

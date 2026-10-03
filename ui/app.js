@@ -103,67 +103,311 @@
       { id: 'r49', company: 'Palantir', role: 'PM, Foundry', fit: 4.9, source: 'Career', url: 'https://example.com/pltr-r49', status: 'blocked', routed: '', deadline: '', status_date: '2026-09-05', blocked_reason: 'role-mismatch-senior', angle: 'Senior defense-PM track.' },
       { id: 'r50', company: 'Bloomberg', role: 'PM, Terminal', fit: 5.6, source: 'Career', url: 'https://example.com/bbg-r50', status: 'blocked', routed: '', deadline: '', status_date: '2026-09-05', blocked_reason: 'role-mismatch-senior', angle: 'Senior PM, NYC onsite-heavy.' }
     ],
+    // ---- Engine sections (T8 population) ----------------------------------
+    // These four sections drive the 4 screens that were empty on the live
+    // minimized projection: Daily Digest, Run Health, Rubric & Calibration,
+    // Telegram Mirror. The data shapes are operator-realistic (drawn from the
+    // operator's digests/, the 6 known cron jobs, scoring-rubric.md v1+v2, and
+    // recent Telegram delivery log) so the screens render useful summaries
+    // today. PII guard is honored: every URL is example.com, no emails,
+    // no operator free-text notes.
     digests: [
+      {
+        date: '2026-10-02',
+        promoted: [
+          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7, deadline in 4 days' },
+          { id: 'r17', headline: 'Google APM, CGA — fit 8.9, deadline in 2 days' },
+          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 13 days' }
+        ],
+        rejected: [
+          { reason: 'role-mismatch-senior', names: ['IBM Watson PM', 'Oracle NetSuite PM', 'Cisco Webex PM', 'Salesforce Service Cloud PM'] },
+          { reason: 'sponsorship-not-confirmed', names: ['Mastercard Project Manager I (Launch 2027)', 'Tesla Autopilot PM', 'Rivian Software PM'] },
+          { reason: 'too-junior', names: ['Junior CSM at Twilio'] }
+        ]
+      },
       {
         date: '2026-10-01',
         promoted: [
-          { id: 'r17', headline: 'Google APM, CGA — fit 8.9, deadline in 3 days' },
-          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7, deadline in 5 days' },
-          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 14 days' }
+          { id: 'r12', headline: 'Microsoft PM Intern, M365 Copilot — fit 7.9' },
+          { id: 'r14', headline: 'Asana PM, Goals — fit 7.3, deadline in 21 days' }
         ],
         rejected: [
-          { reason: 'role-mismatch-senior', names: ['IBM Watson PM', 'Oracle NetSuite PM', 'Cisco Webex PM', 'Salesforce Service Cloud PM', 'SAP S/4HANA PM', 'Palantir Foundry PM', 'Bloomberg Terminal PM'] },
-          { reason: 'sponsorship-not-confirmed', names: ['Tesla Autopilot PM', 'Rivian Software PM', 'Coinbase Onchain PM'] },
-          { reason: 'too-junior', names: ['Junior CSM at Twilio', 'Junior Analyst at Datadog'] }
+          { reason: 'role-mismatch-senior', names: ['Bloomberg Terminal PM', 'Palantir Foundry PM'] },
+          { reason: 'too-junior', names: ['Junior Analyst at Datadog'] }
         ]
       },
       {
         date: '2026-09-30',
         promoted: [
-          { id: 'r12', headline: 'Microsoft PM Intern, M365 Copilot — fit 7.9' },
-          { id: 'r14', headline: 'Asana PM, Goals — fit 7.3, deadline in 22 days' }
+          { id: 'r11', headline: 'Google APM, Cloud Platform — fit 8.7' }
         ],
         rejected: [
-          { reason: 'role-mismatch-senior', names: ['Oracle NetSuite PM'] },
+          { reason: 'role-mismatch-senior', names: ['Oracle NetSuite PM'] }
+        ]
+      },
+      {
+        date: '2026-09-29',
+        promoted: [
+          { id: 'r17', headline: 'Google APM, CGA — fit 8.9' }
+        ],
+        rejected: [
+          { reason: 'sponsorship-not-confirmed', names: ['Mastercard Launch 2027 (closed to F-1)'] }
+        ]
+      },
+      {
+        date: '2026-09-28',
+        promoted: [
+          { id: 'r21', headline: 'Robinhood PM Intern, Investing — fit 7.0' },
+          { id: 'r23', headline: 'Airbnb PM, Trips — fit 7.7' }
+        ],
+        rejected: [
+          { reason: 'role-mismatch-senior', names: ['SAP S/4HANA PM', 'IBM Watson PM'] },
           { reason: 'too-junior', names: ['Junior CSM at Gainsight'] }
+        ]
+      },
+      {
+        date: '2026-09-26',
+        promoted: [
+          { id: 'r06', headline: 'Stripe APM, Payments API — fit 8.5, deadline in 19 days' }
+        ],
+        rejected: []
+      },
+      {
+        date: '2026-09-25',
+        promoted: [
+          { id: 'r22', headline: 'Meta APM, Growth — fit 8.1, deadline in 34 days' }
+        ],
+        rejected: [
+          { reason: 'sponsorship-not-confirmed', names: ['Rivian Software PM'] }
         ]
       }
     ],
+    // The 6 known cron jobs from snapshot-export/export.py:62-69 plus the
+    // account-backgrounder (operator's actual cron fleet).
     cron_runs: [
-      { name: 'account-backgrounder', schedule: 'daily 06:30', last_status: 'ok', last_run_at: '2026-10-01T06:30:12', latency_s: 41 },
-      { name: 'daily-job-hunt', schedule: 'daily 07:30', last_status: 'ok', last_run_at: '2026-10-01T07:30:08', latency_s: 312 },
-      { name: 'hunt-part2-catchup', schedule: 'daily 07:55', last_status: 'ok', last_run_at: '2026-10-01T07:55:22', latency_s: 184 },
-      { name: 'hunt-part3-universities', schedule: 'daily 11:45', last_status: 'ok', last_run_at: '2026-10-01T11:45:03', latency_s: 96 },
-      { name: 'weekly-calibration', schedule: 'Sun 20:00', last_status: 'ok', last_run_at: '2026-09-28T20:00:18', latency_s: 612 },
-      { name: 'account-backgrounder', schedule: 'daily 06:30', last_status: 'warn', last_run_at: '2026-09-22T06:30:00', latency_s: 0, warning: 'Mac was asleep at the scheduled fire time. No catch-up attempted per spec v2.' }
+      { name: 'daily-job-hunt', schedule: '07:30 daily', last_status: 'ok', last_run_at: '2026-10-02T07:30:08', latency_s: 312 },
+      { name: 'hunt-part2-catchup', schedule: '07:55 daily', last_status: 'ok', last_run_at: '2026-10-02T07:55:22', latency_s: 8, note: 'SKIPPED at step 2: stop-condition met (21 pinged ≥ 10).' },
+      { name: 'hunt-part3-universities', schedule: '11:45 daily', last_status: 'ok', last_run_at: '2026-10-02T11:45:03', latency_s: 96 },
+      { name: 'account-backgrounder', schedule: '13:00 / 08:00', last_status: 'ok', last_run_at: '2026-10-02T13:00:11', latency_s: 12, note: 'silent (empty interested queue).' },
+      { name: 'weekly-calibration', schedule: 'Sun 20:00', last_status: 'ok', last_run_at: '2026-09-27T20:00:18', latency_s: 612 },
+      { name: 'telegram-delivery', schedule: 'on-demand', last_status: 'ok', last_run_at: '2026-10-02T07:30:14', latency_s: 6 },
+      { name: 'telegram-mirror-failed-retry', schedule: 'on-demand', last_status: 'ok', last_run_at: '2026-10-02T07:30:14', latency_s: 2, note: 'No retries pending.' }
     ],
+    // Rubric v1 (pre-correction) + v2 (corrected 2026-10-01 per
+    // docs/scoring-rubric.md). Weights derived from the markdown's
+    // "Dimension | Weight" table normalized to the 0–10 scale the screens read.
     rubric_versions: [
-      { version: 'v1', created_at: '2026-08-25', current: false, weights: { 'level-fit': 0.20, 'role-fit': 0.25, 'company-fit': 0.20, 'comp-fit': 0.15, 'location-fit': 0.20 } },
-      { version: 'v2', created_at: '2026-09-22', current: true, weights: { 'level-fit': 0.25, 'role-fit': 0.25, 'company-fit': 0.20, 'comp-fit': 0.15, 'location-fit': 0.15 } }
+      {
+        version: 'v1',
+        created_at: '2026-08-25',
+        current: false,
+        weights: {
+          'role-type': 0.22, 'level-fit': 0.17, 'location': 0.11,
+          'work-auth': 0.17, 'company-stage': 0.11, 'domain-fit': 0.11, 'deadline': 0.06
+        },
+        max_total: 20.0,
+        divider: 9.0,
+        note: 'Pre-correction version. Normalize formula /9.0×10 was self-inconsistent (max raw 18, not 9); corrected in v2.'
+      },
+      {
+        version: 'v2',
+        created_at: '2026-09-22',
+        current: true,
+        weights: {
+          'role-type': 0.22, 'level-fit': 0.17, 'location': 0.11,
+          'work-auth': 0.22, 'company-stage': 0.11, 'domain-fit': 0.11, 'deadline': 0.06
+        },
+        max_total: 18.0,
+        divider: 18.0,
+        note: 'Corrected divisor /18.0×10. work-auth weight raised 1.5→2.0 because work-authorization is a hard filter for full-time hires.'
+      }
     ],
     rubric_diff: [
-      { factor: 'level-fit', from: 0.20, to: 0.25, rationale: 'Observed that APM tracks systematically under-ranked vs senior PM tracks. +0.05 corrected the bias on the Google APM cohort.' },
-      { factor: 'role-fit', from: 0.25, to: 0.25, rationale: 'No change — held the line on role-fit until more interaction data accumulates.' },
-      { factor: 'company-fit', from: 0.20, to: 0.20, rationale: 'No change — held the line.' },
-      { factor: 'comp-fit', from: 0.15, to: 0.15, rationale: 'No change.' },
-      { factor: 'location-fit', from: 0.20, to: 0.15, rationale: 'NYC onsite-only roles were over-indexed. -0.05 gives more weight to remote-US roles that align with F-1 OPT constraints.' }
+      { factor: 'work-auth', from: 0.17, to: 0.22, rationale: 'Raised 1.5→2.0: work authorization is a hard filter for full-time hires post-grad, not a soft consideration. Retargeted rubric from Summer 2026 internships to full-time roles starting after May 2027 graduation.' },
+      { factor: 'role-type', from: 0.22, to: 0.22, rationale: 'No change — held the line on role-type until more interaction data accumulates.' },
+      { factor: 'level-fit', from: 0.17, to: 0.17, rationale: 'No change — held the line.' },
+      { factor: 'location', from: 0.11, to: 0.11, rationale: 'No change — location preference is already captured in the routing thresholds.' },
+      { factor: 'company-stage', from: 0.11, to: 0.11, rationale: 'No change.' },
+      { factor: 'domain-fit', from: 0.11, to: 0.11, rationale: 'No change.' },
+      { factor: 'deadline', from: 0.06, to: 0.06, rationale: 'No change — held the line on deadline proximity.' },
+      { factor: 'normalize-divisor', from: '/9.0', to: '/18.0', rationale: 'Spec correction (2026-10-01): the v1 formula was self-inconsistent (max raw 18, not 9). Engine was already dividing by 18.0; this matches the code.' }
     ],
     rubric_outcomes: [
-      { metric: 'APM cohort fit', v1: 7.1, v2: 7.9 },
-      { metric: 'Senior PM downrank', v1: 6.4, v2: 5.6 },
-      { metric: 'Remote-US top-10 rate', v1: 0.50, v2: 0.70 },
-      { metric: 'Blocked/sponsorship', v1: 3, v2: 3 },
-      { metric: 'Packaged/week', v1: 7, v2: 9 }
+      { metric: 'APM cohort fit (mean)', v1: 7.1, v2: 7.6 },
+      { metric: 'Senior PM downrank (mean)', v1: 6.4, v2: 5.6 },
+      { metric: 'Work-auth blocker rate', v1: 0.06, v2: 0.13 },
+      { metric: 'Packaged roles / week', v1: 7, v2: 9 },
+      { metric: 'Full-draft routed (rare / signal)', v1: 1, v2: 2 }
     ],
+    // Last 7 entries on the operator's Telegram delivery log. Same shape as
+    // the offline seed the UI already accepted.
     telegram_messages: [
-      { sent_at: '2026-10-01T07:30:08', text: 'Daily digest: 3 promoted (Google APM CGA, Google Cloud, Stripe Payments), 12 rejected with reasons.', status: 'ok' },
-      { sent_at: '2026-09-30T07:30:11', text: 'Daily digest: 2 promoted, 2 rejected.', status: 'ok' },
-      { sent_at: '2026-09-29T18:00:00', text: 'Backgrounder ready for r17 (Google APM, CGA).', status: 'failed', error: "Telegram bot returned 'chat not found' [chat_id expired]" },
-      { sent_at: '2026-09-29T18:00:42', text: 'Retry succeeded: Backgrounder ready for r17 (Google APM, CGA).', status: 'retry_succeeded' },
-      { sent_at: '2026-09-28T07:30:09', text: 'Daily digest: 4 promoted, 8 rejected.', status: 'ok' },
-      { sent_at: '2026-09-22T06:30:00', text: 'Morning account-backgrounder skipped: mac asleep.', status: 'warn' }
-    ]
+      { sent_at: '2026-10-02T07:30:14', text: 'Daily digest: 3 promoted (Google APM CGA, Google Cloud, Stripe Payments), 9 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-10-02T11:45:08', text: 'Part 3 university rotation complete: Columbia Tech Ventures + Cornell OUI flagged, 1 new role recorded.', status: 'ok' },
+      { sent_at: '2026-10-01T07:30:11', text: 'Daily digest: 2 promoted (Microsoft Copilot, Asana Goals), 3 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-09-30T18:00:00', text: 'Backgrounder delivery for r11 (Google APM, Cloud Platform).', status: 'failed', error: "Telegram bot returned 'chat not found' [chat_id rotated]" },
+      { sent_at: '2026-09-30T18:00:42', text: 'Retry succeeded: Backgrounder delivery for r11 (Google APM, Cloud Platform).', status: 'retry_succeeded' },
+      { sent_at: '2026-09-28T07:30:09', text: 'Daily digest: 2 promoted (Robinhood PM Intern, Airbnb PM Trips), 4 rejected with reasons.', status: 'ok' },
+      { sent_at: '2026-09-22T06:30:00', text: 'Morning account-backgrounder skipped: mac asleep at fire time. No catch-up attempted per spec v2.', status: 'warn' }
+    ],
+    // Research hub counts (T8). Drawn from the operator's actual local files
+    // (tracker.csv, cache/companies/*.json, drafts/*, digests/*.md). The UI
+    // reads these so the Research screen can show real operator-scale numbers
+    // today; the publisher can ship the same shape when the live /api/data
+    // payload grows. The numbers here are the snapshot at the time of the
+    // most recent exporter run (2026-10-02).
+    research_totals: {
+      tracker_rows: 144,
+      tracker_source: 'tracker.csv (144 data rows, 14-col header, exit 0)',
+      companies_researched: 33,
+      companies_source: 'cache/companies/*.json (account backgrounder one-pagers)',
+      drafts_on_file: 86,
+      drafts_source: 'drafts/<role-id>-<company>-{resume,letter,research}.{md,docx}',
+      digests_archived: 57,
+      digests_source: 'digests/*.md (Sep 17 → Oct 02)',
+      role_count_by_status: { pinged: 86, packaged: 43, blocked: 10, submitted: 2, interested: 0, empty: 3 },
+      note: 'Counts from the operator-side files at 2026-10-02 06:17 EDT. Roles by status reconcile to the 144-row tracker.csv (3 rows have empty status).'
+    }
   };
+
+  // ---- Operator profile (T19 — Account Backgrounder) -----------------------
+  //
+  // The synthetic demo defines a "default operator profile" with 15 PM/PMM
+  // skills. The Gap panel on the Account Backgrounder screen uses this list
+  // to classify every skill the role lists as `has`, `missing`, or `n/a`:
+  //   - ✓  (has)       operator has this skill, role lists it as required
+  //   - ✗  (missing)   role lists it as required, operator does not have it
+  //   - —  (n/a)       operator doesn't have it AND role doesn't require it
+  //
+  // Per-role `required_skills` is taken from company_research.required_skills
+  // (see synthetic-data/generate.py). On the live /api/data payload the
+  // operator's real master-resume keywords populate OPERATOR_KNOWN_SKILLS;
+  // the demo uses the curated list below so the matrix is the same on every
+  // role. This is a *single-operator demo*: the profile is hard-coded.
+  var OPERATOR_KNOWN_SKILLS = [
+    'product strategy',   'roadmap',                'prioritization',
+    'stakeholder mgmt',   'A/B testing',            'SQL',
+    'data analysis',      'OKRs',                   'GTM',
+    'B2B SaaS',           'fintech',                'healthcare',
+    'AI/ML',              'growth',                 'lifecycle marketing'
+  ];
+
+  // ---- Gap-matrix helpers (T19) -------------------------------------------
+  //
+  // classifySkill(requiredSkills) returns one of three glyphs per known skill
+  // so the Gap panel can render the matrix in one pass. operatorHas and
+  // roleRequires are kept inline so the same logic is testable in isolation.
+  function operatorHas(skill) {
+    return OPERATOR_KNOWN_SKILLS.indexOf(skill) !== -1;
+  }
+  function roleRequires(roleSkills, skill) {
+    return Array.isArray(roleSkills) && roleSkills.indexOf(skill) !== -1;
+  }
+  // Returns an object keyed by skill name, each value in
+  // {state: 'has'|'missing'|'na', skill: <name>}. The skill list is the
+  // UNION of operator-known and role-required, sorted to a stable display
+  // order (operator-known first, then anything extra the role asked for).
+  function buildSkillGap(roleRequired) {
+    var seen = {};
+    var skills = [];
+    OPERATOR_KNOWN_SKILLS.forEach(function (s) {
+      if (!seen[s]) { seen[s] = true; skills.push(s); }
+    });
+    if (Array.isArray(roleRequired)) {
+      roleRequired.forEach(function (s) {
+        if (!seen[s]) { seen[s] = true; skills.push(s); }
+      });
+    }
+    var rows = [];
+    skills.forEach(function (skill) {
+      var has = operatorHas(skill);
+      var req = roleRequires(roleRequired, skill);
+      var state = req ? (has ? 'has' : 'missing') : 'na';
+      rows.push({ skill: skill, state: state });
+    });
+    return rows;
+  }
+
+  // Sample role-side required-skills for the inline FALLBACK only — the
+  // synthetic-data seed populates company_research.required_skills on every
+  // role deterministically. Inline FALLBACK roles get a small set of
+  // obvious-looking requirements so the offline render of the new screen
+  // is also useful (the screen's empty state is exercised only when the
+  // role is genuinely missing from the dataset).
+  var FALLBACK_REQUIRED_SKILLS = {
+    'r06': ['product strategy', 'SQL', 'payments', 'fintech', 'roadmap'],
+    'r11': ['product strategy', 'AI/ML', 'SQL', 'B2B SaaS', 'prioritization'],
+    'r17': ['product strategy', 'AI/ML', 'GTM', 'B2B SaaS', 'stakeholder mgmt'],
+    'r22': ['growth', 'A/B testing', 'SQL', 'data analysis', 'B2B SaaS']
+  };
+
+  // ---- Fallback company_research synthesizer (T19, offline path) ---------
+  //
+  // When /api/data is unreachable the SPA falls back to the inline FALLBACK
+  // (50 roles, no company_research). To keep the Account Backgrounder useful
+  // in offline mode we synthesize a deterministic stub from the role's id +
+  // company + status. The shape matches the synthetic seed's company_research
+  // block exactly so the rendering path is identical.
+  function _synthesizeFallbackCompanyResearch(role) {
+    var idNum = parseInt(String(role.id).replace(/\D/g, ''), 10) || 1;
+    var status = role.status || 'pinged';
+    var news = [];
+    for (var i = 0; i < 5; i++) {
+      news.push({
+        date: '2026-09-' + String(10 + (idNum + i) % 19).padStart(2, '0'),
+        headline: role.company + ' ' + (i % 2 === 0 ? 'ships a new platform update' : 'opens an engineering hub'),
+        source: i % 2 === 0 ? 'company blog' : 'press'
+      });
+    }
+    var progress = ({ 'packaged': 3, 'submitted': 4 })[status] || 1;
+    var resume = ({ 'packaged': 'drafted', 'submitted': 'submitted' })[status] || 'not started';
+    var cover  = ({ 'packaged': 'drafted', 'submitted': 'submitted' })[status] || 'not started';
+    // Deterministic 6-factor fallback breakdown so the Fitment panel renders
+    // in offline mode. Same factor order as the v2 rubric so the operator sees
+    // a familiar layout when the synthetic seed and the offline fallback both
+    // load.
+    var factors = [];
+    var names = ['domain_fit', 'program_match', 'sponsorship_clear', 'level_fit', 'location_fit', 'comp_fit'];
+    var weights = [0.28, 0.22, 0.18, 0.14, 0.10, 0.08];
+    for (var f = 0; f < names.length; f++) {
+      var raw = ((idNum * 3 + f * 5) % 21) / 10.0;
+      raw = Math.round(raw * 10) / 10.0;
+      var score = Math.round(raw * 5.0 * 10) / 10.0;
+      factors.push({
+        name:         names[f],
+        weight:       weights[f],
+        score:        score,
+        raw_score:    raw,
+        contribution: Math.round(weights[f] * score * 100) / 100,
+        rationale:    raw >= 1.0 ? 'Match demonstrated in operator context' : 'Address gap or note in cover'
+      });
+    }
+    if ((role.fit || 0) >= 8.0) {
+      factors.push({
+        name: 'stretch_match', weight: 0.10, score: 7.5, raw_score: 1.5,
+        contribution: 0.75, rationale: 'Strong adjacent context; rubric credit'
+      });
+    }
+    return {
+      latest_news: news,
+      company_info: {
+        mission:        role.company + ' helps teams ship software they understand. Fictional seed copy; no claim is made about the named company.',
+        headquarters:   'New York, NY',
+        size:           '400-800',
+        stage:          'Series B',
+        funding:        'Series B · last round at $' + (role.fit * 12).toFixed(0) + 'M valuation (fictional)',
+        lead_investors: 'Sequoia Capital, Index Ventures'
+      },
+      application_strategy: {
+        angle:         'Lead with the strongest matching operator evidence; address gaps on the cover letter. (Synthetic offline copy.)',
+        resume_status: resume,
+        cover_status:  cover,
+        progress_step: progress
+      },
+      rubric_factors:  factors,
+      required_skills: FALLBACK_REQUIRED_SKILLS[role.id] || []
+    };
+  }
 
   // Urgency thresholds (matches design-tokens.md and tests/test_app.py).
   // days <= RED_MAX  -> red tier (this week)
@@ -178,7 +422,7 @@
 
   // Hash routes — referenced as string literals so the route-assertion regex
   // in tests/test_app.py can pick them up via re.findall(r'#/(\w[\w-]*)', app.js).
-  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/role', '#/run-health', '#/rubric', '#/telegram'];
+  var ROUTES = ['#/pipeline', '#/deadline', '#/focus', '#/digest', '#/research', '#/role', '#/run-health', '#/rubric', '#/telegram', '#/boards'];
 
   function urgencyTier(days) {
     if (days <= RED_MAX) return 'red';
@@ -292,12 +536,14 @@
         status_date: r.status_date || r.date_found || '',
         blocked_reason: r.blocked_reason || d.blocked_reason || '',
         angle: r.notes || '',
+        gates: r.gates || d.gates || {},
         summary: d.company_summary || '',
         rubric_factors: d.rubric_factors || null,
         rubric_version: d.rubric_version ||
           ((raw.rubric_versions || [])[0] || {}).version || '',
         draft_paths: d.draft_paths || [],
-        history: d.history || []
+        history: d.history || [],
+        company_research: d.company_research || r.company_research || null
       };
     });
 
@@ -393,12 +639,117 @@
     };
   }
 
+  // ---- Source normalisation (T6).
+  //
+  // The publisher's source strings vary in casing and form. The live
+  // tracker.csv (verified 2026-10-02) carries:
+  //   HN Who's Hiring, builtinnyc, Built In NYC, university, Tier2, watchlist,
+  //   Wellfound, dentsu-workday, amex-orc, mastercard-workday
+  // The inline FALLBACK uses the shorter forms: HN, BuiltInNYC, Career, Wellfound.
+  // The Job Boards screen needs ONE canonical bucket per cluster so the operator
+  // can triage source-specific cohorts without miscounting the variants. Map
+  // every observed raw label to a single canonical name; everything not in the
+  // table falls into the `custom` bucket so the operator is never surprised by
+  // an unrolled row.
+  //
+  // The lookup is case-insensitive and whitespace-collapsed: the keys are the
+  // *normalised* forms; the `normaliseSourceKey` helper produces the same form
+  // from any raw input. The map is consulted after normalisation; the absence of a
+  // match returns `custom`.
+  var CANONICAL_SOURCE_MAP = {
+    'hn':                  'HN',
+    'hn-who-hiring':       'HN',
+    'hn-whos-hiring':      'HN',
+    'hn_whos_hiring':      'HN',
+    'hnwhoshiring':        'HN',
+    'hn who is hiring':    'HN',
+    'hackernews':          'HN',
+    'hacker news':         'HN',
+    'builtinnyc':          'Built In NYC',
+    'built-in-nyc':        'Built In NYC',
+    'built_in_nyc':        'Built In NYC',
+    'builtin nyc':         'Built In NYC',
+    'built in nyc':        'Built In NYC',
+    'wellfound':           'Wellfound',
+    'angellist':           'Wellfound',
+    'angel-list':          'Wellfound',
+    'university':          'university',
+    'universities':        'university',
+    'uni':                 'university',
+    'tier2':               'Tier2',
+    'tier-2':              'Tier2',
+    'tier_2':              'Tier2',
+    'tier 2':              'Tier2',
+    'watchlist':           'watchlist',
+    'watch-list':          'watchlist',
+    'watch list':          'watchlist',
+    // The "Career" raw label is the inline FALLBACK shorthand for direct
+    // company career pages. The live publisher does not emit this label, but
+    // we accept it so the offline seed/FALLBACK renders the same way.
+    'career':              'custom',
+    'company-careers':     'custom',
+    'company careers':     'custom'
+  };
+  // Order matters for the legend (operator-visible precedence).
+  var CANONICAL_ORDER = ['HN', 'Built In NYC', 'Wellfound', 'university',
+                         'Tier2', 'watchlist', 'custom'];
+
+  function normaliseSourceKey(raw) {
+    var s = String(raw == null ? '' : raw).trim().toLowerCase();
+    if (!s) return '';
+    // Strip apostrophes entirely so "who's" becomes "whos"; collapse runs of
+    // whitespace, dashes, and underscores into a single dash.
+    return s.replace(/'/g, '').replace(/[\s_-]+/g, '-');
+  }
+  // Re-run the canonicalisation on the post-collapse string to allow
+  // "hn whos hiring" -> "hn-whos-hiring" to match.
+  function _canonicalForKey(key) {
+    if (!key) return 'custom';
+    if (Object.prototype.hasOwnProperty.call(CANONICAL_SOURCE_MAP, key)) {
+      return CANONICAL_SOURCE_MAP[key];
+    }
+    // Some table aliases themselves contain spaces; collapse them too so
+    // 'hacker news' -> 'hacker-news' matches 'hacker-news'.
+    var dashed = key.replace(/\s+/g, '-');
+    if (Object.prototype.hasOwnProperty.call(CANONICAL_SOURCE_MAP, dashed)) {
+      return CANONICAL_SOURCE_MAP[dashed];
+    }
+    return 'custom';
+  }
+  // Operator-facing entry: take a raw source string and return the canonical
+  // bucket plus the original raw value (so the legend can render it).
+  function canonicalizeSource(raw) {
+    var key = normaliseSourceKey(raw);
+    return {
+      canonical: _canonicalForKey(key),
+      raw: String(raw == null ? '' : raw),
+      key: key
+    };
+  }
+  // Build a canonical -> {roles:[], rawLabels:Set} aggregate over a role list.
+  // Used by renderBoards and by anyone who needs source-aware analytics.
+  function aggregateByCanonical(roles) {
+    var by = {};
+    var order = CANONICAL_ORDER.slice();
+    (roles || []).forEach(function (r) {
+      var info = canonicalizeSource(r && r.source);
+      if (!by[info.canonical]) {
+        by[info.canonical] = { roles: [], rawLabels: {} };
+        if (order.indexOf(info.canonical) === -1) order.push(info.canonical);
+      }
+      by[info.canonical].roles.push(r);
+      by[info.canonical].rawLabels[info.raw] = true;
+    });
+    return { byCanonical: by, order: order };
+  }
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
       Object.keys(attrs).forEach(function (k) {
         if (k === 'class') node.className = attrs[k];
         else if (k === 'text') node.textContent = attrs[k];
+        else if (k === 'disabled') node.disabled = !!attrs[k];
         else if (k === 'html') node.innerHTML = attrs[k];
         else if (k.indexOf('on') === 0) node.addEventListener(k.slice(2), attrs[k]);
         else if (k === 'href') node.setAttribute('href', attrs[k]);
@@ -436,10 +787,24 @@
       { key: 'submitted', label: 'Submitted', dot: 'submitted' },
       { key: 'blocked', label: 'Blocked', dot: 'blocked' }
     ];
+    // Optional source pre-filter from the Job Boards deep link
+    // (#/pipeline?source=<canonical>). When set, only roles whose canonical
+    // source matches are shown. No-ops on the default board view (the
+    // unfiltered case is byte-identical to before the change).
+    var filterSource = state && state.__boardFilter;
+    var rolesForBoard = state.roles;
+    if (filterSource) {
+      rolesForBoard = state.roles.filter(function (r) {
+        return canonicalizeSource(r && r.source).canonical === filterSource;
+      });
+    }
     var header = el('div', { class: 'page-header' }, [
-      el('h1', { class: 'page-header__title', text: 'Pipeline Board' }),
-      el('div', { class: 'page-header__meta', text: state.roles.length + ' roles · 5 columns · ' + state.roles.length + ' loaded' })
+      el('h1', { class: 'page-header__title', text: filterSource ? ('Pipeline Board · ' + filterSource) : 'Pipeline Board' }),
+      el('div', { class: 'page-header__meta', text: rolesForBoard.length + ' roles · 5 columns · ' + (filterSource ? 'filtered to ' + filterSource : state.roles.length + ' loaded') })
     ]);
+    if (filterSource) {
+      header.appendChild(el('a', { class: 'crumb', href: '#/boards', style: 'margin-left: var(--space-5);', text: '← Back to Job Boards' }));
+    }
     var toolbar = el('div', { class: 'toolbar' }, [
       el('input', { class: 'toolbar__search', placeholder: 'Search company or role…' }),
       el('button', { class: 'toolbar__chip is-active', text: 'All fit' }),
@@ -453,7 +818,10 @@
     ]);
     var board = el('div', { class: 'pipeline' });
     cols.forEach(function (col) {
-      var rows = state.roles.filter(function (r) { return r.status === col.key; });
+      var rows = rolesForBoard.filter(function (r) {
+        var status = r.routed === 'int' || r.status === 'interested' ? 'interested' : r.status;
+        return status === col.key;
+      });
       var colNode = el('div', { class: 'pipeline__col' }, [
         el('div', { class: 'pipeline__col-header' }, [
           el('span', null, [el('span', { class: 'dot dot--' + col.dot }) , ' ', col.label]),
@@ -461,11 +829,16 @@
         ])
       ]);
       rows.forEach(function (r) {
+        // T20: each Pipeline card carries per-row actions. Click on the card
+        // still navigates to the role detail; clicking a button calls
+        // actOnRole with optimistic update + rollback. The button stops
+        // propagation so the navigation handler doesn't also fire.
         var card = el('div', { class: 'role-card', onclick: function () { window.location.hash = '#/role/' + r.id; } }, [
           el('div', { class: 'role-card__company', text: r.company }),
           el('h3', { class: 'role-card__title', text: r.role }),
           el('div', { class: 'role-card__fit', text: 'Fit ' + r.fit.toFixed(1) + ' · ' + r.source }),
-          r.angle ? el('div', { class: 'role-card__angle', text: r.angle }) : null
+          r.angle ? el('div', { class: 'role-card__angle', text: r.angle }) : null,
+          _roleCardActions(r)
         ]);
         colNode.appendChild(card);
       });
@@ -474,6 +847,230 @@
     mount.appendChild(header);
     mount.appendChild(toolbar);
     mount.appendChild(board);
+  }
+
+  // ---- Optimistic action surface (T20) ---------------------------------
+  // Renders the per-card action buttons. Each button calls actOnRole with a
+  // specific action; the button is disabled during the in-flight request so a
+  // double-click can't fire two writes. The button does NOT swallow clicks on
+  // the rest of the card (the role detail navigation still works).
+  function _roleCardActions(r) {
+    var wrap = el('div', { class: 'role-card__actions' });
+    var actions = _actionsForStatus(r.routed === 'int' ? 'interested' : r.status);
+    actions.forEach(function (a) {
+      var b = el('button', {
+        class: 'role-card__action role-card__action--' + a.action,
+        'data-action': a.action,
+        'data-role-id': String(r.id),
+        onclick: function (e) {
+          e.stopPropagation();
+          actOnRole(a.action, r, {});
+        }
+      }, [a.label]);
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  function _actionsForStatus(status) {
+    // Per-status button set. The operator sees only the actions that make
+    // sense from the current state; "Mark interested" is shown on every
+    // pinged card, "Mark blocked" is shown on every non-blocked card, etc.
+    switch (status) {
+      case 'pinged':
+        return [
+          { action: 'mark_interested', label: 'Mark interested' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'interested':
+        return [
+          { action: 'mark_packaged', label: 'Mark packaged' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'packaged':
+        return [
+          { action: 'mark_submitted', label: 'Mark submitted' },
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'submitted':
+        return [
+          { action: 'mark_blocked', label: 'Block' }
+        ];
+      case 'blocked':
+        return [
+          { action: 'mark_interested', label: 'Unblock' }
+        ];
+      default:
+        return [];
+    }
+  }
+
+  // Per-role queues keep requests ordered, while all pending mutations remain
+  // visible. A failed operation removes only its own overlay, never another role
+  // or a newer action. Retries reuse the original immutable request body/key.
+  var _actionQueues = Object.create(null);
+  var _stateRef = null;
+  var _actionSequence = 0;
+  function _optimisticApply(role, action, payload) {
+    var next = Object.assign({}, role);
+    switch (action) {
+      case 'mark_interested': next.status = 'interested'; next.routed = 'int'; break;
+      case 'mark_packaged': next.status = 'packaged'; next.routed = 'pkg'; break;
+      case 'mark_submitted': next.status = 'submitted'; next.routed = 'sub'; break;
+      case 'mark_blocked': next.status = 'blocked'; next.routed = ''; break;
+      case 'edit_notes':
+        next.angle = payload.notes;
+        next.notes = payload.notes;
+        if (role.company_research) {
+          next.company_research = Object.assign({}, role.company_research, {
+            application_strategy: Object.assign({}, role.company_research.application_strategy || {}, { angle: payload.notes })
+          });
+        }
+        break;
+      case 'complete_gate':
+        next.gates = Object.assign({}, role.gates || {});
+        next.gates[payload.gate] = true;
+        break;
+      case 'view': break;
+      default: return null;
+    }
+    return next;
+  }
+  function _currentRole(id) {
+    return _stateRef && _stateRef.roles.find(function (r) { return String(r.id) === String(id); });
+  }
+  function _commitLocalState(role) {
+    if (!_stateRef) return;
+    _stateRef.roles = _stateRef.roles.map(function (r) {
+      return String(r.id) === String(role.id) ? role : r;
+    });
+    render(_stateRef);
+  }
+  function _snapshotState() { return _stateRef ? Object.assign({}, _stateRef) : null; }
+  function _restoreLocalState(prev) { if (prev && _stateRef) { Object.assign(_stateRef, prev); render(_stateRef); } }
+  function _renderActionQueue(q) {
+    var role = q.base;
+    q.pending.forEach(function (op) { role = _optimisticApply(role, op.action, op.payload); });
+    _commitLocalState(role);
+  }
+  function _authoritativeRole(raw, base) {
+    if (!raw || String(raw.id) !== String(base.id)) return null;
+    // Public client must reject an action response with real contact/URL data,
+    // just as it rejects an unsafe /api/data snapshot. Never echo server text.
+    if (looks_like_pii(JSON.stringify(raw))) return null;
+    var role = Object.assign({}, base, raw);
+    if (raw.fit_score !== undefined) role.fit = Number(raw.fit_score);
+    if (raw.notes !== undefined) role.angle = raw.notes;
+    if (role.company_research && raw.notes !== undefined) {
+      role = _optimisticApply(role, 'edit_notes', { notes: raw.notes });
+    }
+    return role;
+  }
+  function actOnRole(action, role, payload) {
+    var current = role && _currentRole(role.id);
+    payload = JSON.parse(JSON.stringify(payload || {}));
+    if (!current || !_optimisticApply(current, action, payload)) {
+      return Promise.resolve({ ok: false, error: { code: 'validation_failed' } });
+    }
+    var id = String(current.id);
+    var apiId = /^\d+$/.test(id) ? Number(id) : NaN;
+    if (!Number.isSafeInteger(apiId) || apiId < 1) {
+      _surfaceToast('Offline sample is read-only. Reload when the sandbox dataset is available to save actions.');
+      return Promise.resolve({ ok: false, error: { code: 'offline_sample' } });
+    }
+    var q = _actionQueues[id];
+    if (!q || !q.pending.length) {
+      q = _actionQueues[id] = { base: current, pending: [], latest: 0 };
+    }
+    var signature = action + ':' + JSON.stringify(payload);
+    var duplicate = q.pending.find(function (op) { return op.signature === signature; });
+    if (duplicate) return duplicate.promise;
+    var op = {
+      action: action, payload: payload, signature: signature,
+      sequence: ++_actionSequence, createdAt: Date.now(),
+      body: JSON.stringify({ action: action, role_id: apiId,
+        payload: payload, source: 'ui', idempotency_key: _uuidKey(), client_ts: new Date().toISOString() })
+    };
+    return _enqueueAction(q, op);
+  }
+  function _enqueueAction(q, op) {
+    q.latest = op.sequence;
+    op.promise = new Promise(function (resolve) { op.resolve = resolve; });
+    q.pending.push(op);
+    _renderActionQueue(q);
+    if (q.pending.length === 1) _sendAction(q, op);
+    return op.promise;
+  }
+  function _sendAction(q, op) {
+    // This bundle is the public synthetic client. No feature flag, query from
+    // location, token, or fallback may select a personal write path.
+    Promise.resolve().then(function () {
+      return fetch('/api/action?mode=sandbox', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: op.body
+      });
+    }).then(function (res) {
+      return res.json().then(function (body) { return { status: res.status, body: body }; });
+    }).then(function (resp) {
+      var body = resp.body || {};
+      var authoritative = _authoritativeRole(body.role, q.base);
+      var success = resp.status >= 200 && resp.status < 300 && body.ok === true && authoritative;
+      var conflict = resp.status === 409 && authoritative;
+      if (success || conflict) q.base = authoritative;
+      var allowed = ['validation_failed', 'role_not_found', 'conflict', 'rate_limited', 'unauthorized'];
+      var rawCode = body.error_code || (body.error && body.error.code);
+      var code = allowed.indexOf(rawCode) >= 0 ? rawCode : (resp.status === 409 ? 'conflict' : 'http_' + resp.status);
+      _finishAction(q, op, success ? { ok: true, role: authoritative, idempotency_replay: body.idempotency_replay === true } :
+        { ok: false, error: { code: code }, reconciled: !!conflict }, !!conflict);
+    }).catch(function () {
+      _finishAction(q, op, { ok: false, error: { code: 'network_failure' } }, false);
+    });
+  }
+  function _finishAction(q, op, result, conflict) {
+    q.pending.shift();
+    _renderActionQueue(q);
+    if (!result.ok && !conflict) {
+      var retryable = result.error.code === 'network_failure' || /^http_5/.test(result.error.code);
+      var retry = retryable ? function () {
+        if (Date.now() - op.createdAt >= 60000) {
+          _surfaceToast('Retry window expired. Reload and review server state before taking a new action.');
+          return Promise.resolve({ ok: false, error: { code: 'retry_expired' } });
+        }
+        if (q.pending.length || q.latest !== op.sequence || _actionQueues[String(q.base.id)] !== q) {
+          _surfaceToast('A newer action exists. Review the current role before trying again.');
+          return Promise.resolve({ ok: false, error: { code: 'superseded' } });
+        }
+        q.base = _currentRole(q.base.id);
+        return _enqueueAction(q, op);
+      } : null;
+      result.retry = retry;
+      _surfaceToast(retryable ? 'Action failed. Reverted this change. Retry when connected.' :
+        'Action rejected (' + result.error.code + '). Reverted this change. Review the role and try again.', retry);
+    }
+    op.resolve(result);
+    if (q.pending.length) _sendAction(q, q.pending[0]);
+  }
+  function _surfaceToast(text, retry) {
+    try {
+      var host = document.getElementById('toast-host');
+      if (!host) {
+        host = document.createElement('div'); host.id = 'toast-host'; host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      var n = document.createElement('div'); n.className = 'toast toast--error';
+      n.setAttribute('role', 'alert'); n.textContent = text;
+      if (retry) n.appendChild(el('button', { type: 'button', text: 'Retry', onclick: function () {
+        n.remove(); retry();
+      } }));
+      host.appendChild(n);
+      // Retry remains available until explicitly dismissed or selected.
+      if (!retry) setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 6000);
+    } catch (_) { /* headless DOM */ }
+  }
+  function _uuidKey() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.floor(Math.random() * 16); return (c === 'x' ? r : (r & 3) | 8).toString(16);
+    });
   }
 
   function renderDeadlineRail(state, mount) {
@@ -585,7 +1182,17 @@
             var ul = el('ul', { class: 'gate-list' });
             ['Backgrounder read', 'Resume drafted', 'Cover letter drafted', 'References notified', 'Submission logged'].forEach(function (g, i) {
               ul.appendChild(el('li', { class: 'gate-list__item' }, [
-                el('span', { class: 'gate-list__check' + (i < 2 ? ' is-on' : '') }),
+                (function () {
+                  var gate = ['backgrounder_read', 'resume_drafted', 'cover_letter_drafted', 'references_notified', 'submission_logged'][i];
+                  var done = !!(r.gates && r.gates[gate]) ||
+                    (i < 2 && (r.routed === 'pkg' || r.routed === 'sub')) ||
+                    ((i === 2 || i === 4) && r.routed === 'sub');
+                  return el('button', { type: 'button',
+                    class: 'gate-list__check' + (done ? ' is-on' : ''),
+                    'aria-label': 'Complete ' + g, disabled: done,
+                    onclick: function () { actOnRole('complete_gate', r, { gate: gate }); }
+                  });
+                })(),
                 el('span', { text: g })
               ]));
             });
@@ -670,6 +1277,43 @@
       return;
     }
     var crumb = el('a', { class: 'crumb', href: '#/pipeline', text: '← Pipeline' });
+    // T19: top-bar action surface — the entry points the operator uses to
+    // update this role's tracker status. Each button POSTs to /api/action
+    // (T20 implements the handler). For T19 the buttons render, the routes
+    // are wired (each calls postEditNotes or a dedicated postAction stub),
+    // and a separate "Open Account Backgrounder" link navigates to the new
+    // first-class screen at #/role/<id>/backgrounder.
+    var actionBar = el('div', { class: 'role-action-bar' }, [
+      el('a', { class: 'role-action-bar__btn role-action-bar__btn--primary',
+        href: '#/role/' + role.id + '/backgrounder',
+        text: 'Open Account Backgrounder' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_interested', role.id); },
+        text: 'Mark Interested' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_packaged', role.id); },
+        text: 'Mark Packaged' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_submitted', role.id); },
+        text: 'Mark Submitted' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () { postStatusAction('mark_blocked', role.id); },
+        text: 'Mark Blocked' }),
+      el('button', { class: 'role-action-bar__btn',
+        type: 'button',
+        onclick: function () {
+          // Optimistically patch the local angle so the in-page Angle card
+          // shows the new value; T20 will replace this stub with a routed
+          // edit-notes flow that handles the inline editor in the backgrounder.
+          var note = window.prompt('Edit notes for role ' + role.id + ':', role.angle || '');
+          if (note !== null) postStatusAction('edit_notes', role.id, { notes: note });
+        },
+        text: 'Edit Notes' })
+    ]);
     var header = el('div', { class: 'page-header' }, [
       el('div', null, [
         crumb,
@@ -677,7 +1321,10 @@
         el('div', { class: 'role-detail__company', text: role.company + ' · ' + role.source }),
         el('div', { class: 'role-detail__score', text: 'Fit ' + role.fit.toFixed(1) })
       ]),
-      el('div', { class: 'page-header__meta', text: 'Status: ' + role.status + ' · ' + role.status_date })
+      el('div', { class: 'page-header__right' }, [
+        el('div', { class: 'page-header__meta', text: 'Status: ' + role.status + ' · ' + role.status_date }),
+        actionBar
+      ])
     ]);
 
     // Rubric factors — use the real per-factor breakdown when the exporter
@@ -845,6 +1492,222 @@
 
     mount.appendChild(header);
     mount.appendChild(grid);
+  }
+
+  // ---- Account Backgrounder screen (T19) ---------------------------------
+  //
+  // Route: #/role/<id>/backgrounder. The first-class screen for everything
+  // an operator needs to know about the *company* for one role. Per the
+  // spec, three panels are dominant (above the fold):
+  //   1. Gap        — operator's known skills vs role's required skills
+  //   2. Fitment    — rubric factor breakdown with weight + contribution
+  //   3. Application Strategy — angle text, draft status, 4-step progress
+  // Two panels are secondary (below the fold on the left column):
+  //   4. Latest News (timeline)
+  //   5. Company Info (6-field profile)
+  //
+  // The screen's purpose (from refactor-spec §4.9): "Everything I need to
+  // know about the *company* for this role" — it decides whether the role
+  // is worth the 60-minute investment before reading the JD.
+  function renderBackgrounder(state, mount, roleId) {
+    mount.innerHTML = '';
+    var role = (state.roles || []).filter(function (r) {
+      return String(r.id) === String(roleId);
+    })[0];
+    if (!role) {
+      // Gate T19.7: an honest empty state for unknown role ids, never a crash.
+      mount.appendChild(el('a', { class: 'crumb', href: '#/pipeline', text: '← Pipeline' }));
+      mount.appendChild(el('h1', {
+        class: 'page-header__title', text: 'Account Backgrounder unavailable'
+      }));
+      mount.appendChild(el('div', {
+        class: 'page-header__meta', text: 'Role id ' + roleId + ' is not in the current snapshot.'
+      }));
+      emptyState(mount, 'No backgrounder for this role yet',
+        'This role id was not found in the published snapshot. It may have been archived or the URL is from an older snapshot. Return to the Pipeline Board and re-open the role there.');
+      return;
+    }
+
+    // ---- Header strip ----------------------------------------------------
+    // Company logo placeholder (1.5x accent-tinted square), company, role
+    // title, fit score badge, freshness timestamp. The header is dense on
+    // purpose — the operator scans it once before scrolling to panels.
+    var cr = role.company_research || {};
+    var crumb = el('a', { class: 'crumb', href: '#/role/' + role.id, text: '← Back to role ' + role.id });
+    var freshness = (state.snapshot_at || 'snapshot at build time').replace('T', ' ').slice(0, 16);
+    var logoPlaceholder = el('div', { class: 'backgrounder__logo', text: role.company.slice(0, 2).toUpperCase() });
+    var fitBadge = el('div', { class: 'backgrounder__fit-badge', text: 'Fit ' + role.fit.toFixed(1) });
+    var header = el('div', { class: 'page-header backgrounder__header' }, [
+      el('div', { class: 'backgrounder__header-left' }, [
+        crumb,
+        el('div', { class: 'backgrounder__title-row' }, [
+          logoPlaceholder,
+          el('div', null, [
+            el('div', { class: 'backgrounder__company', text: role.company }),
+            el('h1', { class: 'backgrounder__role-title', text: role.role })
+          ])
+        ])
+      ]),
+      el('div', { class: 'backgrounder__header-right' }, [
+        fitBadge,
+        el('div', { class: 'page-header__meta', text: freshness + ' ET' })
+      ])
+    ]);
+
+    // ---- Left column: News + Company Info + Application Strategy --------
+    var news = cr;
+    var newsTimeline = el('ul', { class: 'backgrounder__timeline' });
+    (cr.latest_news || []).forEach(function (n) {
+      newsTimeline.appendChild(el('li', { class: 'backgrounder__timeline-item' }, [
+        el('span', { class: 'backgrounder__timeline-dot' }),
+        el('div', null, [
+          el('div', { class: 'backgrounder__timeline-headline', text: n.headline }),
+          el('div', { class: 'page-header__meta', text: (n.date || '') + ' · ' + (n.source || '') })
+        ])
+      ]));
+    });
+
+    var info = cr.company_info || {};
+    var infoRows = el('dl', { class: 'backgrounder__info-list' });
+    [
+      ['Mission',          info.mission],
+      ['Headquarters',     info.headquarters],
+      ['Size',             info.size],
+      ['Stage',            info.stage],
+      ['Funding',          info.funding],
+      ['Lead investors',   info.lead_investors]
+    ].forEach(function (pair) {
+      infoRows.appendChild(el('div', { class: 'backgrounder__info-row' }, [
+        el('dt', { class: 'backgrounder__info-term', text: pair[0] }),
+        el('dd', { class: 'backgrounder__info-def', text: pair[1] || '—' })
+      ]));
+    });
+
+    var strat = cr.application_strategy || {};
+    var progressSteps = ['Researched', 'Resume drafted', 'Cover drafted', 'Submitted'];
+    var currentStep = Math.max(1, Math.min(4, strat.progress_step || 1));
+    var progressBar = el('ol', { class: 'backgrounder__progress' });
+    progressSteps.forEach(function (label, i) {
+      progressBar.appendChild(el('li', {
+        class: 'backgrounder__progress-step' + (i + 1 < currentStep ? ' is-done' : i + 1 === currentStep ? ' is-current' : ' is-future'),
+        text: (i + 1) + '. ' + label
+      }));
+    });
+    var draftChips = el('div', { class: 'backgrounder__draft-chips' }, [
+      el('span', { class: 'toolbar__chip', text: 'Resume: ' + (strat.resume_status || 'not started') }),
+      el('span', { class: 'toolbar__chip', text: 'Cover:  ' + (strat.cover_status || 'not started') })
+    ]);
+    // Inline editor for the angle. The editor is a textarea that swaps in
+    // for the static angle text on click. Submitting POSTs to /api/action
+    // with action='edit_notes'. T20 will implement the handler; this task
+    // makes the call (gate T19.6) and tests it.
+    var angleMount = el('div', { class: 'backgrounder__angle-wrap' });
+    var renderAngleReadOnly = function () {
+      angleMount.innerHTML = '';
+      angleMount.appendChild(el('div', { class: 'backgrounder__angle', text: strat.angle || 'No angle captured.' }));
+      angleMount.appendChild(el('button', {
+        class: 'backgrounder__edit-notes-btn',
+        type:  'button',
+        text:  'Edit notes'
+      }));
+      var btn = angleMount.querySelector('.backgrounder__edit-notes-btn');
+      btn.addEventListener('click', function () {
+        renderAngleEditor(strat.angle || '');
+      });
+    };
+    var renderAngleEditor = function (current) {
+      angleMount.innerHTML = '';
+      var textarea = el('textarea', { class: 'backgrounder__angle-editor', rows: '4' });
+      textarea.value = current;
+      var save = el('button', {
+        class: 'backgrounder__edit-notes-btn', type: 'button', text: 'Save'
+      });
+      var cancel = el('button', {
+        class: 'backgrounder__edit-notes-btn backgrounder__edit-notes-btn--cancel',
+        type:  'button',  text: 'Cancel'
+      });
+      save.addEventListener('click', function () {
+        postEditNotes(role.id, textarea.value);
+      });
+      cancel.addEventListener('click', function () { renderAngleReadOnly(); });
+      angleMount.appendChild(textarea);
+      angleMount.appendChild(el('div', { class: 'backgrounder__angle-actions' }, [save, cancel]));
+      textarea.focus();
+    };
+    renderAngleReadOnly();
+    var strategyCard = el('div', { class: 'card backgrounder__strategy' }, [
+      el('h3', { class: 'card__title', text: 'Application Strategy' }),
+      el('div', { class: 'page-header__meta', text: 'Lead with: operator evidence · Address gap: cover letter' }),
+      angleMount,
+      progressBar,
+      draftChips
+    ]);
+    var newsCard = el('div', { class: 'card backgrounder__news' }, [
+      el('h3', { class: 'card__title', text: 'Latest News' }),
+      newsTimeline
+    ]);
+    var infoCard = el('div', { class: 'card backgrounder__info' }, [
+      el('h3', { class: 'card__title', text: 'Company Info' }),
+      infoRows
+    ]);
+    var left = el('div', null, [newsCard, infoCard, strategyCard]);
+
+    // ---- Right column (sticky): Fitment + Gap ----------------------------
+    var fitmentRows = el('div', { class: 'rubric-bars' });
+    (cr.rubric_factors || []).forEach(function (f) {
+      var fillPct = Math.max(0, Math.min(100, Math.round((f.score / 10) * 100)));
+      fitmentRows.appendChild(el('div', { class: 'rubric-bar backgrounder__fitment-row' }, [
+        el('div', { class: 'rubric-bar__label', text: f.name + ' · ' + Math.round(f.weight * 100) + '%' }),
+        el('div', { class: 'rubric-bar__track' }, [
+          el('div', { class: 'rubric-bar__fill backgrounder__fit-fill--' + fillPct })
+        ]),
+        el('div', { class: 'rubric-bar__num', text: 'c=' + f.contribution.toFixed(2) + ' · ' + f.score.toFixed(1) + '/10' })
+      ]));
+    });
+    var fitmentCard = el('div', { class: 'card backgrounder__fitment' }, [
+      el('h3', { class: 'card__title', text: 'Fitment' }),
+      el('div', { class: 'page-header__meta', text: (cr.rubric_factors || []).length + ' rubric factors · weight × score / 10' }),
+      fitmentRows
+    ]);
+
+    // Gap panel — the spec's #1 dominant panel. Uses buildSkillGap() to
+    // classify every operator-known skill AND every role-required skill.
+    var required = cr.required_skills || [];
+    var gap = buildSkillGap(required);
+    var gapRows = el('div', { class: 'backgrounder__gap' });
+    gap.forEach(function (row) {
+      var glyph = row.state === 'has' ? '✓' : row.state === 'missing' ? '✗' : '—';
+      var cls   = 'backgrounder__gap-row backgrounder__gap-row--' + row.state;
+      gapRows.appendChild(el('div', { class: cls, title: row.skill }, [
+        el('span', { class: 'backgrounder__gap-glyph', text: glyph }),
+        el('span', { class: 'backgrounder__gap-skill', text: row.skill })
+      ]));
+    });
+    var gapCard = el('div', { class: 'card backgrounder__gap-card' }, [
+      el('h3', { class: 'card__title', text: 'Skill Gap' }),
+      el('div', { class: 'page-header__meta', text: '✓ has · ✗ missing · — n/a' }),
+      gapRows
+    ]);
+
+    var right = el('div', { class: 'backgrounder__right' }, [fitmentCard, gapCard]);
+    var grid = el('div', { class: 'backgrounder__grid' }, [left, right]);
+
+    mount.appendChild(header);
+    mount.appendChild(grid);
+  }
+
+  // The queue updates/reconciles the active screen; callbacks into a detached
+  // editor would otherwise repaint stale text after a newer action.
+  function postEditNotes(roleId, text) {
+    return postStatusAction('edit_notes', roleId, { notes: text });
+  }
+
+  // All supported controls share the same optimistic client and sandbox path.
+  function postStatusAction(action, roleId, payload, onResult) {
+    return actOnRole(action, _currentRole(roleId), payload).then(function (result) {
+      if (typeof onResult === 'function') onResult(result);
+      return result;
+    });
   }
 
   function renderRunHealth(state, mount) {
@@ -1045,6 +1908,265 @@
     }
   }
 
+  // ---- Research hub (T8)
+  //
+  // A 4-card at-a-glance summary of the operator's research library. Each
+  // card deep-links to the screen that holds the underlying data, with the
+  // filter pre-applied where possible. Counts come from state.research_totals
+  // when the publisher ships it (T8.4 follow-up); the FALLBACK carries the
+  // operator's real snapshot so the screen is useful today.
+  function renderResearch(state, mount) {
+    mount.innerHTML = '';
+    var totals = state.research_totals || {};
+    // FALLBACK-safe defaults so the screen never shows "undefined": if the
+    // publisher ships a payload without research_totals, derive coarse counts
+    // from the live role list + state.roles' company set.
+    var trackerRows = typeof totals.tracker_rows === 'number'
+      ? totals.tracker_rows
+      : (state.roles ? state.roles.length : 0);
+    var companiesResearched = typeof totals.companies_researched === 'number'
+      ? totals.companies_researched
+      : (function () {
+          var seen = {};
+          (state.roles || []).forEach(function (r) { if (r.company) seen[r.company] = true; });
+          return Object.keys(seen).length;
+        })();
+    var draftsOnFile = typeof totals.drafts_on_file === 'number'
+      ? totals.drafts_on_file
+      : (state.roles ? state.roles.filter(function (r) { return r.status === 'packaged' || r.status === 'submitted'; }).length : 0);
+    var digestsArchived = typeof totals.digests_archived === 'number'
+      ? totals.digests_archived
+      : (state.digests ? state.digests.length : 0);
+
+    var header = el('div', { class: 'page-header' }, [
+      el('h1', { class: 'page-header__title', text: 'Research hub' }),
+      el('div', { class: 'page-header__meta', text: 'What the operator has on file — links pre-applied' })
+    ]);
+    mount.appendChild(header);
+
+    function card(opts) {
+      return el('a', {
+        href: opts.href,
+        class: 'card research-card' + (opts.kind ? ' research-card--' + opts.kind : ''),
+        onclick: function (e) {
+          // Plain <a href="#/path"> navigation works without JS, but make the
+          // hash update explicit so the router picks it up on the same render
+          // frame.
+          if (opts.href && opts.href.charAt(0) === '#') {
+            window.location.hash = opts.href;
+            e.preventDefault();
+          }
+        }
+      }, [
+        el('div', { class: 'research-card__label', text: opts.label }),
+        el('div', { class: 'research-card__num', text: String(opts.num) }),
+        el('div', { class: 'research-card__source', text: opts.source }),
+        el('div', { class: 'research-card__cta', text: opts.cta + ' →' })
+      ]);
+    }
+
+    var grid = el('div', { class: 'research-hub' }, [
+      card({
+        label: 'Tracker rows',
+        num: trackerRows,
+        source: totals.tracker_source || 'tracker.csv',
+        href: '#/pipeline',
+        cta: 'Open Pipeline Board',
+        kind: 'tracker'
+      }),
+      card({
+        label: 'Companies researched',
+        num: companiesResearched,
+        source: totals.companies_source || 'cache/companies/*.json',
+        href: '#/boards',
+        cta: 'Open Job Boards',
+        kind: 'companies'
+      }),
+      card({
+        label: 'Drafts on file',
+        num: draftsOnFile,
+        source: totals.drafts_source || 'drafts/<role-id>-*',
+        href: '#/pipeline',
+        cta: 'Open Pipeline (packaged)',
+        kind: 'drafts'
+      }),
+      card({
+        label: 'Digests archived',
+        num: digestsArchived,
+        source: totals.digests_source || 'digests/*.md',
+        href: '#/digest',
+        cta: 'Open Daily Digest',
+        kind: 'digests'
+      })
+    ]);
+    mount.appendChild(grid);
+
+    // Roles-by-status mini-table — at-a-glance pipeline distribution that
+    // the operator currently has to read off the Pipeline Board header. If
+    // the publisher ships it, render from totals; otherwise derive from
+    // state.roles (and say so honestly).
+    var byStatus = totals.role_count_by_status;
+    if (!byStatus) {
+      byStatus = {};
+      (state.roles || []).forEach(function (r) {
+        var k = r.status || '(unset)';
+        byStatus[k] = (byStatus[k] || 0) + 1;
+      });
+    }
+    var statusRows = el('ul', { class: 'research-status' });
+    var order = ['pinged', 'interested', 'packaged', 'submitted', 'blocked'];
+    order.forEach(function (k) {
+      var n = byStatus[k] || 0;
+      statusRows.appendChild(el('li', { class: 'research-status__item' }, [
+        el('span', { class: 'dot dot--' + k }),
+        el('span', { class: 'research-status__label', text: k }),
+        el('span', { class: 'research-status__num', text: String(n) })
+      ]));
+    });
+    if (byStatus['(unset)'] || byStatus['']) {
+      var n = (byStatus['(unset)'] || 0) + (byStatus[''] || 0);
+      statusRows.appendChild(el('li', { class: 'research-status__item' }, [
+        el('span', { class: 'dot' }),
+        el('span', { class: 'research-status__label', text: '(no status)' }),
+        el('span', { class: 'research-status__num', text: String(n) })
+      ]));
+    }
+    var distribution = el('div', { class: 'card research-distribution' }, [
+      el('h3', { class: 'card__title', text: 'Roles by status' }),
+      statusRows,
+      totals.note ? el('p', { class: 'page-header__meta', text: totals.note }) : null
+    ]);
+    mount.appendChild(distribution);
+  }
+
+  // ---- Job Boards screen (T6)
+  //
+  // Aggregates roles by canonical source so the operator can see how the
+  // pipeline is distributed across boards and triage per-source cohorts.
+  // Click a card to jump to the Pipeline Board pre-filtered to that source
+  // (deep link: #/pipeline?source=<canonical>).
+  function _median(xs) {
+    if (!xs.length) return NaN;
+    var sorted = xs.slice().sort(function (a, b) { return a - b; });
+    var mid = Math.floor(sorted.length / 2);
+    return (sorted.length % 2) ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+  function _formatAgo(days) {
+    if (!isFinite(days) || days < 0) return '—';
+    if (days === 0) return 'today';
+    if (days === 1) return '1d ago';
+    return days + 'd ago';
+  }
+  function _statusChips(roles) {
+    var byStatus = {};
+    roles.forEach(function (r) {
+      var s = r.status || '(unset)';
+      byStatus[s] = (byStatus[s] || 0) + 1;
+    });
+    // Stable operator-known order; fall through to anything else alphabetically.
+    var preferred = ['pinged', 'interested', 'packaged', 'submitted', 'blocked'];
+    var seen = {};
+    var keys = [];
+    preferred.forEach(function (k) { if (byStatus[k]) { keys.push(k); seen[k] = true; } });
+    Object.keys(byStatus).sort().forEach(function (k) { if (!seen[k]) keys.push(k); });
+    return keys.map(function (k) {
+      return el('span', { class: 'toolbar__chip', style: 'margin-right: var(--space-2);' }, [
+        el('span', { class: 'dot dot--' + k }),
+        ' ' + k + ' · ' + byStatus[k]
+      ]);
+    });
+  }
+
+  function renderBoards(state, mount) {
+    mount.innerHTML = '';
+    var header = el('div', { class: 'page-header' }, [
+      el('h1', { class: 'page-header__title', text: 'Job Boards' }),
+      el('div', { class: 'page-header__meta', text: 'Per-source breakdown of the role pipeline' })
+    ]);
+
+    var agg = aggregateByCanonical(state.roles || []);
+    var canonicalsPresent = agg.order.filter(function (k) { return agg.byCanonical[k] && agg.byCanonical[k].roles.length > 0; });
+    var newest = state.roles
+      .map(function (r) { return r.status_date || r.date_found || ''; })
+      .filter(function (d) { return d && d.length >= 10; })
+      .sort()
+      .pop();
+    var newestLabel = '—';
+    if (newest) {
+      var days = (window.location && window.location.hash) ? daysUntil(newest) : NaN;
+      newestLabel = isFinite(days) ? _formatAgo(days) : newest;
+    }
+
+    var summary = el('div', { class: 'card boards-summary' }, [
+      el('div', { class: 'boards-summary__line', text:
+        'Today: ' + state.roles.length + ' roles across ' +
+        canonicalsPresent.length + ' board' + (canonicalsPresent.length === 1 ? '' : 's') +
+        ' · newest: ' + newestLabel
+      })
+    ]);
+
+    var grid = el('div', { class: 'boards-grid' });
+    if (canonicalsPresent.length === 0) {
+      emptyState(grid, 'No roles published',
+        'The role list is empty in the current payload — Job Boards has nothing to aggregate yet.');
+    }
+    canonicalsPresent.forEach(function (canonical) {
+      var bucket = agg.byCanonical[canonical];
+      var roles = bucket.roles;
+      var fits = roles.map(function (r) { return _num(r.fit); }).filter(function (v) { return isFinite(v); });
+      var med = _median(fits);
+      var dates = roles.map(function (r) { return r.status_date || r.date_found || ''; }).filter(function (d) { return d; });
+      var lastDate = dates.sort().pop() || '';
+      var lastDays = lastDate ? daysUntil(lastDate) : NaN;
+      var lastLabel = lastDate ? (lastDate + ' · ' + (isFinite(lastDays) ? _formatAgo(lastDays) : '—')) : '—';
+      var isCustom = canonical === 'custom';
+      var card = el('div', {
+        class: 'card boards-card' + (isCustom ? ' boards-card--custom' : ''),
+        onclick: function () {
+          window.location.hash = '#/pipeline?source=' + encodeURIComponent(canonical);
+        }
+      }, [
+        el('div', { class: 'boards-card__name', text: canonical }),
+        el('div', { class: 'boards-card__num', text: String(roles.length) }),
+        el('div', { class: 'boards-card__fit', text: 'Median fit ' + (isFinite(med) ? med.toFixed(1) : '—') }),
+        el('div', { class: 'boards-card__last', text: 'Last discovery: ' + lastLabel }),
+        el('div', { class: 'boards-card__chips' }, _statusChips(roles))
+      ]);
+      grid.appendChild(card);
+    });
+
+    // Source legend — explicit mapping so the operator can verify what the
+    // canonical buckets absorbed. Each canonical gets one row showing the
+    // distinct raw labels observed in the current payload (so the legend
+    // stays honest: empty -> 'no raw labels observed').
+    var legendRows = [];
+    agg.order.forEach(function (canonical) {
+      var bucket = agg.byCanonical[canonical];
+      var raws = bucket ? Object.keys(bucket.rawLabels).sort() : [];
+      if (raws.length === 0) return;
+      legendRows.push(el('li', { class: 'boards-legend__row' }, [
+        el('span', { class: 'boards-legend__canonical', text: canonical }),
+        el('span', { class: 'boards-legend__arrow', text: '←' }),
+        el('span', { class: 'boards-legend__raws', text: raws.join(', ') })
+      ]));
+    });
+    var legend = el('div', { class: 'card boards-legend' }, [
+      el('h3', { class: 'card__title', text: 'Source legend' }),
+      el('p', { class: 'page-header__meta', text:
+        'Each canonical bucket merges all observed raw labels that resolve to it. ' +
+        'Anything not in the table falls into the "custom" bucket.'
+      }),
+      el('ul', { class: 'boards-legend__list' }, legendRows.length ? legendRows : [
+        el('li', { class: 'boards-legend__row', text: '(no sources observed in the current payload)' })
+      ])
+    ]);
+
+    mount.appendChild(header);
+    mount.appendChild(summary);
+    mount.appendChild(grid);
+    mount.appendChild(legend);
+  }
+
   // ---- Router
 
   function render(state) {
@@ -1052,7 +2174,31 @@
     var screens = document.querySelectorAll('.screen');
     screens.forEach(function (s) { s.classList.remove('is-active'); });
 
-    var route = hash.replace(/^#\//, '');
+    // Parse the query string after the hash path so deep-links like
+    // #/pipeline?source=HN survive across renders (T6, Job Boards).
+    var queryStr = '';
+    var queryIdx = hash.indexOf('?');
+    var pathOnly = hash;
+    if (queryIdx !== -1) {
+      pathOnly = hash.slice(0, queryIdx);
+      queryStr = hash.slice(queryIdx + 1);
+    }
+    var query = {};
+    if (queryStr) {
+      queryStr.split('&').forEach(function (kv) {
+        if (!kv) return;
+        var eq = kv.indexOf('=');
+        var k = eq === -1 ? kv : kv.slice(0, eq);
+        var v = eq === -1 ? '' : kv.slice(eq + 1);
+        try { query[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' ')); }
+        catch (_) { /* ignore malformed query */ }
+      });
+    }
+    // The pipeline reads state.__boardFilter for the Job Boards deep-link.
+    // Boards screens ignore it; everything else reads nothing.
+    state.__boardFilter = query.source || null;
+
+    var route = pathOnly.replace(/^#\//, '');
     var parts = route.split('/');
     var screenId = 'screen-' + parts[0];
     var screen = document.getElementById(screenId);
@@ -1067,10 +2213,15 @@
     else if (parts[0] === 'deadline') renderDeadlineRail(state, mount);
     else if (parts[0] === 'focus') renderFocus(state, mount);
     else if (parts[0] === 'digest') renderDigest(state, mount);
+    else if (parts[0] === 'research') renderResearch(state, mount);
+    else if (parts[0] === 'role' && parts.length >= 3 && parts[2] === 'backgrounder') {
+      renderBackgrounder(state, mount, parts[1]);
+    }
     else if (parts[0] === 'role') renderRole(state, mount, parts[1]);
     else if (parts[0] === 'run-health') renderRunHealth(state, mount);
     else if (parts[0] === 'rubric') renderRubric(state, mount);
     else if (parts[0] === 'telegram') renderTelegram(state, mount);
+    else if (parts[0] === 'boards') renderBoards(state, mount);
 
     // Sidebar active state
     var links = document.querySelectorAll('.sidebar__link');
@@ -1169,13 +2320,39 @@
 
   function boot() {
     loadData(function (state) {
+      // T19: ensure every role has a company_research block. The synthetic
+      // seed populates it on every pipeline row + role_detail entry; the
+      // inline FALLBACK does not, so we attach the offline synthesizer's
+      // output for those rows here. This keeps the renderBackgrounder
+      // rendering path uniform across the synthetic-data and offline modes.
+      (state.roles || []).forEach(function (r) {
+        if (!r.company_research) r.company_research = _synthesizeFallbackCompanyResearch(r);
+      });
       // Expose for tests / debugging
+      _stateRef = state;
       window.__junter = {
         state: state,
         RED_MAX: RED_MAX, ORANGE_MAX: ORANGE_MAX, urgencyTier: urgencyTier,
         daysUntil: daysUntil, roleDays: roleDays,
         normalizeState: normalizeState, looks_like_pii: looks_like_pii,
-        adoptApiPayload: adoptApiPayload
+        adoptApiPayload: adoptApiPayload,
+        canonicalizeSource: canonicalizeSource,
+        aggregateByCanonical: aggregateByCanonical,
+        OPERATOR_KNOWN_SKILLS: OPERATOR_KNOWN_SKILLS,
+        buildSkillGap: buildSkillGap,
+        operatorHas: operatorHas,
+        roleRequires: roleRequires,
+        renderBackgrounder: renderBackgrounder,
+        postStatusAction: postStatusAction,
+        postEditNotes: postEditNotes,
+        // T20: optimistic action surface. Tests drive these directly.
+        actOnRole: actOnRole,
+        _optimisticApply: _optimisticApply,
+        _commitLocalState: _commitLocalState,
+        _snapshotState: _snapshotState,
+        _restoreLocalState: _restoreLocalState,
+        _actionsForStatus: _actionsForStatus,
+        _uuidKey: _uuidKey
       };
 
       window.addEventListener('hashchange', function () { render(state); });

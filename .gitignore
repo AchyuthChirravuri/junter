@@ -25,6 +25,9 @@ venv/
 # Node
 node_modules/
 
+# Vercel deploy artifacts
+.vercel/
+
 # Generated / build outputs
 out/
 build/

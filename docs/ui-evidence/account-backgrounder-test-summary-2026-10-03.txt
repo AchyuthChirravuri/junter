@@ -1,0 +1,17 @@
+Account Backgrounder UI test summary
+
+Command
+  python3 -m unittest discover -s ui/tests -v
+
+Result
+  Ran 70 tests in 7.607s
+  OK (skipped=1)
+
+Backgrounder coverage added by this change verifies:
+- renderBackgrounder is defined and receives #/role/<id>/backgrounder routes
+- an unknown role id renders an honest empty state
+- the 15-skill default operator profile and has / missing / n-a Gap classification
+- every one of 50 synthetic roles has company_research
+- each Fitment panel has 5-7 deterministic rubric rows
+- Edit Notes posts the expected edit_notes action payload to /api/action
+- the synthetic seed passes the runtime PII guard

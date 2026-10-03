@@ -69,6 +69,7 @@ the candidate pastes the portal's essay/short-answer questions. Using the backgr
 
 ## Cost controls
 - Max **~25 search queries per run** total (8 Tier 1 + 10 Tier 2 + 7 Tier 3), one daily run, one weekly run.
+  - Reconciliation note (T3 polish, 2026-10-02): the prior draft of this section and the "Search sources" section above (line 13) both use "~25 queries max total" as the per-run ceiling; this is the chosen budget, not a duplicate of the Tier 1 "max 8" number (which is the *Tier 1* sub-budget). The composition is fixed: 8 + 10 + 7 = 25, and we do not auto-escalate beyond Tier 3.
 - Cheap model for daily ops; premium only for a 9+ full draft if quality requires it.
 - No browser automation in v1. No LinkedIn scraping ever.
 

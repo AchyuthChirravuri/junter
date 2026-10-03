@@ -1,0 +1,19 @@
+T21 PRE-DEPLOY verification run — 2026-10-03
+
+Command
+  bash tests/verify/run_all.sh
+
+Result
+  PASS Figma parity                 1s (5 tests)
+  PASS Design tokens                0s (4 tests)
+  PASS PII guard                    0s (5 tests)
+  PASS Action surface               1s (5 tests)
+  PASS Mechanism strengths          0s (5 tests)
+  PASS Live probe logic (offline)   1s (4 tests)
+  PASS Visual regression            57s (4 tests)
+
+PRE_DEPLOY=PASS
+READY FOR AUTHORIZED DEPLOY=yes
+LIVE_ACCEPTANCE=PENDING
+
+Total: 32 tests, approximately 60 seconds. The live runner is implemented but deliberately not invoked: it requires an explicitly supplied newly deployed HTTPS URL and matching intended/deployed source SHA.
