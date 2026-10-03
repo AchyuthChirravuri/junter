@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readStore, writeStore, storeContext } from '../lib/store.js';
+import { getSyntheticStore } from '../lib/transactional-store.js';
 
 const VALID_ACTIONS = new Set(['mark_interested', 'mark_packaged', 'mark_submitted', 'mark_blocked', 'edit_notes', 'complete_gate', 'view']);
 const VALID_GATES = new Set(['backgrounder_read', 'resume_drafted', 'cover_letter_drafted', 'references_notified', 'submission_logged']);
@@ -87,12 +88,21 @@ function checkIdempotency(key) {
   return idemBuffer.get(key) || null;
 }
 function authorized(req, context) {
-  if (context.mode === 'sandbox') return true;
+  if (context.mode === 'sandbox' || context.mode === 'synthetic') return true;
   const expected = process.env.JUNTER_BEARER_TOKEN;
   const supplied = String(req.headers?.['x-junter-token'] || req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
   if (!expected || !supplied) return false;
   const a = Buffer.from(expected), b = Buffer.from(supplied);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+async function executeSynthetic(req, body) {
+  if (req.method !== 'POST') return { status: 405, body: { ok: false, error: { code: 'method_not_allowed', message: 'POST only' } } };
+  const details = validate(body);
+  if (Object.keys(details).length) return { status: 400, body: { ok: false, error: 'schema validation failed', error_code: 'validation_failed', details } };
+  if (!authorized(req, { mode: 'synthetic' })) return { status: 401, body: { ok: false, error: { code: 'unauthorized', message: 'bearer token required' } } };
+  const result = await (await getSyntheticStore()).apply(body);
+  return { status: result.status, body: { ok: result.status === 200, role: result.role || null, idempotency_replay: Boolean(result.idempotency_replay), request_id: result.request_id || null, applied_at: result.applied_at || null, ...(result.error ? { error: result.error } : {}) } };
 }
 
 async function execute(req, body, request_id, applied_at) {
@@ -141,6 +151,18 @@ async function execute(req, body, request_id, applied_at) {
 }
 
 export default async function handler(req, res) {
+  // Once a synthetic database is configured, this is the only public write
+  // authority. The legacy local seam below remains for offline regression tests.
+  if (process.env.JUNTER_MODE === 'synthetic' || process.env.JUNTER_SYNTHETIC_DATABASE_DATABASE_URL) {
+    let body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = null; } }
+    let result;
+    try { result = await executeSynthetic(req, body); }
+    catch { result = { status: 503, body: { ok: false, role: null, error: { code: 'persistence_unavailable', message: 'safe persistence unavailable' } } }; }
+    res.setHeader('Cache-Control', 'no-store');
+    if (result.status === 405) res.setHeader('Allow', 'POST');
+    return res.status(result.status).json(result.body);
+  }
   // Serialize before the first await: same-instance parallel calls cannot
   // pass the replay check together or overwrite different role updates.
   const previous = queue;

@@ -14,7 +14,8 @@ process.env.JUNTER_AUDIT_LOG = log;
 let state, writes, conflict, patchCalls;
 function reset() {
   __test.idemBuffer.clear(); __test.rateBuckets.clear();
-  for (const name of ['VERCEL', 'JUNTER_MODE', 'JUNTER_BEARER_TOKEN', 'JUNTER_SANDBOX_CONFIG_ID', 'JUNTER_PERSONAL_CONFIG_ID', 'EDGE_CONFIG', 'JUNTER_VERCEL_API_TOKEN']) delete process.env[name];
+  for (const name of ['VERCEL', 'JUNTER_MODE', 'JUNTER_BEARER_TOKEN', 'JUNTER_SANDBOX_CONFIG_ID', 'JUNTER_PERSONAL_CONFIG_ID', 'EDGE_CONFIG', 'JUNTER_VERCEL_API_TOKEN', 'JUNTER_SYNTHETIC_DATABASE_DATABASE_URL', 'JUNTER_SYNTHETIC_DATABASE_NAMESPACE']) delete process.env[name];
+  delete globalThis.__junterSyntheticStore;
   process.env.JUNTER_AUDIT_LOG = log;
   state = { roles: [{ id: 1, status: 'pinged', routed: '', angle: 'original', company_research: { application_strategy: { angle: 'original' } } }], lastUpdated: null };
   writes = 0; conflict = false; patchCalls = [];
@@ -89,22 +90,13 @@ test('sandbox selection is server-owned, personal requires explicit auth', async
   process.env.JUNTER_MODE = 'sandbox'; process.env.JUNTER_SANDBOX_CONFIG_ID = 'ecfg_mock'; process.env.JUNTER_PERSONAL_CONFIG_ID = 'ecfg_mock';
   assert.equal((await invoke(body())).statusCode, 503); assert.equal(writes, 0);
 });
-test('REST wire update uses sandbox store, junter-data item and GET reader sees mock update', async () => {
-  reset(); process.env.JUNTER_SANDBOX_CONFIG_ID = 'ecfg_mock_sandbox'; process.env.EDGE_CONFIG = 'https://edge-config.vercel.com/ecfg_mock_sandbox?token=mock'; process.env.JUNTER_VERCEL_API_TOKEN = 'test-only-placeholder';
-  globalThis.__junterActionStore = async (value, expected, context) => {
-    if (value === undefined) return { value: structuredClone(state), etag: digest(state) };
-    assert.equal(expected, digest(state));
-    const r = await patchEdgeConfig(value, context, async (url, init) => {
-      patchCalls.push({ url, init }); assert.equal(init.method, 'PATCH'); assert.equal(JSON.parse(init.body).items[0].key, 'junter-data');
-      state = JSON.parse(init.body).items[0].value; globalThis.junterStoreValue = state;
-      return { ok: true, status: 200 };
-    });
-    writes++; return r;
-  };
-  const action = await invoke(body()); assert.equal(action.statusCode, 200); assert.equal(patchCalls.length, 1);
-  assert.ok(patchCalls[0].url.includes('/ecfg_mock_sandbox/items'));
+test('missing synthetic configuration makes the public data route fail closed', async () => {
+  reset();
   const res = { headers: {}, status(s) { this.statusCode = s; return this; }, setHeader(k,v) { this.headers[k] = v; }, json(value) { this.body = value; } };
-  await dataHandler({}, res); assert.equal(res.body.roles[0].routed, 'int'); assert.equal(res.headers['Cache-Control'], 's-maxage=60, stale-while-revalidate=300');
+  await dataHandler({ method: 'GET' }, res);
+  assert.equal(res.statusCode, 503);
+  assert.deepEqual(res.body.roles, []);
+  assert.equal(res.headers['Cache-Control'], 'no-store');
 });
 test('all final audit rows contain requested fields even invalid/method failures', async () => {
   reset(); await invoke(null); await invoke(body(), {}, 'GET');

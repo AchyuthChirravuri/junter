@@ -42,6 +42,9 @@ dist/
 
 # Local-only tooling (reads real tracker data; carries no secrets but stays local)
 scripts/
+!scripts/
+scripts/*
+!scripts/seed-synthetic.mjs
 
 # Editor backups
 *.bak-*

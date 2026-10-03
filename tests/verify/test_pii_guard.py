@@ -27,7 +27,12 @@ class PiiGuardTests(unittest.TestCase):
     def test_all_committed_json_payloads_are_safe(self):
         # Only committed JSON may be deployed. Ignore package lock/config and Figma
         # metadata because neither is served by /api/data or the static UI.
-        payloads = [path for path in ROOT.rglob("*.json") if ".git" not in path.parts and path.name not in {"package.json", "package-lock.json", "export.json"}]
+        payloads = [
+            path for path in ROOT.rglob("*.json")
+            if ".git" not in path.parts
+            and "node_modules" not in path.parts
+            and path.name not in {"package.json", "package-lock.json", "export.json"}
+        ]
         self.assertIn(SEED, payloads, "synthetic-data/seed.json missing from deployable payload inventory")
         for path in payloads:
             raw = path.read_text(encoding="utf-8")
