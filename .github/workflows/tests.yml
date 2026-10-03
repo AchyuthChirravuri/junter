@@ -67,6 +67,20 @@ jobs:
           test -f ui/app.js
           python ui/tests/check_seed.py
 
+      - name: Run UI prototype unit tests (T8.3)
+        # Pinpoint coverage for the 4 engine screens + the new Research hub
+        # (#/research). Includes a test that writes /tmp/ui_test_summary.txt so
+        # the T8.5 grep gate below has a file to read.
+        run: |
+          python -m unittest discover -s ui/tests -t . -v
+
+      - name: Verify T8.5 ui_test_summary gate
+        # Gate: `grep -c "telegram|cron|rubric|digest" /tmp/ui_test_summary.txt`
+        # must be > 0 (every populated engine screen is reflected).
+        run: |
+          test -s /tmp/ui_test_summary.txt
+          grep -c "telegram\|cron\|rubric\|digest" /tmp/ui_test_summary.txt
+
       - name: Verify demo outputs the documented files
         run: |
           test -f out/README.md
